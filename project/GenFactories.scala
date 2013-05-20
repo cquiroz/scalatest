@@ -42,6 +42,7 @@ import org.scalatest.words.HaveWord
 import org.scalatest.words.BeWord
 import org.scalatest.words.NotWord
 import org.scalatest.words.ContainWord
+import org.scalatest.words.NewContainWord
 import org.scalatest.words.ResultOfLengthWordApplication
 import org.scalatest.words.ResultOfSizeWordApplication
 import org.scalatest.words.ResultOfLessThanComparison
@@ -419,6 +420,180 @@ $endif$
    */
   def and(containWord: ContainWord): AndContainWord = new AndContainWord
 
+  /**
+   * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="../Matchers.html"><code>Matchers</code></a> for an overview of
+   * the matchers DSL.
+   *
+   * @author Bill Venners
+   */
+  final class AndNewContainWord {
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain (3 - 1))
+     *                              ^
+     * </pre>
+     */
+    //def apply(expectedElement: Any): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Holder] = thisMatcherFactory.and(MatcherWords.contain(expectedElement))
+
+    // And some, the ones that would by themselves already generate a Matcher, just return a MatcherFactoryN where N is the same.
+
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain key ("one"))
+     *                               ^
+     * </pre>
+     */
+    //def newKey[U](expectedElement: U): MatcherFactory$arity$[SC with scala.collection.GenMap[U, Any], $commaSeparatedTCNs$] = thisMatcherFactory.and(MatcherWords.newContain.newKey(expectedElement))
+
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain value (1))
+     *                              ^
+     * </pre>
+     */
+    //def newValue[U](expectedValue: U): MatcherFactory$arity$[SC with scala.collection.GenMap[K, U] forSome { type K }, $commaSeparatedTCNs$] = thisMatcherFactory.and(MatcherWords.newContain.newValue(expectedValue))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain theSameElementsAs List(1, 2, 3))
+     *                              ^
+     * </pre>
+     */
+    //def newTheSameElementsAs[E](right: GenTraversable[E])(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newTheSameElementsAs(right)(equality))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain theSameElementsInOrderAs List(1, 2, 3))
+     *                              ^
+     * </pre>
+     */
+    //def newTheSameElementsInOrderAs[E](right: GenTraversable[E])(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newTheSameElementsInOrderAs(right)(equality))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain allOf (1, 2, 3))
+     *                              ^
+     * </pre>
+     */
+    //def newAllOf[E](right: E*)(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newAllOf(right.toList: _*)(equality))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain inOrder (1, 2, 3))
+     *                              ^
+     * </pre>
+     */
+    //def newInOrder[E](right: E*)(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newInOrder(right.toList: _*)(equality))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain oneOf (1, 3, 3))
+     *                              ^
+     * </pre>
+     */
+    $if (arityIsOne)$
+    def newOneOf(right: Any*)(implicit ev: TC1[_] <:< Holder[_]): MatcherFactory1[SC, Holder] = {
+      val rightMatcherFactory = MatcherWords.newContain.newOneOf(right.toList: _*)
+      new MatcherFactory1[SC, Holder] {
+        def matcher[T <: SC](implicit ev: Holder[T]): Matcher[T] = {
+          new Matcher[T] {
+            def apply(left: T): MatchResult = {
+              val leftMatcher = thisMatcherFactory.matcher(ev.asInstanceOf[TC1[T]])
+              val rightMatcher = rightMatcherFactory.matcher
+              andMatchersAndApply(left, leftMatcher, rightMatcher)
+            }
+          }
+        }
+      }
+    }
+    $endif$
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain only (3, 1))
+     *                              ^
+     * </pre>
+     */
+    //def newOnly[E](right: E*)(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newOnly(right.toList: _*)(equality))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (and contain inOrderOnly (1, 3))
+     *              ^
+     * </pre>
+     */
+    //def newInOrderOnly[E](right: E*)(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newInOrderOnly(right.toList: _*)(equality))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (and contain noneOf (7, 8, 9))
+     *              ^
+     * </pre>
+     */
+    //def newNoneOf[E](right: E*)(implicit equality: Equality[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //thisMatcherFactory.and(MatcherWords.newContain.newNoneOf(right.toList: _*)(equality))
+      
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain a (validNumber))
+     *                              ^
+     * </pre>
+     */
+    //def newA[E](aMatcher: AMatcher[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //and(MatcherWords.newContain.newA(aMatcher))
+    
+    /**
+     * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
+     *
+     * <pre class="stHighlight">
+     * (aMatcherFactory and contain an (invalidNumber))
+     *                              ^
+     * </pre>
+     */
+    //def newAn[E](anMatcher: AnMatcher[E]): MatcherFactory$arity$[SC with GenTraversable[E], $commaSeparatedTCNs$] = 
+      //and(MatcherWords.newContain.newAn(anMatcher))
+  }
+    
+  /**
+   * This method enables the following syntax:
+   *
+   * <pre class="stHighlight">
+   * Map("one" -&gt; 1, "two" -&gt; 2) should (contain key ("two") and contain key ("one"))
+   *                                                               ^ 
+   * </pre>
+   */
+  def and(newContainWord: NewContainWord): AndNewContainWord = new AndNewContainWord
+    
   /**
    * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="../Matchers.html"><code>Matchers</code></a> for an overview of
    * the matchers DSL.

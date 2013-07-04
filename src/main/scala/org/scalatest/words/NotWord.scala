@@ -29,6 +29,7 @@ import org.scalatest.MatchersHelper.fullyMatchRegexWithGroups
 import org.scalatest.MatchersHelper.startWithRegexWithGroups
 import org.scalatest.MatchersHelper.endWithRegexWithGroups
 import org.scalatest.MatchersHelper.includeRegexWithGroups
+import org.scalatest.MatchersHelper.duplicateIfNeeded
 import org.scalatest.Suite.getObjectsForFailureMessage
 
 /**
@@ -822,11 +823,14 @@ final class NotWord {
           def apply(left: T): MatchResult = {
         
             val right = oneOf.right
+            
+            val (msgLeft, evalLeft) = duplicateIfNeeded(left)
+            val leftText = UnquotedString(FailureMessages.decorateToStringValue(msgLeft))
 
             MatchResult(
-              !containing.containsOneOf(left, right),
-              FailureMessages("containedOneOfElements", left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
-              FailureMessages("didNotContainOneOfElements", left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              !containing.containsOneOf(evalLeft, right),
+              FailureMessages("containedOneOfElements", leftText, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              FailureMessages("didNotContainOneOfElements", leftText, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
             )
           }
         }

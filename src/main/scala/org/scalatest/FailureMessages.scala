@@ -36,6 +36,7 @@ private[scalatest] object FailureMessages {
       case aChar: Char =>  "\'" + aChar + "\'"
       case anArray: Array[_] =>  prettifyArrays(anArray)
       case aWrappedArray: WrappedArray[_] => prettifyArrays(aWrappedArray)
+      case itr: Iterator[_] => "Iterator(" + itr.map(decorateToStringValue).mkString(", ") + ")"
       case anythingElse => anythingElse.toString
     }
 

@@ -322,4 +322,14 @@ private[scalatest] object MatchersHelper {
     checkPatternMatchAndGroups(matches, left, pMatcher, regex, groups, "didNotIncludeRegex", "includedRegex", "includedRegexButNotGroupAtIndex", 
                                "includedRegexButNotGroup", "includedRegexAndGroup")
   }
+  
+  def duplicateIfNeeded[T](left: T): (T, T) = {
+    left match {
+      case itr: Iterator[_] => 
+        val (d1, d2) = itr.duplicate
+        (d1.asInstanceOf[T], d2.asInstanceOf[T])
+      case _ => 
+        (left, left)
+    }
+  }
 }

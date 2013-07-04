@@ -270,32 +270,35 @@ The bottom two don't, but still I don't want to support that in general.
         no (nils) should contain oneOf (1, 3, 4)
         no (listsNil) should contain oneOf (3, 4, 5)
 
+        val l1 = lists
         val e1 = intercept[TestFailedException] {
-          all (lists) should contain oneOf (1, 3, 4)
+          all (l1) should contain oneOf (1, 3, 4)
         }
         e1.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
         e1.failedCodeLineNumber.get should be (thisLineNumber - 3)
         e1.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 2, " + decorateToStringValue(List(2)) + " did not contain one of (1, 3, 4) (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(lists)))
+                                   "in " + decorateToStringValue(l1)))
 
+        val l2 = nils
         val e2 = intercept[TestFailedException] {
-          all (nils) should contain oneOf ("ho", "hey", "howdy")
+          all (l2) should contain oneOf ("ho", "hey", "howdy")
         }
         e2.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
         e2.failedCodeLineNumber.get should be (thisLineNumber - 3)
         e2.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 0, " + decorateToStringValue(List()) + " did not contain one of (\"ho\", \"hey\", \"howdy\") (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(nils)))
+                                   "in " + decorateToStringValue(l2)))
 
-        val e4 = intercept[TestFailedException] {
-          all (listsNil) should contain oneOf (1, 3, 4)
+        val l3 = listsNil
+        val e3 = intercept[TestFailedException] {
+          all (l3) should contain oneOf (1, 3, 4)
         }
-        e4.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
-        e4.failedCodeLineNumber.get should be (thisLineNumber - 3)
-        e4.message should be (Some("'all' inspection failed, because: \n" +
+        e3.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
+        e3.failedCodeLineNumber.get should be (thisLineNumber - 3)
+        e3.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 2, " + decorateToStringValue(List()) + " did not contain one of (1, 3, 4) (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(listsNil)))
+                                   "in " + decorateToStringValue(l3)))
       }
 
       def `should use the implicit Equality in scope` {
@@ -348,32 +351,35 @@ The bottom two don't, but still I don't want to support that in general.
         no (nils) should (contain oneOf (1, 3, 4))
         no (listsNil) should (contain oneOf (3, 4, 5))
 
+        val l1 = lists
         val e1 = intercept[TestFailedException] {
-          all (lists) should (contain oneOf (1, 3, 4))
+          all (l1) should (contain oneOf (1, 3, 4))
         }
         e1.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
         e1.failedCodeLineNumber.get should be (thisLineNumber - 3)
         e1.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 2, " + decorateToStringValue(List(2)) + " did not contain one of (1, 3, 4) (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(lists)))
+                                   "in " + decorateToStringValue(l1)))
 
+        val l2 = nils
         val e2 = intercept[TestFailedException] {
-          all (nils) should (contain oneOf ("ho", "hey", "howdy"))
+          all (l2) should (contain oneOf ("ho", "hey", "howdy"))
         }
         e2.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
         e2.failedCodeLineNumber.get should be (thisLineNumber - 3)
         e2.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 0, " + decorateToStringValue(List()) + " did not contain one of (\"ho\", \"hey\", \"howdy\") (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(nils)))
+                                   "in " + decorateToStringValue(l2)))
 
-        val e4 = intercept[TestFailedException] {
-          all (listsNil) should (contain oneOf (1, 3, 4))
+        val l3 = listsNil
+        val e3 = intercept[TestFailedException] {
+          all (l3) should (contain oneOf (1, 3, 4))
         }
-        e4.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
-        e4.failedCodeLineNumber.get should be (thisLineNumber - 3)
-        e4.message should be (Some("'all' inspection failed, because: \n" +
+        e3.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
+        e3.failedCodeLineNumber.get should be (thisLineNumber - 3)
+        e3.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 2, " + decorateToStringValue(List()) + " did not contain one of (1, 3, 4) (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(listsNil)))
+                                   "in " + decorateToStringValue(l3)))
       }
 
       def `should use the implicit Equality in scope` {
@@ -435,14 +441,15 @@ scala> all (list1s) should (contain (oneOf (1, 3, 4)))
 
       def `should do nothing if valid, else throw a TFE with an appropriate error message` {
         all (toLists) should not contain oneOf ("fee", "fie", "foe", "fum")
+        val l1 = toLists
         val e1 = intercept[TestFailedException] {
-          all (toLists) should not contain oneOf ("happy", "birthday", "to", "you")
+          all (l1) should not contain oneOf ("happy", "birthday", "to", "you")
         }
         e1.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
         e1.failedCodeLineNumber.get should be (thisLineNumber - 3)
         e1.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 0, " + decorateToStringValue(List("to")) + " contained one of (\"happy\", \"birthday\", \"to\", \"you\") (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(toLists)))
+                                   "in " + decorateToStringValue(l1)))
       }
       def `should use the implicit Equality in scope` {
         implicit val ise = upperCaseEquality
@@ -500,14 +507,15 @@ The top two don't, but still I don't want to support that in general.
 
       def `should do nothing if valid, else throw a TFE with an appropriate error message` {
         all (toLists) should (not contain oneOf ("fee", "fie", "foe", "fum"))
+        val l1 = toLists
         val e1 = intercept[TestFailedException] {
-          all (toLists) should (not contain oneOf ("happy", "birthday", "to", "you"))
+          all (l1) should (not contain oneOf ("happy", "birthday", "to", "you"))
         }
         e1.failedCodeFileName.get should be ("ListShouldContainOneOfSpec.scala")
         e1.failedCodeLineNumber.get should be (thisLineNumber - 3)
         e1.message should be (Some("'all' inspection failed, because: \n" +
                                    "  at index 0, " + decorateToStringValue(List("to")) + " contained one of (\"happy\", \"birthday\", \"to\", \"you\") (ListShouldContainOneOfSpec.scala:" + (thisLineNumber - 5) + ") \n" +
-                                   "in " + decorateToStringValue(toLists)))
+                                   "in " + decorateToStringValue(l1)))
       }
       def `should use the implicit Equality in scope` {
         implicit val ise = upperCaseEquality

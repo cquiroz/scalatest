@@ -45,6 +45,7 @@ import org.scalatest.MatchersHelper.fullyMatchRegexWithGroups
 import org.scalatest.MatchersHelper.startWithRegexWithGroups
 import org.scalatest.MatchersHelper.endWithRegexWithGroups
 import org.scalatest.MatchersHelper.includeRegexWithGroups
+import org.scalatest.MatchersHelper.duplicateIfNeeded
 
 /**
  * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="Matchers.html"><code>Matchers</code></a> for an overview of
@@ -656,15 +657,16 @@ sealed class ResultOfNotWordForAny[T](left: T, shouldBeTrue: Boolean) {
       )
   }
 
-  def contain(newOneOf: ResultOfOneOfApplication)(implicit containing: Containing[T]) {
+  def contain(oneOf: ResultOfOneOfApplication)(implicit containing: Containing[T]) {
 
-    val right = newOneOf.right
+    val right = oneOf.right
+    val (msgLeft, evalLeft) = duplicateIfNeeded(left)
 
-    if (containing.containsOneOf(left, right) != shouldBeTrue)
+    if (containing.containsOneOf(evalLeft, right) != shouldBeTrue)
       throw newTestFailedException(
         FailureMessages(
           if (shouldBeTrue) "didNotContainOneOfElements" else "containedOneOfElements",
-          left,
+          UnquotedString(FailureMessages.decorateToStringValue(msgLeft)),
           UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))
         )
       )

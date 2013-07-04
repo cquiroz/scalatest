@@ -187,29 +187,30 @@ object Containing {
   implicit def convertEqualityToJavaCollectionContaining[E, JCOL[e] <: java.util.Collection[e]](equality: Equality[E]): Containing[JCOL[E]] = 
     containingNatureOfJavaCollection(equality)
 
-  implicit def containingNatureOfGenTraversable[E, TRAV[e] <: scala.collection.GenTraversable[e]](implicit equality: Equality[E]): Containing[TRAV[E]] = 
+  implicit def containingNatureOfGenTraversableOnce[E, TRAV[e] <: scala.collection.GenTraversableOnce[e]](implicit equality: Equality[E]): Containing[TRAV[E]] = 
     new Containing[TRAV[E]] {
       def contains(trav: TRAV[E], ele: Any): Boolean = {
+        val stream = trav.toStream
         equality match {
           case normEq: NormalizingEquality[_] => 
             val normRight = normEq.normalizedOrSame(ele)
-            trav.exists((e: E) => normEq.afterNormalizationEquality.areEqual(normEq.normalized(e), normRight))
-          case _ => trav.exists((e: E) => equality.areEqual(e, ele))
+            stream.exists((e: E) => normEq.afterNormalizationEquality.areEqual(normEq.normalized(e), normRight))
+          case _ => stream.exists((e: E) => equality.areEqual(e, ele))
         }
       }
       def containsOneOf(trav: TRAV[E], elements: scala.collection.Seq[Any]): Boolean = {
-        val foundSet = checkOneOf[E](trav, elements, equality)
+        val foundSet = checkOneOf[E](trav.toStream, elements, equality)
         foundSet.size == 1
       }
       def containsNoneOf(trav: TRAV[E], elements: scala.collection.Seq[Any]): Boolean = {
-        val found = checkNoneOf[E](trav, elements, equality)
+        val found = checkNoneOf[E](trav.toStream, elements, equality)
         !found.isDefined
       }
     }
 
   // Enables (xs should contain ("HI")) (after being lowerCased)
-  implicit def convertEqualityToGenTraversableContaining[E, TRAV[e] <: scala.collection.GenTraversable[e]](equality: Equality[E]): Containing[TRAV[E]] = 
-    containingNatureOfGenTraversable(equality)
+  implicit def convertEqualityToGenTraversableOnceContaining[E, TRAV[e] <: scala.collection.GenTraversableOnce[e]](equality: Equality[E]): Containing[TRAV[E]] = 
+    containingNatureOfGenTraversableOnce(equality)
 
   // OPT so that it will work with Some also, but it doesn't work with None
   implicit def containingNatureOfOption[E, OPT[e] <: Option[e]](implicit equality: Equality[E]): Containing[OPT[E]] = 

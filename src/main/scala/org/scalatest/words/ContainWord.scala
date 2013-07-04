@@ -28,6 +28,7 @@ import org.scalatest.enablers.KeyMapping
 import org.scalatest.enablers.ValueMapping
 import org.scalatest.exceptions.NotAllowedException
 import org.scalatest.exceptions.StackDepthExceptionHelper.getStackDepthFun
+import org.scalatest.MatchersHelper.duplicateIfNeeded
 
 /**
  * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="../Matchers.html"><code>Matchers</code></a> for an overview of
@@ -194,10 +195,12 @@ final class ContainWord {
       def matcher[T](implicit containing: Containing[T]): Matcher[T] = {
         new Matcher[T] {
           def apply(left: T): MatchResult = {
+            val (msgLeft, evalLeft) = duplicateIfNeeded(left)
+            val leftText = UnquotedString(FailureMessages.decorateToStringValue(msgLeft))
             MatchResult(
-              containing.containsOneOf(left, right),
-              FailureMessages("didNotContainOneOfElements", left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
-              FailureMessages("containedOneOfElements", left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              containing.containsOneOf(evalLeft, right),
+              FailureMessages("didNotContainOneOfElements", leftText, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              FailureMessages("containedOneOfElements", leftText, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
             )
           }
         }

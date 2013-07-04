@@ -22,6 +22,7 @@ import org.scalatest.enablers.Sequencing
 import org.scalatest.enablers.KeyMapping
 import org.scalatest.enablers.ValueMapping
 import org.scalatest.MatchersHelper.newTestFailedException
+import org.scalatest.MatchersHelper.duplicateIfNeeded
 import org.scalatest.FailureMessages
 import org.scalatest.UnquotedString
 import org.scalatest.exceptions.NotAllowedException
@@ -48,11 +49,14 @@ class ResultOfContainWord[L](left: L, shouldBeTrue: Boolean = true) {
       throw new NotAllowedException(FailureMessages("oneOfEmpty"), getStackDepthFun("ResultOfContainWord.scala", "oneOf"))
     if (right.distinct.size != right.size)
       throw new NotAllowedException(FailureMessages("oneOfDuplicate"), getStackDepthFun("ResultOfContainWord.scala", "oneOf"))
-    if (containing.containsOneOf(left, right) != shouldBeTrue)
+    
+    val (msgLeft, evalLeft) = duplicateIfNeeded(left)
+    
+    if (containing.containsOneOf(evalLeft, right) != shouldBeTrue) 
       throw newTestFailedException(
         FailureMessages(
           if (shouldBeTrue) "didNotContainOneOfElements" else "containedOneOfElements",
-          left,
+          UnquotedString(FailureMessages.decorateToStringValue(msgLeft)),
           UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))
         )
       )

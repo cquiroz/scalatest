@@ -1038,6 +1038,30 @@ object GenContain {
         "decorateToStringValue\\(list1s\\(0\\)\\) \\+ \\\" was not equal to \\\" \\+ decorateToStringValue\\(\\\"23\\\"\\)" -> "decorateToStringValue(\"[\" + list1s(0) + \"]\") + \" was not equal to \" + decorateToStringValue(\"[23]\")",
         "decorateToStringValue\\(lists\\(2\\)\\) \\+ \\\" was not equal to \\\" \\+ decorateToStringValue\\(\\\"01233\\\"\\)" -> "decorateToStringValue(\"[\" + lists(2) + \"]\") + \" was not equal to \" + decorateToStringValue(\"[01233]\")"
       )
+      
+    val iteratorMapping = 
+      List(
+        "val fumList: List\\[String\\] = List\\(\\\"fum\\\"\\)" -> "def fumList: Iterator[String] = List(\"fum\").iterator", 
+        "val toList: List\\[String\\] = List\\(\\\"to\\\"\\)" -> "def toList: Iterator[String] = List(\"to\").iterator", 
+        "val fumfuList: List\\[String\\] = List\\(\\\"fum\\\", \\\"fu\\\"\\)" -> "def fumfuList: Iterator[String] = List(\"fum\", \"fu\").iterator",
+        "val list1s: Vector\\[List\\[Int\\]\\] = Vector\\(List\\(1\\), List\\(1\\), List\\(1\\)\\)" -> "def list1s: Vector[Iterator[Int]] = Vector(List(1).iterator, List(1).iterator, List(1).iterator)", 
+        "val lists: Vector\\[List\\[Int\\]\\] = Vector\\(List\\(1\\), List\\(1\\), List\\(2\\)\\)" -> "def lists: Vector[Iterator[Int]] = Vector(List(1).iterator, List(1).iterator, List(2).iterator)", 
+        "val nils: Vector\\[List\\[Int\\]\\] = Vector\\(Nil, Nil, Nil\\)" -> "def nils: Vector[Iterator[Int]] = Vector(Nil.iterator, Nil.iterator, Nil.iterator)", 
+        "val listsNil: Vector\\[List\\[Int\\]\\] = Vector\\(List\\(1\\), List\\(1\\), Nil\\)" -> "def listsNil: Vector[Iterator[Int]] = Vector(List(1).iterator, List(1).iterator, Nil.iterator)", 
+        "val hiLists: Vector\\[List\\[String\\]\\] = Vector\\(List\\(\\\"hi\\\"\\), List\\(\\\"hi\\\"\\), List\\(\\\"hi\\\"\\)\\)" -> "def hiLists: Vector[Iterator[String]] = Vector(List(\"hi\").iterator, List(\"hi\").iterator, List(\"hi\").iterator)", 
+        "val toLists: Vector\\[List\\[String\\]\\] = Vector\\(List\\(\\\"to\\\"\\), List\\(\\\"to\\\"\\), List\\(\\\"to\\\"\\)\\)" -> "def toLists: Vector[Iterator[String]] = Vector(List(\"to\").iterator, List(\"to\").iterator, List(\"to\").iterator)", 
+        "decorateToStringValue\\(List\\(2\\)\\)" -> "decorateToStringValue(List(2).iterator)",
+        "decorateToStringValue\\(List\\(\\)\\)" -> "decorateToStringValue(List().iterator)",
+        "decorateToStringValue\\(List\\(\\\"to\\\"\\)\\)" -> "decorateToStringValue(List(\"to\").iterator)", 
+        "ListShouldContain" -> "ItrShouldContain"/*, 
+        "List\\[String\\]" -> "Iterator[String]"*/
+        /*"List\\[String\\]" -> "Array[String]", 
+        "List\\[Int\\]" -> "Array[Int]", 
+        "List" -> "Array", 
+        "listsNil" -> "listsArray", 
+        "Nil" -> "Array()", 
+        "LinkedArray" -> "LinkedList"*/
+      )
     
     // Generate tests for atLeastOneOf
     generateFile("ListShouldContainAtLeastOneOfSpec.scala", "Array", arrayMapping: _*)
@@ -1072,6 +1096,7 @@ object GenContain {
     generateFile("ListShouldContainOneOfSpec.scala", "String", stringMapping: _*)
     generateFile("ListShouldContainOneOfLogicalAndSpec.scala", "String", stringMapping: _*)
     generateFile("ListShouldContainOneOfLogicalOrSpec.scala", "String", stringMapping: _*)
+    generateFile("ListShouldContainOneOfSpec.scala", "Itr", iteratorMapping: _*)
     
     // Generate tests for noneOf
     generateFile("ListShouldContainNoneOfSpec.scala", "Option", optionMapping: _*)

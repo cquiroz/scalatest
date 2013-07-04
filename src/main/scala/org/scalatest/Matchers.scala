@@ -45,6 +45,7 @@ import MatchersHelper.fullyMatchRegexWithGroups
 import MatchersHelper.startWithRegexWithGroups
 import MatchersHelper.endWithRegexWithGroups
 import MatchersHelper.includeRegexWithGroups
+import org.scalatest.MatchersHelper.duplicateIfNeeded
 import org.scalautils.NormalizingEquality
 import Assertions.checkExpectedException
 import Assertions.checkNoException
@@ -3278,11 +3279,12 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
       val right = newOneOf.right
 
       doCollected(collected, xs, "contain", 1) { e =>
-        if (containing.containsOneOf(e, right) != shouldBeTrue)
+        val (msgLeft, evalLeft) = duplicateIfNeeded(e)
+        if (containing.containsOneOf(evalLeft, right) != shouldBeTrue)
           throw newTestFailedException(
             FailureMessages(
               if (shouldBeTrue) "didNotContainOneOfElements" else "containedOneOfElements",
-              e,
+              UnquotedString(FailureMessages.decorateToStringValue(msgLeft)),
               UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))
             ),
             None,
@@ -3774,11 +3776,12 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
       if (right.distinct.size != right.size)
         throw new NotAllowedException(FailureMessages("oneOfDuplicate"), getStackDepthFun("Matchers.scala", "oneOf"))
       doCollected(collected, xs, "oneOf", 1) { e =>
-        if (containing.containsOneOf(e, right) != shouldBeTrue)
+        val (msgLeft, evalLeft) = duplicateIfNeeded(e)
+        if (containing.containsOneOf(evalLeft, right) != shouldBeTrue)
           throw newTestFailedException(
             FailureMessages(
               if (shouldBeTrue) "didNotContainOneOfElements" else "containedOneOfElements",
-              e,
+              UnquotedString(FailureMessages.decorateToStringValue(msgLeft)),
               UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))
             ),
             None,

@@ -145,8 +145,8 @@ class AssertionsSpec extends FunSpec with OptionValues {
     def equaled(left: Any, right: Any): String = 
       FailureMessages("equaled", left, right)
       
-    def expressionFailed(left: String): String = 
-      FailureMessages("expressionFailed", UnquotedString(left))
+    def wasFalse(left: String): String = 
+      FailureMessages("wasFalse", UnquotedString(left))
       
     def wasNotGreaterThan(left: Any, right: Any): String = 
       FailureMessages("wasNotGreaterThan", left, right)
@@ -171,6 +171,12 @@ class AssertionsSpec extends FunSpec with OptionValues {
       
     def wasLessThanOrEqualTo(left: Any, right: Any): String = 
       FailureMessages("wasLessThanOrEqualTo", left, right)
+      
+    def commaAnd(left: String, right: String): String = 
+      FailureMessages("commaAnd", UnquotedString(left), UnquotedString(right))
+    
+    def commaBut(left: String, right: String): String = 
+      FailureMessages("commaBut", UnquotedString(left), UnquotedString(right))
     
     it("should do nothing when is used to check a == 3") {
       assert(a == 3)
@@ -234,7 +240,7 @@ class AssertionsSpec extends FunSpec with OptionValues {
       val e = intercept[TestFailedException] { 
         assert(3 == 5) 
       }
-      assert(e.message === Some(expressionFailed("assert(3 == 5)")))
+      assert(e.message === Some(wasFalse("assert(3 == 5)")))
       assert(e.failedCodeFileName === (Some(fileName)))
       assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
     }
@@ -487,6 +493,71 @@ class AssertionsSpec extends FunSpec with OptionValues {
         assert(3 !== a) 
       }
       assert(e.message === Some(equaled(3, 3)))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should do nothing when is used to check a == 3 && b == 5") {
+      assert(a == 3 && b == 5)
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 3 && b == 6") {
+      val e = intercept[TestFailedException] {
+        assert(a == 3 && b == 6)
+      }
+      assert(e.message === Some(commaBut(equaled(3, 3), didNotEqual(5, 6))))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 && b == 5") {
+      val e = intercept[TestFailedException] {
+        assert(a == 2 && b == 5)
+      }
+      assert(e.message === Some(didNotEqual(3, 2)))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 && b == 6") {
+      val e = intercept[TestFailedException] {
+        assert(a == 2 && b == 6)
+      }
+      assert(e.message === Some(didNotEqual(3, 2)))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should do nothing when is used to check a == 3 || b == 5") {
+      assert(a == 3 || b == 5)
+    }
+    
+    it("should do nothing when is used to check a == 3 || b == 6") {
+      assert(a == 3 || b == 6)
+    }
+    
+    it("should do nothing when is used to check a == 2 || b == 5") {
+      assert(a == 2 || b == 5)
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 || b == 6") {
+      val e = intercept[TestFailedException] {
+        assert(a == 2 || b == 6)
+      }
+      assert(e.message === Some(commaAnd(didNotEqual(3, 2), didNotEqual(5, 6))))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should do nothing when is used to check a == 3 && (b == 5 && b > 3)") {
+      assert(a == 3 && (b == 5 && b > 3))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 3 && (b == 5 && b > 5)") {
+      val e = intercept[TestFailedException] {
+        assert(a == 3 && (b == 5 && b > 5))
+      }
+      assert(e.message === Some(commaBut(equaled(3, 3), commaBut(equaled(5, 5), wasNotGreaterThan(5, 5)))))
       assert(e.failedCodeFileName === (Some(fileName)))
       assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
     }

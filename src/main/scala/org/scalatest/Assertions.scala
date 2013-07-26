@@ -411,6 +411,11 @@ trait Assertions extends LegacyTripleEquals {
         }
       }
     }
+    
+    def macroAssert(expression: MacroExpression) {
+      if (!expression.value)
+        throw newAssertionFailedException(Some(expression.errorMessage), None, "Assertions.scala", "macroAssert", 2)
+    }
   }
   
   val $org_scalatest_AssertionsHelper = new AssertionsHelper

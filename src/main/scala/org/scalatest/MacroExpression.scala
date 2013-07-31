@@ -42,33 +42,18 @@ final class SimpleMacroExpression(expression: => Boolean, val expressionText: St
   def errorMessage: String = FailureMessages("wasFalse", UnquotedString(expressionText))
 }
   
-final class NotMacroExpression(left: Any, operator: String, val expressionText: String) extends MacroExpression { self => 
+final class NotMacroExpression(expression: MacroExpression, operator: String, val expressionText: String) extends MacroExpression { self => 
   
-  lazy val value: Boolean = {//!expression
-    left match {
-      case expr: MacroExpression => !expr.value
-      case bool: Boolean => !bool
-      case _ => false // should not happen
-    }
-  }
+  lazy val value: Boolean = !expression.value
+    
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
   def unary_! : MacroExpression = 
     new NotMacroExpression(this, "!", "!(" + expressionText + ")")
-  def okMessage: String = {
-    left match {
-      case expr: MacroExpression => expr.errorMessage
-      case _ => FailureMessages(if (value) "wasTrue" else "wasFalse", UnquotedString(expressionText))
-    }
-  }
-  def errorMessage: String = {
-    left match {
-      case expr: MacroExpression => expr.okMessage
-      case _ => FailureMessages(if (value) "wasTrue" else "wasFalse", UnquotedString(expressionText))
-    }
-  }
+  def okMessage: String = expression.errorMessage
+  def errorMessage: String = expression.okMessage
 }
   
 final class BinaryMacroExpression(left: Any, operator: String, right: Any, expression: => Boolean, val expressionText: String) extends MacroExpression {

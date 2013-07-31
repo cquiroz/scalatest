@@ -561,5 +561,27 @@ class AssertionsSpec extends FunSpec with OptionValues {
       assert(e.failedCodeFileName === (Some(fileName)))
       assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
     }
+    
+    it("should do nothing when is used to check !(a == 5)") {
+      assert(!(a == 5))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check !(a == 3)") {
+      val e = intercept[TestFailedException] {
+        assert(!(a == 3))
+      }
+      assert(e.message === Some(equaled(3, 3)))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 3 && !(b == 5)") {
+      val e = intercept[TestFailedException] {
+        assert(a == 3 && !(b == 5))
+      }
+      assert(e.message === Some(commaBut(equaled(3, 3), equaled(5, 5))))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
   }
 }

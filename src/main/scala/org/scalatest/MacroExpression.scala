@@ -19,47 +19,54 @@ sealed abstract class MacroExpression extends Function0[Boolean] {
   val value: Boolean
   val expressionText: String
   def apply: Boolean = value
-  def not: MacroExpression
   def &&(right: MacroExpression): MacroExpression
   def ||(right: MacroExpression): MacroExpression
+  def unary_! : MacroExpression
   def okMessage: String
   def errorMessage: String
 }
 
 final class SimpleMacroExpression(expression: => Boolean, val expressionText: String) extends MacroExpression {
+  
+  def this(expression: MacroExpression, expressionText: String) = 
+    this(expression.value, expressionText)
+  
   lazy val value: Boolean = expression
-  def not: MacroExpression = 
-    new UnaryMacroExpression(this, "!", !value, "!(" + expressionText + ")")
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
+  def unary_! : MacroExpression = 
+    new NotMacroExpression(this, "!", "!(" + expressionText + ")")
   def okMessage: String = FailureMessages("wasTrue", UnquotedString(expressionText))
   def errorMessage: String = FailureMessages("wasFalse", UnquotedString(expressionText))
 }
   
-final class UnaryMacroExpression(left: Any, operator: String, expression: => Boolean, val expressionText: String) extends MacroExpression { self => 
+final class NotMacroExpression(left: Any, operator: String, val expressionText: String) extends MacroExpression { self => 
   
-  def this(left: Any, operator: String, expression: MacroExpression, expressionText: String) = 
-    this(left, operator, expression.value, expressionText)
-  
-  lazy val value: Boolean = expression
-  def not: MacroExpression = 
-    new UnaryMacroExpression(this, "!", !value, "!(" + expressionText + ")")
+  lazy val value: Boolean = {//!expression
+    left match {
+      case expr: MacroExpression => !expr.value
+      case bool: Boolean => !bool
+      case _ => false // should not happen
+    }
+  }
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
+  def unary_! : MacroExpression = 
+    new NotMacroExpression(this, "!", "!(" + expressionText + ")")
   def okMessage: String = {
     left match {
-      case expr: MacroExpression => expr.okMessage
-      case _ => FailureMessages("wasTrue", UnquotedString(expressionText))
+      case expr: MacroExpression => expr.errorMessage
+      case _ => FailureMessages(if (value) "wasTrue" else "wasFalse", UnquotedString(expressionText))
     }
   }
   def errorMessage: String = {
     left match {
-      case expr: MacroExpression => expr.errorMessage
-      case _ => FailureMessages("wasFalse", UnquotedString(expressionText))
+      case expr: MacroExpression => expr.okMessage
+      case _ => FailureMessages(if (value) "wasTrue" else "wasFalse", UnquotedString(expressionText))
     }
   }
 }
@@ -71,14 +78,14 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
   
   lazy val value: Boolean = expression
     
-  def not: MacroExpression = 
-    new UnaryMacroExpression(this, "!", !value, "!(" + expressionText + ")")
-    
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
     
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
+  
+  def unary_! : MacroExpression = 
+    new NotMacroExpression(this, "!", "!(" + expressionText + ")")
     
   def getText(obj: Any): String = 
     obj match {

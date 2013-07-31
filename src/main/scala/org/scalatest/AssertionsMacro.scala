@@ -136,6 +136,21 @@ class AssertionsMacro[C <: Context](val context: C) {
       )
     )
   }
+  
+  def notMacroExpression(target: Tree, expressionText: String): Apply = {
+    val macroExpressionClass = context.mirror.staticClass(classOf[NotMacroExpression].getName)
+    Apply(
+      Select(
+        New(Ident(macroExpressionClass)),
+        newTermName("<init>")
+      ),
+      List(
+        target.duplicate, 
+        context.literal("!").tree, 
+        context.literal(expressionText).tree
+      )
+    )
+  }
     
   def macroAssert: Apply = 
     Apply(
@@ -156,11 +171,13 @@ class AssertionsMacro[C <: Context](val context: C) {
                 val leftTree = 
                   select.qualifier match {
                     case selectApply: Apply => transformAstRecursive(selectApply.duplicate)
+                    case selectSelect: Select => transformAstRecursive(selectSelect.duplicate)
                     case _ => select.qualifier.duplicate
                   }
                 val rightTree = 
                   apply.args(0) match {
-                    case argApply => transformAstRecursive(argApply.duplicate)
+                    case argApply: Apply => transformAstRecursive(argApply.duplicate)
+                    case argSelect: Select => transformAstRecursive(argSelect.duplicate)
                     case _ => apply.args(0).duplicate
                   }
                 (leftTree, rightTree)
@@ -180,11 +197,18 @@ class AssertionsMacro[C <: Context](val context: C) {
                   valDef("$org_scalatest_assert_macro_right", funApply.args(0).duplicate), 
                   binaryMacroExpression(select.duplicate, getText(tree), apply.args(0).duplicate)
                 )
-              case _ => tree.duplicate
+              case _ => simpleMacroExpression(tree.duplicate, getText(tree))
             }
-          case _ => tree.duplicate
+          case _ => simpleMacroExpression(tree.duplicate, getText(tree))
         }
-      case _ => tree.duplicate
+      case select: Select if select.name.decoded == "unary_!" => // for !
+        val leftTree = 
+          select.qualifier match {
+            case selectApply: Apply => transformAstRecursive(selectApply.duplicate)
+            case _ => select.qualifier.duplicate
+          }
+          notMacroExpression(leftTree.duplicate, getText(tree))
+      case _ => simpleMacroExpression(tree.duplicate, getText(tree))
     }
     
   def transformAst(tree: Tree): Tree = 
@@ -197,11 +221,13 @@ class AssertionsMacro[C <: Context](val context: C) {
                 val leftTree = 
                   select.qualifier match {
                     case selectApply: Apply => transformAstRecursive(selectApply.duplicate)
+                    case selectSelect: Select => transformAstRecursive(selectSelect.duplicate)
                     case _ => select.qualifier.duplicate
                   }
                 val rightTree = 
                   apply.args(0) match {
-                    case argApply => transformAstRecursive(argApply.duplicate)
+                    case argApply: Apply => transformAstRecursive(argApply.duplicate)
+                    case argSelect: Select => transformAstRecursive(argSelect.duplicate)
                     case _ => apply.args(0).duplicate
                   }
                 (leftTree, rightTree)
@@ -235,6 +261,18 @@ class AssertionsMacro[C <: Context](val context: C) {
               macroAssert
             )
         }
+        
+      case select: Select if select.name.decoded == "unary_!" => // for !
+        val leftTree = 
+          select.qualifier match {
+            case selectApply: Apply => transformAstRecursive(selectApply.duplicate)
+            case _ => simpleMacroExpression(select.qualifier.duplicate, getText(select.qualifier))
+          }
+        Block(
+          valDef("$org_scalatest_assert_macro_expr", notMacroExpression(leftTree, getText(tree))), 
+          macroAssert
+        )
+        
       case _ => 
         Block(
           valDef("$org_scalatest_assert_macro_expr", simpleMacroExpression(tree.duplicate, getText(tree))), 

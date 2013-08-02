@@ -29,7 +29,7 @@ import Runner.mergeMap
 import Runner.parseSuiteArgsIntoNameStrings
 import Runner.parseConcurrentConfig
 import java.io.{StringWriter, PrintWriter}
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.{LinkedBlockingQueue, ExecutorService, Executors}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import scala.collection.JavaConverters._
 import org.scalatest.time._
@@ -190,7 +190,8 @@ class Framework extends SbtFramework {
     presentReminder: Boolean,
     presentReminderWithShortStackTraces: Boolean,
     presentReminderWithFullStackTraces: Boolean,
-    presentReminderWithoutCanceledTests: Boolean
+    presentReminderWithoutCanceledTests: Boolean, 
+    concurrentDistributor: Option[ConcurrentDistributor]
   ): Array[Task] = {
     val suiteStartTime = System.currentTimeMillis
     val suiteClass = suite.getClass
@@ -230,75 +231,81 @@ class Framework extends SbtFramework {
         Filter(if (tagsToInclude.isEmpty) Some(Set(SELECTED_TAG)) else Some(tagsToInclude + SELECTED_TAG), tagsToExclude, false, new DynaTags(suiteTags.toMap, testTags.toMap))
       }
 
-    report(SuiteStarting(tracker.nextOrdinal(), suite.suiteName, suite.suiteId, Some(suiteClass.getName), formatter, Some(TopOfClass(suiteClass.getName))))
-
     val args = Args(report, Stopper.default, filter, configMap, None, tracker, Set.empty)
-    val distributor =
-      new RecordingDistributor(
-        taskDefinition, 
-        rerunSuiteId,
-        reporter,
-        args,
-        loader,
-        tagsToInclude,
-        tagsToExclude,
-        selectors,
-        explicitlySpecified, 
-        configMap,
-        summaryCounter,
-        useSbtLogInfoReporter,
-        presentAllDurations,
-        presentInColor,
-        presentShortStackTraces, 
-        presentFullStackTraces,
-        presentUnformatted,
-        presentReminder,
-        presentReminderWithShortStackTraces,
-        presentReminderWithFullStackTraces,
-        presentReminderWithoutCanceledTests
-      )
     
-    try {
+    concurrentDistributor match {
+      case Some(concurrentDistributor) => 
+        concurrentDistributor.apply(suite, args.copy(distributor = Some(concurrentDistributor), tracker = tracker.nextTracker))
+        Array.empty[Task]
+      case None =>
+        val distributor =
+          new RecordingDistributor(
+            taskDefinition, 
+            rerunSuiteId,
+            reporter,
+            args,
+            loader,
+            tagsToInclude,
+            tagsToExclude,
+            selectors,
+            explicitlySpecified, 
+            configMap,
+            summaryCounter,
+            useSbtLogInfoReporter,
+            presentAllDurations,
+            presentInColor,
+            presentShortStackTraces, 
+            presentFullStackTraces,
+            presentUnformatted,
+            presentReminder,
+            presentReminderWithShortStackTraces,
+            presentReminderWithFullStackTraces,
+            presentReminderWithoutCanceledTests
+          )
+        report(SuiteStarting(tracker.nextOrdinal(), suite.suiteName, suite.suiteId, Some(suiteClass.getName), formatter, Some(TopOfClass(suiteClass.getName))))
+    
+        try {
       
-      val status = suite.run(None, args.copy(distributor = Some(distributor)))
-      val formatter = formatterForSuiteCompleted(suite)
-      val duration = System.currentTimeMillis - suiteStartTime
+          val status = suite.run(None, args.copy(distributor = Some(distributor)))
+          val formatter = formatterForSuiteCompleted(suite)
+          val duration = System.currentTimeMillis - suiteStartTime
 
-      report(SuiteCompleted(tracker.nextOrdinal(), suite.suiteName, suite.suiteId, Some(suiteClass.getName), Some(duration), formatter, Some(TopOfClass(suiteClass.getName))))
+          report(SuiteCompleted(tracker.nextOrdinal(), suite.suiteName, suite.suiteId, Some(suiteClass.getName), Some(duration), formatter, Some(TopOfClass(suiteClass.getName))))
       
-      statefulStatus match {
-        case Some(s) => 
-          s.setFailed()
-        case None => // Do nothing
-      }
-    }
-    catch {       
-      case e: Exception => {
-
-        // TODO: Could not get this from Resources. Got:
-        // java.util.MissingResourceException: Can't find bundle for base name org.scalatest.ScalaTestBundle, locale en_US
-        // TODO Chee Seng, I wonder why we couldn't access resources, and if that's still true. I'd rather get this stuff
-        // from the resource file so we can later localize.
-        val rawString = "Exception encountered when attempting to run a suite with class name: " + suiteClass.getName
-        val formatter = formatterForSuiteAborted(suite, rawString)
-
-        val duration = System.currentTimeMillis - suiteStartTime
-        report(SuiteAborted(tracker.nextOrdinal(), rawString, suite.suiteName, suite.suiteId, Some(suiteClass.getName), Some(e), Some(duration), formatter, Some(SeeStackDepthException)))
-        
-        statefulStatus match {
-          case Some(s) => s.setFailed()
-          case None => // Do nothing
+          statefulStatus match {
+            case Some(s) => 
+              s.setFailed()
+            case None => // Do nothing
+          }
         }
-      }
-    }
-    finally {
-      statefulStatus match {
-        case Some(s) => s.setCompleted()
-        case None => // Do nothing
-      }
-    }
+        catch {       
+          case e: Exception => {
+
+            // TODO: Could not get this from Resources. Got:
+            // java.util.MissingResourceException: Can't find bundle for base name org.scalatest.ScalaTestBundle, locale en_US
+            // TODO Chee Seng, I wonder why we couldn't access resources, and if that's still true. I'd rather get this stuff
+            // from the resource file so we can later localize.
+            val rawString = "Exception encountered when attempting to run a suite with class name: " + suiteClass.getName
+            val formatter = formatterForSuiteAborted(suite, rawString)
+
+            val duration = System.currentTimeMillis - suiteStartTime
+            report(SuiteAborted(tracker.nextOrdinal(), rawString, suite.suiteName, suite.suiteId, Some(suiteClass.getName), Some(e), Some(duration), formatter, Some(SeeStackDepthException)))
+        
+            statefulStatus match {
+              case Some(s) => s.setFailed()
+              case None => // Do nothing
+            }
+          }
+        }
+        finally {
+          statefulStatus match {
+            case Some(s) => s.setCompleted()
+            case None => // Do nothing
+          }
+        }
     
-    distributor.nestedTasks
+        distributor.nestedTasks
+    }
   }
   
   class ScalaTestNestedTask(
@@ -370,7 +377,8 @@ class Framework extends SbtFramework {
         presentReminder,
         presentReminderWithShortStackTraces,
         presentReminderWithFullStackTraces,
-        presentReminderWithoutCanceledTests
+        presentReminderWithoutCanceledTests, 
+        None
       )
     }
     
@@ -397,7 +405,8 @@ class Framework extends SbtFramework {
     presentReminder: Boolean,
     presentReminderWithShortStackTraces: Boolean,
     presentReminderWithFullStackTraces: Boolean,
-    presentReminderWithoutCanceledTests: Boolean
+    presentReminderWithoutCanceledTests: Boolean, 
+    concurrentDistributor: Option[ConcurrentDistributor]
   ) extends Task {
     
     def loadSuiteClass = {
@@ -491,7 +500,8 @@ class Framework extends SbtFramework {
           presentReminder,
           presentReminderWithShortStackTraces,
           presentReminderWithFullStackTraces,
-          presentReminderWithoutCanceledTests
+          presentReminderWithoutCanceledTests, 
+          concurrentDistributor
         )
       }
        else 
@@ -605,6 +615,19 @@ class Framework extends SbtFramework {
     
     dispatch(RunStarting(tracker.nextOrdinal(), 0, configMap))
     
+    val (execService, concurrentDistributor) = 
+      if (concurrent) {
+        val poolSize =
+          if (concurrentConfig.numThreads > 0) concurrentConfig.numThreads
+          else Runtime.getRuntime.availableProcessors * 2
+        val execSvc: ExecutorService = Executors.newFixedThreadPool(poolSize)
+        // TODO: to support chosenStyleSet
+        val distributor = new ConcurrentDistributor(Args(dispatch, Stopper.default, Filter(if (tagsToInclude.isEmpty) None else Some(tagsToInclude), tagsToExclude), configMap, None, tracker, Set.empty), execSvc)
+        (Some(execSvc), Some(distributor))
+      }
+      else
+        (None, None)
+    
     private def createTask(td: TaskDef): ScalaTestTask = 
       new ScalaTestTask(
           td, 
@@ -626,7 +649,8 @@ class Framework extends SbtFramework {
           presentReminder,
           presentReminderWithShortStackTraces,
           presentReminderWithFullStackTraces,
-          presentReminderWithoutCanceledTests
+          presentReminderWithoutCanceledTests, 
+          concurrentDistributor
         )
     
     private def filterWildcard(paths: List[String], taskDefs: Array[TaskDef]): Array[TaskDef] = 
@@ -646,11 +670,20 @@ class Framework extends SbtFramework {
     
     def done = {
       if (!isDone.getAndSet(true)) {
+        concurrentDistributor match {
+          case Some(concurrentDistributor) => 
+            concurrentDistributor.waitUntilDone()
+          case None =>
+        }
         val duration = System.currentTimeMillis - runStartTime
         val summary = new Summary(summaryCounter.testsSucceededCount.get, summaryCounter.testsFailedCount.get, summaryCounter.testsIgnoredCount.get, summaryCounter.testsPendingCount.get, 
                                   summaryCounter.testsCanceledCount.get, summaryCounter.suitesCompletedCount.get, summaryCounter.suitesAbortedCount.get, summaryCounter.scopesPendingCount.get)
         dispatch(RunCompleted(tracker.nextOrdinal(), Some(duration), Some(summary)))
         dispatchReporter.dispatchDisposeAndWaitUntilDone()
+        execService match {
+          case Some(execService) => execService.shutdown()
+          case None => 
+        }
         val fragments: Vector[Fragment] =
           StringReporter.summaryFragments(
             true,

@@ -27,10 +27,12 @@ import Runner.parseCompoundArgIntoSet
 import Runner.SELECTED_TAG
 import Runner.mergeMap
 import Runner.parseSuiteArgsIntoNameStrings
+import Runner.parseConcurrentConfig
 import java.io.{StringWriter, PrintWriter}
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import scala.collection.JavaConverters._
+import org.scalatest.time._
 
 /**
  * This class is ScalaTest's implementation of the new Framework API that will be supported in sbt 0.13. Since 0.13 is
@@ -572,6 +574,8 @@ class Framework extends SbtFramework {
     loader: ClassLoader,
     tagsToInclude: Set[String],
     tagsToExclude: Set[String],
+    concurrent: Boolean, 
+    concurrentConfig: ConcurrentConfig, 
     membersOnly: List[String], 
     wildcard: List[String], 
     configMap: ConfigMap, 
@@ -593,14 +597,19 @@ class Framework extends SbtFramework {
     val runStartTime = System.currentTimeMillis
     
     val dispatchReporter = ReporterFactory.getDispatchReporter(repConfig, None, None, loader, Some(resultHolder), false, 0, 0) // TODO: Support slowpoke detection from sbt
+    val dispatch = 
+      if (concurrent && concurrentConfig.enableSuiteSortingReporter) 
+        new SuiteSortingReporter(dispatchReporter, Span(Runner.testSortingReporterTimeout.millisPart + 1000, Millis), System.err)
+      else 
+        dispatchReporter
     
-    dispatchReporter(RunStarting(tracker.nextOrdinal(), 0, configMap))
+    dispatch(RunStarting(tracker.nextOrdinal(), 0, configMap))
     
     private def createTask(td: TaskDef): ScalaTestTask = 
       new ScalaTestTask(
           td, 
           loader,
-          dispatchReporter,
+          dispatch,
           tracker,
           tagsToInclude,
           tagsToExclude,
@@ -640,7 +649,7 @@ class Framework extends SbtFramework {
         val duration = System.currentTimeMillis - runStartTime
         val summary = new Summary(summaryCounter.testsSucceededCount.get, summaryCounter.testsFailedCount.get, summaryCounter.testsIgnoredCount.get, summaryCounter.testsPendingCount.get, 
                                   summaryCounter.testsCanceledCount.get, summaryCounter.suitesCompletedCount.get, summaryCounter.suitesAbortedCount.get, summaryCounter.scopesPendingCount.get)
-        dispatchReporter(RunCompleted(tracker.nextOrdinal(), Some(duration), Some(summary)))
+        dispatch(RunCompleted(tracker.nextOrdinal(), Some(duration), Some(summary)))
         dispatchReporter.dispatchDisposeAndWaitUntilDone()
         val fragments: Vector[Fragment] =
           StringReporter.summaryFragments(
@@ -690,51 +699,51 @@ class Framework extends SbtFramework {
             val event = is.readObject
             event match {
               case e: TestStarting => 
-                dispatchReporter(e) 
+                dispatch(e) 
                 react()
               case e: TestSucceeded => 
-                dispatchReporter(e) 
+                dispatch(e) 
                 summaryCounter.incrementTestsSucceededCount()
                 react()
               case e: TestFailed => 
-                dispatchReporter(e) 
+                dispatch(e) 
                 summaryCounter.incrementTestsFailedCount()
                 react()
               case e: TestIgnored => 
-                dispatchReporter(e)
+                dispatch(e)
                 summaryCounter.incrementTestsIgnoredCount()
                 react()
               case e: TestPending => 
-                dispatchReporter(e)
+                dispatch(e)
                 summaryCounter.incrementTestsPendingCount()
                 react()
               case e: TestCanceled => 
-                dispatchReporter(e)
+                dispatch(e)
                 summaryCounter.incrementTestsCanceledCount()
                 react()
               case e: SuiteStarting => 
-                dispatchReporter(e)
+                dispatch(e)
                 react()
               case e: SuiteCompleted => 
-                dispatchReporter(e)
+                dispatch(e)
                 summaryCounter.incrementSuitesCompletedCount()
                 react()
               case e: SuiteAborted => 
-                dispatchReporter(e)
+                dispatch(e)
                 summaryCounter.incrementSuitesAbortedCount()
                 react()
-              case e: ScopeOpened => dispatchReporter(e); react()
-              case e: ScopeClosed => dispatchReporter(e); react()
+              case e: ScopeOpened => dispatch(e); react()
+              case e: ScopeClosed => dispatch(e); react()
               case e: ScopePending => 
-                dispatchReporter(e)
+                dispatch(e)
                 summaryCounter.incrementScopesPendingCount()
                 react()
-              case e: InfoProvided => dispatchReporter(e); react()
-              case e: MarkupProvided => dispatchReporter(e); react()
+              case e: InfoProvided => dispatch(e); react()
+              case e: MarkupProvided => dispatch(e); react()
               case e: RunStarting => react() // just ignore test starting and continue
               case e: RunCompleted => // Sub-process completed, just let the thread terminate
-              case e: RunStopped => dispatchReporter(e)
-              case e: RunAborted => dispatchReporter(e)
+              case e: RunStopped => dispatch(e)
+              case e: RunAborted => dispatch(e)
 	        }
           }
         }
@@ -758,6 +767,8 @@ class Framework extends SbtFramework {
     val configMap = parsePropertiesArgsIntoMap(propertiesArgsList)
     val tagsToInclude: Set[String] = parseCompoundArgIntoSet(includesArgsList, "-n")
     val tagsToExclude: Set[String] = parseCompoundArgIntoSet(excludesArgsList, "-l")
+    val concurrent: Boolean = !concurrentList.isEmpty
+    val concurrentConfig: ConcurrentConfig = parseConcurrentConfig(concurrentList)
     val membersOnly: List[String] = parseSuiteArgsIntoNameStrings(memberOnlyList, "-m")
     val wildcard: List[String] = parseSuiteArgsIntoNameStrings(wildcardList, "-w")
     
@@ -823,6 +834,8 @@ class Framework extends SbtFramework {
       testClassLoader,
       tagsToInclude,
       tagsToExclude,
+      concurrent, 
+      concurrentConfig, 
       membersOnly, 
       wildcard, 
       configMap,

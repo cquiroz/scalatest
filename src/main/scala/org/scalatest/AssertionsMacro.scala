@@ -126,8 +126,10 @@ class AssertionsMacro[C <: Context](val context: C) {
       List(Ident(newTermName("$org_scalatest_assert_macro_expr")))
     )
     
+  val logicOperators = Set("&&", "||", "&", "|")
+    
   def traverseSelect(select: Select, rightExpr: Tree): (Tree, Tree) = 
-    if (select.name.decoded == "&&" || select.name.decoded == "||") {
+    if (logicOperators.contains(select.name.decoded)) {
       val leftTree = 
         select.qualifier match {
           case selectApply: Apply => transformAst(selectApply.duplicate)

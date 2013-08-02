@@ -20,7 +20,9 @@ sealed abstract class MacroExpression extends Function0[Boolean] {
   val expressionText: String
   def apply: Boolean = value
   def &&(right: MacroExpression): MacroExpression
+  def &(right: MacroExpression): MacroExpression
   def ||(right: MacroExpression): MacroExpression
+  def |(right: MacroExpression): MacroExpression
   def unary_! : MacroExpression
   def okMessage: String
   def errorMessage: String
@@ -34,8 +36,12 @@ final class SimpleMacroExpression(expression: => Boolean, val expressionText: St
   lazy val value: Boolean = expression
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
+  def &(right: MacroExpression): MacroExpression = 
+    new BinaryMacroExpression(this, "&", right, value & right.value, "(" + expressionText + " & " + right.expressionText + ")")
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
+  def |(right: MacroExpression): MacroExpression = 
+    new BinaryMacroExpression(this, "|", right, value | right.value, "(" + expressionText + " | " + right.expressionText + ")")
   def unary_! : MacroExpression = 
     new NotMacroExpression(this, "!", "!(" + expressionText + ")")
   def okMessage: String = FailureMessages("wasTrue", UnquotedString(expressionText))
@@ -48,8 +54,12 @@ final class NotMacroExpression(expression: MacroExpression, operator: String, va
     
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
+  def &(right: MacroExpression): MacroExpression = 
+    new BinaryMacroExpression(this, "&", right, value & right.value, "(" + expressionText + " & " + right.expressionText + ")")
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
+  def |(right: MacroExpression): MacroExpression = 
+    new BinaryMacroExpression(this, "|", right, value | right.value, "(" + expressionText + " | " + right.expressionText + ")")
   def unary_! : MacroExpression = 
     new NotMacroExpression(this, "!", "!(" + expressionText + ")")
   def okMessage: String = expression.errorMessage
@@ -65,9 +75,15 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
     
   def &&(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "&&", right, value && right.value, "(" + expressionText + " && " + right.expressionText + ")")
+  
+  def &(right: MacroExpression): MacroExpression = 
+    new BinaryMacroExpression(this, "&", right, value & right.value, "(" + expressionText + " & " + right.expressionText + ")")
     
   def ||(right: MacroExpression): MacroExpression = 
     new BinaryMacroExpression(this, "||", right, value || right.value, "(" + expressionText + " || " + right.expressionText + ")")
+  
+  def |(right: MacroExpression): MacroExpression = 
+    new BinaryMacroExpression(this, "|", right, value | right.value, "(" + expressionText + " | " + right.expressionText + ")")
   
   def unary_! : MacroExpression = 
     new NotMacroExpression(this, "!", "!(" + expressionText + ")")
@@ -101,7 +117,7 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
       case ">=" => FailureMessages("wasGreaterThanOrEqualTo", left, right)
       case "<" => FailureMessages("wasLessThan", left, right)
       case "<=" => FailureMessages("wasLessThanOrEqualTo", left, right)
-      case "&&" => 
+      case "&&" | "&" => 
         (left, right) match {
           case (leftExpr: MacroExpression, rightExpr: MacroExpression) => 
             FailureMessages("commaAnd", 
@@ -114,7 +130,7 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
           case _ =>
             FailureMessages("commaAnd", left, right)
         }
-      case "||" => 
+      case "||" | "|" => 
         (left, right) match {
           case (leftExpr: MacroExpression, rightExpr: MacroExpression) => 
             FailureMessages("commaAnd", 
@@ -145,7 +161,7 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
       case ">=" => FailureMessages("wasNotGreaterThanOrEqualTo", left, right)
       case "<" => FailureMessages("wasNotLessThan", left, right)
       case "<=" => FailureMessages("wasNotLessThanOrEqualTo", left, right)
-      case "&&" => 
+      case "&&" | "&" => 
         (left, right) match {
           case (leftExpr: MacroExpression, rightExpr: MacroExpression) => 
             if (leftExpr.value) 
@@ -162,7 +178,7 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
           case _ =>
             FailureMessages("commaBut", left, right)
         }
-      case "||" => 
+      case "||" | "|" => 
         (left, right) match {
           case (leftExpr: MacroExpression, rightExpr: MacroExpression) => 
             FailureMessages("commaAnd", UnquotedString(leftExpr.errorMessage), UnquotedString(rightExpr.errorMessage))

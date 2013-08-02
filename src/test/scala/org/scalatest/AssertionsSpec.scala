@@ -528,6 +528,37 @@ class AssertionsSpec extends FunSpec with OptionValues {
       assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
     }
     
+    it("should do nothing when is used to check a == 3 & b == 5") {
+      assert(a == 3 & b == 5)
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 3 & b == 6") {
+      val e = intercept[TestFailedException] {
+        assert(a == 3 & b == 6)
+      }
+      assert(e.message === Some(commaBut(equaled(3, 3), didNotEqual(5, 6))))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 & b == 5") {
+      val e = intercept[TestFailedException] {
+        assert(a == 2 & b == 5)
+      }
+      assert(e.message === Some(didNotEqual(3, 2)))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 & b == 6") {
+      val e = intercept[TestFailedException] {
+        assert(a == 2 & b == 6)
+      }
+      assert(e.message === Some(didNotEqual(3, 2)))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
     it("should do nothing when is used to check a == 3 || b == 5") {
       assert(a == 3 || b == 5)
     }
@@ -543,6 +574,27 @@ class AssertionsSpec extends FunSpec with OptionValues {
     it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 || b == 6") {
       val e = intercept[TestFailedException] {
         assert(a == 2 || b == 6)
+      }
+      assert(e.message === Some(commaAnd(didNotEqual(3, 2), didNotEqual(5, 6))))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should do nothing when is used to check a == 3 | b == 5") {
+      assert(a == 3 | b == 5)
+    }
+    
+    it("should do nothing when is used to check a == 3 | b == 6") {
+      assert(a == 3 | b == 6)
+    }
+    
+    it("should do nothing when is used to check a == 2 | b == 5") {
+      assert(a == 2 | b == 5)
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check a == 2 | b == 6") {
+      val e = intercept[TestFailedException] {
+        assert(a == 2 | b == 6)
       }
       assert(e.message === Some(commaAnd(didNotEqual(3, 2), didNotEqual(5, 6))))
       assert(e.failedCodeFileName === (Some(fileName)))
@@ -580,6 +632,19 @@ class AssertionsSpec extends FunSpec with OptionValues {
         assert(a == 3 && !(b == 5))
       }
       assert(e.message === Some(commaBut(equaled(3, 3), equaled(5, 5))))
+      assert(e.failedCodeFileName === (Some(fileName)))
+      assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
+    }
+    
+    it("should do nothing when is used to check (a == 3) == (b == 5)") {
+      assert((a == 3) == (b == 5))
+    }
+    
+    it("should throw TestFailedException with correct message and stack depth when is used to check (a == 3) == (b != 5)") {
+      val e = intercept[TestFailedException] {
+        assert((a == 3) == (b != 5))
+      }
+      assert(e.message === Some(didNotEqual(true, false)))
       assert(e.failedCodeFileName === (Some(fileName)))
       assert(e.failedCodeLineNumber === (Some(thisLineNumber - 4)))
     }

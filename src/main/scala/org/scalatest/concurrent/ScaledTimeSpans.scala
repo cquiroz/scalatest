@@ -16,7 +16,7 @@
 package org.scalatest.concurrent
 
 import org.scalatest.time.Span
-import org.scalatest.tools.Runner
+import org.scalatest.tools.RunnerThreadLocal
 
 /*
 I have checked in the PoC at the following branch:-
@@ -191,6 +191,6 @@ trait ScaledTimeSpans {
    * via the command line by passing a <a href="../tools/Runner$.html#scalingTimeSpans"><code>-F</code> argument</a> to <a href="../tools/Runner$.html"><code>Runner</code></a>.
    * </p>
    */
-  def spanScaleFactor: Double = Runner.spanScaleFactor
+  def spanScaleFactor: Double = RunnerThreadLocal.get.spanScaleFactor
 }
 

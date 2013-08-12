@@ -732,8 +732,9 @@ object Runner {
   private val RUNNER_JFRAME_START_Y: Int = 100
   
   private[scalatest] val SELECTED_TAG = "org.scalatest.Selected"
+  private[scalatest] val SPAN_SCALE_FACTOR = "org.scalatest.SpanScaleFactor"
   
-  @volatile private[scalatest] var spanScaleFactor: Double = 1.0
+  //@volatile private[scalatest] var spanScaleFactor: Double = 1.0
 
   private final val DefaultNumFilesToArchive = 2
 
@@ -911,7 +912,7 @@ object Runner {
     val testNGList: List[String] = parseSuiteArgsIntoNameStrings(testNGArgs, "-b")
     val chosenStyleSet: Set[String] = parseChosenStylesIntoChosenStyleSet(chosenStyles, "-y")
     val slowpokeConfig: Option[SlowpokeConfig] = parseSlowpokeConfig(slowpokeArgs)
-    spanScaleFactor = parseDoubleArgument(spanScaleFactors, "-F", 1.0)
+    val spanScaleFactor = parseDoubleArgument(spanScaleFactors, "-F", 1.0)
     testSortingReporterTimeout = Span(parseDoubleArgument(testSortingReporterTimeouts, "-T", 2.0), Seconds)
 
     // If there's a graphic reporter, we need to leave it out of
@@ -943,11 +944,15 @@ object Runner {
 
     if (propertiesMap.isDefinedAt("org.scalatest.ChosenStyles"))
       throw new IllegalArgumentException("Property name 'org.scalatest.ChosenStyles' is used by ScalaTest, please choose other property name.")
+    if (propertiesMap.isDefinedAt(SPAN_SCALE_FACTOR))
+      throw new IllegalArgumentException("Property name '" + SPAN_SCALE_FACTOR + "' is used by ScalaTest, please choose other property name.")
     val configMap: ConfigMap = 
-      if (chosenStyleSet.isEmpty)
-        propertiesMap
-      else
-        propertiesMap + ("org.scalatest.ChosenStyles" -> chosenStyleSet)
+      (
+        if (chosenStyleSet.isEmpty)
+          propertiesMap
+        else
+          propertiesMap + ("org.scalatest.ChosenStyles" -> chosenStyleSet)
+      ) + (SPAN_SCALE_FACTOR -> spanScaleFactor)
 
     val (detectSlowpokes: Boolean, slowpokeDetectionDelay: Long, slowpokeDetectionPeriod: Long) =
       slowpokeConfig match {
@@ -2386,6 +2391,8 @@ object Runner {
     var tracker = new Tracker(new Ordinal(runStamp))
 
     val runStartTime = System.currentTimeMillis
+    
+    RunnerThreadLocal.set(configMap)
     
     try {
       val loadProblemsExist =

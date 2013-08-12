@@ -28,10 +28,13 @@ import Runner.SELECTED_TAG
 import Runner.mergeMap
 import Runner.parseSuiteArgsIntoNameStrings
 import Runner.parseChosenStylesIntoChosenStyleSet
+import Runner.parseArgs
+import Runner.parseDoubleArgument
 import java.io.{StringWriter, PrintWriter}
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import scala.collection.JavaConverters._
+import Runner.SPAN_SCALE_FACTOR
 
 /**
  * This class is ScalaTest's implementation of the new Framework API that will be supported in sbt 0.13. Since 0.13 is
@@ -192,6 +195,9 @@ class Framework extends SbtFramework {
     presentReminderWithoutCanceledTests: Boolean
   ): Array[Task] = {
     val suiteStartTime = System.currentTimeMillis
+    
+    RunnerThreadLocal.set(configMap)
+    
     val suiteClass = suite.getClass
     val report = new SbtReporter(rerunSuiteId, taskDefinition.fullyQualifiedName, taskDefinition.fingerprint, eventHandler, reporter, summaryCounter)
     val formatter = formatterForSuiteStarting(suite)
@@ -753,42 +759,63 @@ class Framework extends SbtFramework {
 
   def runner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader) = {
 
-    val translator = new FriendlyParamsTranslator()
-    val (propertiesArgsList, includesArgsList, excludesArgsList, repoArgsList, concurrentList, memberOnlyList, wildcardList, 
-         suiteList, junitList, testngList, chosenStyles) = translator.parsePropsAndTags(args.filter(!_.equals("")))
+    val ParsedArgs(
+      runpathArgs,
+      reporterArgs,
+      suiteArgs,
+      againArgs,
+      junitArgs,
+      propertiesArgs,
+      tagsToIncludeArgs,
+      tagsToExcludeArgs,
+      concurrentArgs,
+      membersOnlyArgs,
+      wildcardArgs,
+      testNGArgs,
+      suffixes, 
+      chosenStyles, 
+      spanScaleFactors, 
+      testSortingReporterTimeouts,
+      slowpokeArgs
+    ) = parseArgs(args)
                
-    if (!suiteList.isEmpty)
+    if (!suiteArgs.isEmpty)
       throw new IllegalArgumentException("-s (suite) is not supported when runs in SBT, please use SBT's test-only instead.")
     
-    if (!junitList.isEmpty)
+    if (!junitArgs.isEmpty)
       throw new IllegalArgumentException("-j (junit) is not supported when runs in SBT.")
     
-    if (!testngList.isEmpty)
+    if (!testNGArgs.isEmpty)
       throw new IllegalArgumentException("-b (testng) is not supported when runs in SBT.")
     
-    if (!concurrentList.isEmpty)
+    if (!concurrentArgs.isEmpty)
       throw new IllegalArgumentException("-c, -P (concurrent) is not supported when runs in SBT.")
                
-    val propertiesMap = parsePropertiesArgsIntoMap(propertiesArgsList)
+    val spanScaleFactor = parseDoubleArgument(spanScaleFactors, "-F", 1.0)
+    val propertiesMap = parsePropertiesArgsIntoMap(propertiesArgs)
     val chosenStyleSet: Set[String] = parseChosenStylesIntoChosenStyleSet(chosenStyles, "-y")
     if (propertiesMap.isDefinedAt("org.scalatest.ChosenStyles"))
       throw new IllegalArgumentException("Property name 'org.scalatest.ChosenStyles' is used by ScalaTest, please choose other property name.")
+    if (propertiesMap.isDefinedAt(SPAN_SCALE_FACTOR))
+      throw new IllegalArgumentException("Property name '" + SPAN_SCALE_FACTOR + "' is used by ScalaTest, please choose other property name.")
     val configMap: ConfigMap = 
-      if (chosenStyleSet.isEmpty)
-        propertiesMap
-      else
-        propertiesMap + ("org.scalatest.ChosenStyles" -> chosenStyleSet)
+      (
+        if (chosenStyleSet.isEmpty)
+          propertiesMap
+        else
+          propertiesMap + ("org.scalatest.ChosenStyles" -> chosenStyleSet)
+      ) + (SPAN_SCALE_FACTOR -> spanScaleFactor)
       
-    val tagsToInclude: Set[String] = parseCompoundArgIntoSet(includesArgsList, "-n")
-    val tagsToExclude: Set[String] = parseCompoundArgIntoSet(excludesArgsList, "-l")
-    val membersOnly: List[String] = parseSuiteArgsIntoNameStrings(memberOnlyList, "-m")
-    val wildcard: List[String] = parseSuiteArgsIntoNameStrings(wildcardList, "-w")
+    val tagsToInclude: Set[String] = parseCompoundArgIntoSet(tagsToIncludeArgs, "-n")
+    val tagsToExclude: Set[String] = parseCompoundArgIntoSet(tagsToExcludeArgs, "-l")
+    val membersOnly: List[String] = parseSuiteArgsIntoNameStrings(membersOnlyArgs, "-m")
+    val wildcard: List[String] = parseSuiteArgsIntoNameStrings(wildcardArgs, "-w")
     
     val fullReporterConfigurations: ReporterConfigurations = 
       if (remoteArgs.isEmpty) {
         // Creating the normal/main runner, should create reporters as specified by args.
         // If no reporters specified, just give them a default stdout reporter
-        Runner.parseReporterArgsIntoConfigurations(repoArgsList)
+        Runner.parseReporterArgsIntoConfigurations(reporterArgs)
       }
       else {
         // Creating a sub-process runner, should just create stdout reporter and socket reporter
@@ -825,7 +852,7 @@ class Framework extends SbtFramework {
             configSet.contains(PresentReminderWithoutCanceledTests)
           )
         case None => 
-          (!remoteArgs.isEmpty || repoArgsList.isEmpty, false, true, false, false, false, false, false, false, false)
+          (!remoteArgs.isEmpty || reporterArgs.isEmpty, false, true, false, false, false, false, false, false, false)
       }
     
     //val reporterConfigs = fullReporterConfigurations.copy(standardOutReporterConfiguration = None)

@@ -5,6 +5,9 @@ import org.scalatest.tools.Runner.parsePropertiesArgsIntoMap
 import org.scalatest.tools.Runner.parseCompoundArgIntoSet
 import org.scalatest.tools.Runner.parseSuiteArgsIntoNameStrings
 import org.scalatest.tools.Runner.parseChosenStylesIntoChosenStyleSet
+import org.scalatest.tools.Runner.parseArgs
+import org.scalatest.tools.Runner.SPAN_SCALE_FACTOR
+import org.scalatest.tools.Runner.parseDoubleArgument
 import SuiteDiscoveryHelper._
 import org.scalatest.Suite.formatterForSuiteStarting
 import org.scalatest.Suite.formatterForSuiteCompleted
@@ -107,35 +110,60 @@ class ScalaTestFramework extends SbtFramework {
     def getConfigurations(args: Array[String], loggers: Array[Logger], eventHandler: EventHandler, testLoader: ClassLoader) = 
       synchronized {
         if (reporterConfigs.get.isEmpty) {
-          // Why are we getting rid of empty strings? Were empty strings coming in from sbt? -bv 11/09/2011
-          val translator = new FriendlyParamsTranslator()
-          val (propertiesArgsList, includesArgsList, excludesArgsList, repoArgsList, concurrentList, memberOnlyArgList, wildcardArgList, 
-               suiteList, junitList, testngList, chosenStyles) = translator.parsePropsAndTags(args.filter(!_.equals("")))
+          val ParsedArgs(
+            runpathArgs,
+            reporterArgs,
+            suiteArgs,
+            againArgs,
+            junitArgs,
+            propertiesArgs,
+            tagsToIncludeArgs,
+            tagsToExcludeArgs,
+            concurrentArgs,
+            membersOnlyArgs,
+            wildcardArgs,
+            testNGArgs,
+            suffixes, 
+            chosenStyles, 
+            spanScaleFactors, 
+            testSortingReporterTimeouts,
+            slowpokeArgs
+          ) = parseArgs(args)
                
-          if (!suiteList.isEmpty)
+          if (!suiteArgs.isEmpty)
             throw new IllegalArgumentException("-s (suite) is not supported when runs in SBT, please use SBT's test-only instead.")
           
-          if (!junitList.isEmpty)
+          if (!junitArgs.isEmpty)
             throw new IllegalArgumentException("-j (junit) is not supported when runs in SBT.")
           
-          if (!testngList.isEmpty)
+          if (!testNGArgs.isEmpty)
             throw new IllegalArgumentException("-b (testng) is not supported when runs in SBT.")
           
-          if (!concurrentList.isEmpty)
+          if (!concurrentArgs.isEmpty)
             throw new IllegalArgumentException("-c, -P (concurrent) is not supported when runs in SBT.")
           
-          val propertiesMap = parsePropertiesArgsIntoMap(propertiesArgsList)
+          val spanScaleFactor = parseDoubleArgument(spanScaleFactors, "-F", 1.0)
+          val propertiesMap = parsePropertiesArgsIntoMap(propertiesArgs)
           val chosenStyleSet: Set[String] = parseChosenStylesIntoChosenStyleSet(chosenStyles, "-y")
           if (propertiesMap.isDefinedAt("org.scalatest.ChosenStyles"))
             throw new IllegalArgumentException("Property name 'org.scalatest.ChosenStyles' is used by ScalaTest, please choose other property name.")
-          configMap.getAndSet(Some(if (chosenStyleSet.isEmpty) propertiesMap else propertiesMap + ("org.scalatest.ChosenStyles" -> chosenStyleSet)))
-          val tagsToInclude: Set[String] = parseCompoundArgIntoSet(includesArgsList, "-n")
-          val tagsToExclude: Set[String] = parseCompoundArgIntoSet(excludesArgsList, "-l")
+          configMap.getAndSet(
+            Some(
+              (
+                if (chosenStyleSet.isEmpty)
+                  propertiesMap
+                else
+                  propertiesMap + ("org.scalatest.ChosenStyles" -> chosenStyleSet)
+              ) + (SPAN_SCALE_FACTOR -> spanScaleFactor)
+            )
+          )
+          val tagsToInclude: Set[String] = parseCompoundArgIntoSet(tagsToIncludeArgs, "-n")
+          val tagsToExclude: Set[String] = parseCompoundArgIntoSet(tagsToExcludeArgs, "-l")
           filter.getAndSet(Some(org.scalatest.Filter(if (tagsToInclude.isEmpty) None else Some(tagsToInclude), tagsToExclude)))
-          membersOnly.getAndSet(Some(parseSuiteArgsIntoNameStrings(memberOnlyArgList, "-m")))
-          wildcard.getAndSet(Some(parseSuiteArgsIntoNameStrings(wildcardArgList, "-w")))
+          membersOnly.getAndSet(Some(parseSuiteArgsIntoNameStrings(membersOnlyArgs, "-m")))
+          wildcard.getAndSet(Some(parseSuiteArgsIntoNameStrings(wildcardArgs, "-w")))
           
-          val fullReporterConfigurations = Runner.parseReporterArgsIntoConfigurations(repoArgsList)
+          val fullReporterConfigurations = Runner.parseReporterArgsIntoConfigurations(reporterArgs)
           
           fullReporterConfigurations.standardOutReporterConfiguration match {
             case Some(stdoutConfig) =>
@@ -155,7 +183,7 @@ class ScalaTestFramework extends SbtFramework {
               presentReminderWithFullStackTraces.getAndSet(configSet.contains(PresentReminderWithFullStackTraces))
               presentReminderWithoutCanceledTests.getAndSet(configSet.contains(PresentReminderWithoutCanceledTests))
             case None => 
-              useStdout.getAndSet(repoArgsList.isEmpty)  // If no reporters specified, just give them a default stdout reporter
+              useStdout.getAndSet(reporterArgs.isEmpty)  // If no reporters specified, just give them a default stdout reporter
               presentAllDurations.getAndSet(false)
               presentInColor.getAndSet(true)
               presentShortStackTraces.getAndSet(false)
@@ -313,6 +341,8 @@ Tags to include and exclude: -n "CheckinTests FunctionalTests" -l "SlowTests Net
         //println("sbt args: " + args.toList)
         if ((isAccessibleSuite(suiteClass) || isRunnable(suiteClass)) && isDiscoverableSuite(suiteClass)) {
           val (reporter, filter, configMap, membersOnly, wildcard) = RunConfig.getConfigurations(args, loggers, eventHandler, testLoader)
+          
+          RunnerThreadLocal.set(configMap)
           
           if ((wildcard.isEmpty && membersOnly.isEmpty) || filterWildcard(wildcard, testClassName) || filterMembersOnly(membersOnly, testClassName)) {
           

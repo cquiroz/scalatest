@@ -31,6 +31,8 @@ private[scalatest] class SuiteRunner(suite: Suite, args: Args, status: ScalaTest
   def run() {
 
     if (!stopRequested()) {
+      RunnerThreadLocal.set(args.configMap)
+      
       // Create a Rerunner if the Suite has a no-arg constructor
       val hasPublicNoArgConstructor: Boolean =
         try {

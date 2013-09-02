@@ -20,6 +20,7 @@ import org.scalautils.NormalizingEquality
 import org.scalautils.Uniformity
 import org.scalautils.StringNormalizations._
 import SharedHelpers._
+import matchers.{AMatcher, AnMatcher}
 
 class ListShouldContainSpec extends Spec with Matchers {
 
@@ -409,6 +410,72 @@ class ListShouldContainSpec extends Spec with Matchers {
           caseLists shouldNot (contain ("HI"))
         }
         normalizedInvokedCount should be (4)
+      }
+    }
+
+    object `when used with contain a AMatcher syntax` {
+
+      val hiWord = AMatcher[String]("hi word") { _ == "hi" }
+      val hoWord = AMatcher[String]("ho word") { _ == "ho" }
+
+      def `should do nothing if valid` {
+        xs should contain a hiWord
+      }
+
+      def `should throw a TFE with approciate error message if not valid` {
+        val e1 = intercept[TestFailedException] {
+          xs should contain a hoWord
+        }
+        e1.message.get should be (FailureMessages("didNotContainA", xs, UnquotedString("ho word")))
+        e1.failedCodeFileName.get should be ("ListShouldContainSpec.scala")
+        e1.failedCodeLineNumber.get should be (thisLineNumber - 4)
+
+        val e2 = intercept[TestFailedException] {
+          nil should contain a hiWord
+        }
+        e2.message.get should be (FailureMessages("didNotContainA", nil, UnquotedString("hi word")))
+        e2.failedCodeFileName.get should be ("ListShouldContainSpec.scala")
+        e2.failedCodeLineNumber.get should be (thisLineNumber - 4)
+      }
+    }
+
+    object `when used with not contain a AMatcher syntax` {
+
+      val hiWord = AMatcher[String]("hi word") { _ == "hi" }
+      val hoWord = AMatcher[String]("ho word") { _ == "ho" }
+
+      def `should do nothing if valid` {
+        xs should not contain a (hoWord)
+        nil should not contain a (hoWord)
+      }
+
+      def `should throw a TFE with approciate error message if not valid` {
+        val e1 = intercept[TestFailedException] {
+          xs should not contain a (hiWord)
+        }
+        e1.message.get should be (FailureMessages("containedA", xs, UnquotedString("hi word")))
+        e1.failedCodeFileName.get should be ("ListShouldContainSpec.scala")
+        e1.failedCodeLineNumber.get should be (thisLineNumber - 4)
+      }
+    }
+
+    object `when used with shouldNot contain a AMatcher syntax` {
+
+      val hiWord = AMatcher[String]("hi word") { _ == "hi" }
+      val hoWord = AMatcher[String]("ho word") { _ == "ho" }
+
+      def `should do nothing if valid` {
+        xs shouldNot contain a (hoWord)
+        nil shouldNot contain a (hoWord)
+      }
+
+      def `should throw a TFE with approciate error message if not valid` {
+        val e1 = intercept[TestFailedException] {
+          xs shouldNot contain a (hiWord)
+        }
+        e1.message.get should be (FailureMessages("containedA", xs, UnquotedString("hi word")))
+        e1.failedCodeFileName.get should be ("ListShouldContainSpec.scala")
+        e1.failedCodeLineNumber.get should be (thisLineNumber - 4)
       }
     }
   }

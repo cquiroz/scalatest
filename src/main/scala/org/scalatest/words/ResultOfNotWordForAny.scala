@@ -929,6 +929,19 @@ sealed class ResultOfNotWordForAny[T](left: T, shouldBeTrue: Boolean, methodName
         )
     }
   }
+
+  def contain[E, C[E]](resultOfAWordToAMatcherApplication: ResultOfAWordToAMatcherApplication[E])(implicit ev: T =:= C[E], containing: ContainingMatcher[E, C]) {
+    val aMatcher = resultOfAWordToAMatcherApplication.aMatcher
+    if (containing.containsAMatcher(left, aMatcher) != shouldBeTrue) {
+      throw newTestFailedException(
+        FailureMessages(
+          if (shouldBeTrue) "didNotContainA" else "containedA",
+          left,
+          UnquotedString(aMatcher.nounName)
+        )
+      )
+    }
+  }
   
   /**
    * Overrides toString to return pretty text.

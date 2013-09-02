@@ -16,17 +16,14 @@
 package org.scalatest.words
 
 import scala.collection.GenTraversable
-import org.scalatest.enablers.Containing
-import org.scalatest.enablers.Aggregating
-import org.scalatest.enablers.Sequencing
-import org.scalatest.enablers.KeyMapping
-import org.scalatest.enablers.ValueMapping
+import org.scalatest.enablers._
 import org.scalatest.MatchersHelper.newTestFailedException
 import org.scalatest.FailureMessages
 import org.scalatest.UnquotedString
 import org.scalatest.exceptions.NotAllowedException
 import org.scalatest.exceptions.StackDepthExceptionHelper.getStackDepthFun
 import org.scalautils.Prettifier
+import org.scalatest.matchers.AMatcher
 
 /**
  * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="Matchers.html"><code>Matchers</code></a> for an overview of
@@ -290,6 +287,17 @@ class ResultOfContainWord[L](left: L, shouldBeTrue: Boolean = true, methodName: 
           if (shouldBeTrue) "didNotContainAtMostOneOf" else "containedAtMostOneOf",
           left,
           UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))
+        )
+      )
+  }
+
+  def a[E, C[E]](aMatcher: AMatcher[E])(implicit ev: L =:= C[E], containing: ContainingMatcher[E, C]) {
+    if (containing.containsAMatcher(left, aMatcher) != shouldBeTrue)
+      throw newTestFailedException(
+        FailureMessages(
+          if (shouldBeTrue) "didNotContainA" else "containedA",
+          left,
+          UnquotedString(aMatcher.nounName)
         )
       )
   }

@@ -19,6 +19,8 @@ import exceptions.TestCanceledException
 import scala.reflect.Manifest
 import Assertions.areEqualComparingArraysStructurally
 import org.scalautils.LegacyTripleEquals
+import exceptions.StackDepthExceptionHelper.getStackDepthFun
+import exceptions.StackDepthException.toExceptionFunction
 
 /**
  * Trait that contains ScalaTest's basic assertion methods.
@@ -376,6 +378,8 @@ trait Assertions extends LegacyTripleEquals {
   }
 */
 
+  import language.experimental.macros
+
   /**
    * Assert that a boolean condition is true.
    * If the condition is <code>true</code>, this method returns normally.
@@ -384,10 +388,38 @@ trait Assertions extends LegacyTripleEquals {
    * @param condition the boolean condition to assert
    * @throws TestFailedException if the condition is <code>false</code>.
    */
-  def assert(condition: Boolean) {
-    if (!condition)
-      throw newAssertionFailedException(None, None, 4)
+  def assert(condition: Boolean): Unit = macro AssertionsMacro.apply
+
+  class AssertionsHelper {
+    def macroAssertTrue(expression: Boolean, expressionText: String) {
+      if (!expression)
+        throw newAssertionFailedException(Some(FailureMessages("expressionFailed", UnquotedString(expressionText))), None, "Assertions.scala", "macroAssertTrue", 2)
+    }
+
+    def macroAssertTrue(left: Any, operator: String, right: Any, expression: Boolean, expressionText: String) {
+      if (!expression) {
+        val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, right)
+        throw operator match {
+          case "==" => newAssertionFailedException(Some(FailureMessages("didNotEqual", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          case "===" => newAssertionFailedException(Some(FailureMessages("didNotEqual", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          /*case "!=" => newAssertionFailedException(Some(FailureMessages("equaled", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          case "!==" => newAssertionFailedException(Some(FailureMessages("equaled", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          case ">" => newAssertionFailedException(Some(FailureMessages("wasNotGreaterThan", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          case ">=" => newAssertionFailedException(Some(FailureMessages("wasNotGreaterThanOrEqualTo", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          case "<" => newAssertionFailedException(Some(FailureMessages("wasNotLessThan", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)
+          case "<=" => newAssertionFailedException(Some(FailureMessages("wasNotLessThanOrEqualTo", leftee, rightee)), None, "Assertions.scala", "macroAssertTrue", 2)*/
+          case _ => throw newAssertionFailedException(Some(FailureMessages("expressionFailed", UnquotedString(expressionText))), None, "Assertions.scala", "macroAssertTrue", 2)
+        }
+      }
+    }
+
+    def macroAssert(expression: MacroExpression) {
+      if (!expression.value)
+        throw newAssertionFailedException(Some(expression.errorMessage), None, "Assertions.scala", "macroAssert", 2)
+    }
   }
+
+  val $org_scalatest_AssertionsHelper = new AssertionsHelper
 
   private[scalatest] def newAssertionFailedException(optionalMessage: Option[Any], optionalCause: Option[Throwable], stackDepth: Int): Throwable =
     (optionalMessage, optionalCause) match {
@@ -404,6 +436,9 @@ trait Assertions extends LegacyTripleEquals {
       case (Some(message), None) => new TestCanceledException(message.toString, stackDepth)
       case (Some(message), Some(cause)) => new TestCanceledException(message.toString, cause, stackDepth)
     }
+
+  private[scalatest] def newAssertionFailedException(optionalMessage: Option[String], optionalCause: Option[Throwable], fileName: String, methodName: String, stackDepthAdjustment: Int): Throwable =
+    new TestFailedException(toExceptionFunction(optionalMessage), optionalCause, getStackDepthFun(fileName, methodName, stackDepthAdjustment))
 
   /**
    * Assert that a boolean condition, described in <code>String</code>

@@ -17,7 +17,7 @@ object ScalatestBuild extends Build {
        <dependency org="org.eclipse.jetty.orbit" name="javax.servlet" rev="3.0.0.v201112011016">
          <artifact name="javax.servlet" type="orbit" ext="jar"/>
        </dependency>, 
-     libraryDependencies ++= simpledependencies,
+     libraryDependencies ++= simpledependencies, 
      resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public",
      genMustMatchersTask, 
      genGenTask, 
@@ -99,6 +99,7 @@ object ScalatestBuild extends Build {
    ).dependsOn(scalatest  % "test->test")
 
    def simpledependencies = Seq(
+     "org.scala-lang" % "scala-reflect" % scalaVersionToUse, // this is needed to compile macro
      "org.scala-sbt" % "test-interface" % "1.0" % "optional", 
      "org.scalacheck" % ("scalacheck_" + scalaVersionToUse) % "1.10.0" % "optional", 
      "org.easymock" % "easymockclassextension" % "3.1" % "optional", 

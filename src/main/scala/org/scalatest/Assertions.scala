@@ -18,7 +18,7 @@ package org.scalatest
 import exceptions.TestCanceledException
 import scala.reflect.Manifest
 import Assertions.areEqualComparingArraysStructurally
-import org.scalautils.LegacyTripleEquals
+import org.scalautils.TripleEquals
 import exceptions.StackDepthExceptionHelper.getStackDepthFun
 import exceptions.StackDepthException.toExceptionFunction
 
@@ -281,7 +281,7 @@ import exceptions.StackDepthException.toExceptionFunction
  *
  * @author Bill Venners
  */
-trait Assertions extends LegacyTripleEquals {
+trait Assertions extends TripleEquals {
 
   /* *
    * Class used via an implicit conversion to enable any two objects to be compared with
@@ -417,6 +417,11 @@ trait Assertions extends LegacyTripleEquals {
       if (!expression.value)
         throw newAssertionFailedException(Some(expression.errorMessage), None, "Assertions.scala", "macroAssert", 2)
     }
+
+    def macroAssert(expression: MacroExpression, clue: Any) {
+      if (!expression.value)
+        throw newAssertionFailedException(Some(clue + "\n" + expression.errorMessage), None, "Assertions.scala", "macroAssert", 2)
+    }
   }
 
   val $org_scalatest_AssertionsHelper = new AssertionsHelper
@@ -453,10 +458,11 @@ trait Assertions extends LegacyTripleEquals {
    * @throws TestFailedException if the condition is <code>false</code>.
    * @throws NullPointerException if <code>message</code> is <code>null</code>.
    */
-  def assert(condition: Boolean, clue: Any) {
+  /*def assert(condition: Boolean, clue: Any) {
     if (!condition)
       throw newAssertionFailedException(Some(clue), None, 4)
-  }
+  }*/
+  def assert(condition: Boolean, clue: Any): Unit = macro AssertionsMacro.applyWithClue
 
   /**
    * Assert that an <code>Option[String]</code> is <code>None</code>. 

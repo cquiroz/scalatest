@@ -95,13 +95,11 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
     }
 
   def getObjectsForFailureMessage =
-    left match {
-      case leftStr: String =>
-        right match {
-          case rightStr: String =>
-            Suite.diffStrings(leftStr, rightStr)
-          case _ => (left, right)
-        }
+
+    (left, right) match {
+      case (leftStr: String, rightStr: String) if (leftStr != null && rightStr != null) => Suite.getObjectsForFailureMessage(leftStr, rightStr)
+      case (leftEqualizer: org.scalautils.TripleEqualsSupport#Equalizer[_], rightStr: String) =>
+        Suite.getObjectsForFailureMessage(leftEqualizer.left, rightStr)
       case _ => (left, right)
     }
 

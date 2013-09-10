@@ -17,7 +17,7 @@ package org.scalautils
 
 import org.scalatest._
 
-class CopiedForLegacyToleranceSpec extends Spec with Tolerance {
+class CopiedForLegacyToleranceSpec extends Spec with Tolerance with LegacyTripleEquals {
 
   val sevenDotOh = 7.0
   val minusSevenDotOh = -7.0

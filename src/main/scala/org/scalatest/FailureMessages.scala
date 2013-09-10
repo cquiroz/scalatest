@@ -18,6 +18,7 @@ package org.scalatest
 import java.util.ResourceBundle
 import java.text.MessageFormat
 import scala.collection.mutable.WrappedArray
+import scala.annotation.tailrec
 
 /**
  * Grab a resource intended for use in a failure message. For each argument passed,
@@ -27,7 +28,8 @@ import scala.collection.mutable.WrappedArray
  * @author Bill Venners
  */
 private[scalatest] object FailureMessages {
-  
+
+  @tailrec
   def decorateToStringValue(o: Any): String =
     o match {
       case null => "null"
@@ -36,6 +38,7 @@ private[scalatest] object FailureMessages {
       case aChar: Char =>  "\'" + aChar + "\'"
       case anArray: Array[_] =>  prettifyArrays(anArray)
       case aWrappedArray: WrappedArray[_] => prettifyArrays(aWrappedArray)
+      case aEqualizer: org.scalautils.TripleEqualsSupport#Equalizer[_] => decorateToStringValue(aEqualizer.left)
       case anythingElse => anythingElse.toString
     }
 

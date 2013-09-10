@@ -120,7 +120,7 @@ trait TripleEqualsSupport {
    *
    * @author Bill Venners
    */
-  class Equalizer[L](left: L) {
+  class Equalizer[L](val left: L) {
   
     /**
      * Compare two objects for equality, returning a <code>Boolean</code>, using the <code>Equality</code> type class passed as <code>equality</code>.

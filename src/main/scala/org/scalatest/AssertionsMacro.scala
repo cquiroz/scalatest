@@ -31,6 +31,14 @@ class AssertionsMacro[C <: Context](val context: C) {
       )
     )
 
+  def apply(booleanExpr: Expr[Boolean], clueExpr: Expr[Any]): Expr[Unit] =
+    context.Expr(
+      Block(
+        valDef("$org_scalatest_assert_macro_expr", transformAst(booleanExpr.tree)),
+        macroAssertWithClue(clueExpr.tree)
+      )
+    )
+
   private def valDef(name: String, rhs: Tree): ValDef =
     ValDef(
       Modifiers(),
@@ -126,6 +134,15 @@ class AssertionsMacro[C <: Context](val context: C) {
       List(Ident(newTermName("$org_scalatest_assert_macro_expr")))
     )
 
+  private def macroAssertWithClue(clueTree: Tree): Apply =
+    Apply(
+      Select(
+        Ident(newTermName("$org_scalatest_AssertionsHelper")),
+        newTermName("macroAssert")
+      ),
+      List(Ident(newTermName("$org_scalatest_assert_macro_expr")), clueTree.duplicate)
+    )
+
   //val logicOperators = Set("&&", "||", "&", "|")
 
   private def traverseSelect(select: Select, rightExpr: Tree): (Tree, Tree) =
@@ -193,5 +210,8 @@ class AssertionsMacro[C <: Context](val context: C) {
 object AssertionsMacro {
   def apply(context: Context)(condition: context.Expr[Boolean]): context.Expr[Unit] = {
     new AssertionsMacro[context.type](context).apply(condition)
+  }
+  def applyWithClue(context: Context)(condition: context.Expr[Boolean], clue: context.Expr[Any]): context.Expr[Unit] = {
+    new AssertionsMacro[context.type](context).apply(condition, clue)
   }
 }

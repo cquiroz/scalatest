@@ -59,6 +59,7 @@ import TripleEqualsSupport._
  *
  * @author Bill Venners
  */
+@deprecated("org.scalautils.LegacyTripleEquals has been deprecated and will be removed in a future version of ScalaTest. Please use TripleEquals instead.")
 trait LegacyTripleEquals extends TripleEqualsSupport {
 
   implicit override def unconstrainedEquality[A, B](implicit equalityOfA: Equality[A]): Constraint[A, B] = new EqualityConstraint[A, B](equalityOfA)

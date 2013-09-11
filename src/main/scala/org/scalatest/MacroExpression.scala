@@ -151,9 +151,9 @@ final class BinaryMacroExpression(left: Any, operator: String, right: Any, expre
       case "===" =>
         val (leftee, rightee) = getObjectsForFailureMessage
         FailureMessages("didNotEqual", leftee, rightee)
-      /*case "!=" => FailureMessages("equaled", left, right)
+      case "!=" => FailureMessages("equaled", left, right)
       case "!==" => FailureMessages("equaled", left, right)
-      case ">" => FailureMessages("wasNotGreaterThan", left, right)
+      /*case ">" => FailureMessages("wasNotGreaterThan", left, right)
       case ">=" => FailureMessages("wasNotGreaterThanOrEqualTo", left, right)
       case "<" => FailureMessages("wasNotLessThan", left, right)
       case "<=" => FailureMessages("wasNotLessThanOrEqualTo", left, right)

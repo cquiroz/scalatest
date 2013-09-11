@@ -177,7 +177,7 @@ class AssertionsMacro[C <: Context](val context: C) {
             )
           case funApply: Apply if funApply.args.size == 1 => // For === and !== that takes Equality
             funApply.fun match {
-              case select: Select if select.name.decoded == "===" || select.name.decoded == "!==" =>
+              case select: Select =>
                 val (leftTree, rightTree) = traverseSelect(select, funApply.args(0))
                 Block(
                   valDef("$org_scalatest_assert_macro_left", leftTree),

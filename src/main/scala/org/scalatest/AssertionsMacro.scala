@@ -20,7 +20,7 @@ import collection.mutable.ListBuffer
 import collection.immutable.TreeMap
 import reflect.internal.util.{Position, OffsetPosition, RangePosition}
 
-class AssertionsMacro[C <: Context](val context: C) {
+class AssertionsMacroImpl[C <: Context](val context: C) {
   import context.universe._
 
   def apply(booleanExpr: Expr[Boolean]): Expr[Unit] = {
@@ -146,6 +146,6 @@ class AssertionsMacro[C <: Context](val context: C) {
 
 object AssertionsMacro {
   def apply(context: Context)(condition: context.Expr[Boolean]): context.Expr[Unit] = {
-    new AssertionsMacro[context.type](context).apply(condition)
+    new AssertionsMacroImpl[context.type](context).apply(condition)
   }
 }

@@ -4,7 +4,7 @@ import java.net.{URL, URLClassLoader}
 
 object ScalatestBuild extends Build {
 
-  val scalaVersionToUse = "2.10.3"
+  val scalaVersionToUse = "2.11.0-SNAPSHOT"
     
   val releaseVersion = "2.0-SNAPSHOT"
 
@@ -13,7 +13,8 @@ object ScalatestBuild extends Build {
      organization := "org.scalatest",
      version := releaseVersion,
      scalaVersion := scalaVersionToUse,
-     scalacOptions ++= Seq("-no-specialization", "-feature", "-target:jvm-1.5"),
+     scalaHome := Some(file("/home/cheeseng/git/GenMHv3/build/pack")),
+     scalacOptions ++= Seq("-no-specialization", "-feature", "-Ybackend:o3"),
      initialCommands in console := """|import org.scalatest._
                                       |import org.scalautils._
                                       |import Matchers._""".stripMargin,
@@ -22,7 +23,7 @@ object ScalatestBuild extends Build {
          <artifact name="javax.servlet" type="orbit" ext="jar"/>
        </dependency>, 
      libraryDependencies ++= simpledependencies,
-     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersionToUse, // this is needed to compile macro
+     libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.11.0-M8", // this is needed to compile macro
      resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public",
      genMustMatchersTask, 
      genGenTask, 
@@ -112,7 +113,7 @@ object ScalatestBuild extends Build {
 
    def simpledependencies = Seq(
      "org.scala-sbt" % "test-interface" % "1.0" % "optional",
-     "org.scalacheck" %% "scalacheck" % "1.11.0" % "optional",
+     "org.scalacheck" % "scalacheck_2.11.0-M8" % "1.11.3" % "optional",
      "org.easymock" % "easymockclassextension" % "3.1" % "optional", 
      "org.jmock" % "jmock-legacy" % "2.5.1" % "optional", 
      "org.mockito" % "mockito-all" % "1.9.0" % "optional", 

@@ -6,7 +6,7 @@ import scala.io.Source
 
 object ScalatestBuild extends Build {
 
-  val scalaVersionToUse = "2.10.3"
+  val scalaVersionToUse = "2.11.0-SNAPSHOT"
     
   val releaseVersion = "2.1.0-RC2"
   val githubTag = "release-2.1.0-RC2-for-scala-2.10" // for scaladoc source urls
@@ -147,7 +147,8 @@ object ScalatestBuild extends Build {
 
    def simpledependencies = Seq(
      "org.scala-sbt" % "test-interface" % "1.0" % "optional",
-     "org.scalacheck" %% "scalacheck" % "1.11.0" % "optional",
+     "org.scalacheck" % "scalacheck_2.11.0-M8" % "1.11.3" % "optional",
+     "org.scala-lang.modules" % "scala-xml_2.11.0-M8" % "1.0.0-RC7" % "optional",
      "org.easymock" % "easymockclassextension" % "3.1" % "optional", 
      "org.jmock" % "jmock-legacy" % "2.5.1" % "optional", 
      "org.mockito" % "mockito-all" % "1.9.0" % "optional", 

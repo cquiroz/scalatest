@@ -16,29 +16,29 @@
 package org.scalautils
 import reflect.macros.Context
 
-trait MacroExpr {
-  val expression: Any
+trait MacroExpr[T] {
+  val value: T
 }
 
 object MacroExpr {
 
   import scala.language.experimental.macros
 
-  def applyExpr(expression: Any, qualifier: Any, name: String, decodedName: String, args: List[Any]): MacroExpr =
-    ApplyMacroExpr(expression, qualifier, name, decodedName, args)
+  def applyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]): MacroExpr[T] =
+    ApplyMacroExpr(value, qualifier, name, decodedName, args)
 
-  def selectExpr(expression: Any, qualifier: Any, name: String, decodedName: String): MacroExpr =
-    SelectMacroExpr(expression, qualifier, name, decodedName)
+  def selectExpr[T](value: T, qualifier: Any, name: String, decodedName: String): MacroExpr[T] =
+    SelectMacroExpr(value, qualifier, name, decodedName)
 
-  def identExpr(expression: Any, name: String): MacroExpr =
-    IdentMacroExpr(expression, name)
+  def identExpr[T](value: T, name: String): MacroExpr[T] =
+    IdentMacroExpr(value, name)
 
-  def fallbackExpr(expression: Any, expressionText: String) =
-    FallbackExpr(expression, expressionText)
+  def fallbackExpr[T](value: T, expressionText: String): MacroExpr[T] =
+    FallbackExpr(value, expressionText)
 
-  def expression(expr: Any): MacroExpr = macro MacroExpr.buildExpression
+  def expression[T](expr: T): MacroExpr[T] = macro MacroExpr.buildExpression[T]
 
-  def buildExpression(context: Context)(expr: context.Expr[Any]): context.Expr[MacroExpr] = {
+  def buildExpression[T](context: Context)(expr: context.Expr[T]): context.Expr[MacroExpr[T]] = {
     import context.universe._
 
     def valDef(name: String, rhs: Tree): ValDef =
@@ -175,7 +175,7 @@ object MacroExpr {
 
 }
 
-private[scalautils] case class ApplyMacroExpr(expression: Any, qualifier: Any, name: String, decodedName: String, args: List[Any]) extends MacroExpr {
+private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]) extends MacroExpr[T] {
 
   private val symbolicSet =
     Set(
@@ -191,13 +191,13 @@ private[scalautils] case class ApplyMacroExpr(expression: Any, qualifier: Any, n
       Prettifier.default(qualifier) + "." + decodedName + "(" + args.map(Prettifier.default(_)).mkString(", ") + ")"
 }
 
-private[scalautils] case class SelectMacroExpr(expression: Any, qualifier: Any, name: String, decodedName: String) extends MacroExpr {
+private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String) extends MacroExpr[T] {
 
   override def toString: String =
     Prettifier.default(qualifier) + "." + decodedName
 
 }
 
-private[scalautils] case class IdentMacroExpr(expression: Any, name: String) extends MacroExpr
+private[scalautils] case class IdentMacroExpr[T](value: T, name: String) extends MacroExpr[T]
 
-private[scalautils] case class FallbackExpr(expression: Any, expressionText: String) extends MacroExpr
+private[scalautils] case class FallbackExpr[T](value: T, expressionText: String) extends MacroExpr[T]

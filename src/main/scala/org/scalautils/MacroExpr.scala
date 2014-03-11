@@ -182,7 +182,7 @@ private[scalautils] case class ApplyMacroExpr(expression: Any, qualifier: Any, n
       "=="
     )
 
-  private lazy val isSymbolic = symbolicSet.contains(decodedName)
+  private lazy val isSymbolic = symbolicSet.contains(decodedName) // TODO: better way to determine symbolic
 
   override def toString: String =
     if (isSymbolic)

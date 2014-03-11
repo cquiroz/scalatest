@@ -33,6 +33,9 @@ object MacroExpr {
   def identExpr[T](value: T, name: String): MacroExpr[T] =
     IdentMacroExpr(value, name)
 
+  def thisExpr[T](value: T): MacroExpr[T] =
+    ThisExpr(value)
+
   def fallbackExpr[T](value: T, expressionText: String): MacroExpr[T] =
     FallbackExpr(value, expressionText)
 
@@ -75,7 +78,7 @@ object MacroExpr {
               val funValDef =
                 valDef(
                   "$org_scalautils_macro_apply_qualifier",
-                  select.qualifier.duplicate  // TODO: Probably need to traverse if it is an Apply
+                  transformAst(select.qualifier)
                 )
               val argsValDef =
                 apply.args.zipWithIndex.map { case (arg, idx) =>
@@ -85,7 +88,10 @@ object MacroExpr {
               val newExpr =
                 Apply(
                   Select(
-                    Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                    Select(
+                      Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                      newTermName("value")
+                    ),
                     select.name
                   ),
                   argsNames
@@ -135,11 +141,14 @@ object MacroExpr {
           val qualifierValDef =
             valDef(
               "$org_scalautils_macro_apply_qualifier",
-              select.qualifier.duplicate  // TODO: Probably need to traverse if it is an Apply
+              transformAst(select.qualifier)
             )
           val newExpr =
             Select(
-              Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+              Select(
+                Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                newTermName("value")
+              ),
               select.name
             )
           Block(
@@ -164,8 +173,23 @@ object MacroExpr {
             )
           )
 
-        case ident: Ident => ident.duplicate
-        case thisTree: This => thisTree.duplicate
+        case ident: Ident => fallback(ident.duplicate)
+        case thisTree: This =>
+          Apply(
+            Select(
+              Select(
+                Select(
+                  Ident(newTermName("org")),
+                  newTermName("scalautils")
+                ),
+                newTermName("MacroExpr")
+              ),
+              newTermName("thisExpr")
+            ),
+            List(
+              tree
+            )
+          )
         case _ => fallback(tree)
       }
 
@@ -194,10 +218,20 @@ private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name:
 private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String) extends MacroExpr[T] {
 
   override def toString: String =
-    Prettifier.default(qualifier) + "." + decodedName
-
+    qualifier match {
+      case thisExpr: ThisExpr[_] => Prettifier.default(value)
+      case _ => Prettifier.default(qualifier) + "." + decodedName
+    }
 }
 
 private[scalautils] case class IdentMacroExpr[T](value: T, name: String) extends MacroExpr[T]
 
-private[scalautils] case class FallbackExpr[T](value: T, expressionText: String) extends MacroExpr[T]
+private[scalautils] case class ThisExpr[T](value: T) extends MacroExpr[T] {
+  override def toString: String = "" // omit this in printing
+}
+
+private[scalautils] case class FallbackExpr[T](value: T, expressionText: String) extends MacroExpr[T] {
+
+  override def toString: String = Prettifier.default(value)
+
+}

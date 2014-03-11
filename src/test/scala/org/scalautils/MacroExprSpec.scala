@@ -15,7 +15,7 @@ class MacroExprSpec extends Spec {
       assert(expr.toString == "1 == 2")
     }
 
-    def `should get MacroExpr for a.toChar correctly ` {
+    def `should get MacroExpr for a.toChar correctly` {
       val expr = MacroExpr.expression(a.toChar)
       assert(expr.toString == "1.toChar")
     }
@@ -32,7 +32,7 @@ class MacroExprSpec extends Spec {
 
     def `should get MacroExpr for aString.substring(2, 5).endsWith("r") correctly` {
       val expr = MacroExpr.expression(aString.substring(2, 5).endsWith("r"))
-      assert(expr.toString == "\"str\".endsWith(\"r\")")
+      assert(expr.toString == "\"a string\".substring(2, 5).endsWith(\"r\")")
     }
   }
 

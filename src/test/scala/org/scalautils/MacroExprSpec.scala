@@ -6,14 +6,18 @@ class MacroExprSpec extends Spec {
 
   object `MacroExpr ` {
 
+    class CustomInt(value: Int) {
+      def :+(other: Int): CustomInt =
+        new CustomInt(value + other)
+
+      override def toString: String = value.toString
+    }
+
     val a = 1
     val b = 2
     val aString = "a string"
-
-    def `should get MacroExpr for a == b correctly` {
-      val expr = MacroExpr.expression(a == b)
-      assert(expr.toString == "1 == 2")
-    }
+    val aBoolean = true
+    val aCustomInt = new CustomInt(8)
 
     def `should get MacroExpr for a.toChar correctly` {
       val expr = MacroExpr.expression(a.toChar)
@@ -34,6 +38,102 @@ class MacroExprSpec extends Spec {
       val expr = MacroExpr.expression(aString.substring(2, 5).endsWith("r"))
       assert(expr.toString == "\"a string\".substring(2, 5).endsWith(\"r\")")
     }
+
+    def `should use symbolic notation for a == b` {
+      val expr = MacroExpr.expression(a == b)
+      assert(expr.toString == "1 == 2")
+    }
+
+    def `should use symbolic notation for a * b` {
+      val expr = MacroExpr.expression(a * b)
+      assert(expr.toString == "1 * 2")
+    }
+
+    def `should use symbolic notation for a / b` {
+      val expr = MacroExpr.expression(a / b)
+      assert(expr.toString == "1 / 2")
+    }
+
+    def `should use symbolic notation for a % b` {
+      val expr = MacroExpr.expression(a % b)
+      assert(expr.toString == "1 % 2")
+    }
+
+    def `should use symbolic notation for a + b` {
+      val expr = MacroExpr.expression(a + b)
+      assert(expr.toString == "1 + 2")
+    }
+
+    def `should use symbolic notation for a - b` {
+      val expr = MacroExpr.expression(a - b)
+      assert(expr.toString == "1 - 2")
+    }
+
+    def `should use symbolic notation for a < b` {
+      val expr = MacroExpr.expression(a < b)
+      assert(expr.toString == "1 < 2")
+    }
+
+    def `should use symbolic notation for a > b` {
+      val expr = MacroExpr.expression(a > b)
+      assert(expr.toString == "1 > 2")
+    }
+
+    def `should use symbolic notation for a <= b` {
+      val expr = MacroExpr.expression(a <= b)
+      assert(expr.toString == "1 <= 2")
+    }
+
+    def `should use symbolic notation for a >= b` {
+      val expr = MacroExpr.expression(a >= b)
+      assert(expr.toString == "1 >= 2")
+    }
+
+    def `should use symbolic notation for a ^ b` {
+      val expr = MacroExpr.expression(a ^ b)
+      assert(expr.toString == "1 ^ 2")
+    }
+
+    def `should use symbolic notation for a & b` {
+      val expr = MacroExpr.expression(a & b)
+      assert(expr.toString == "1 & 2")
+    }
+
+    def `should use symbolic notation for a | b` {
+      val expr = MacroExpr.expression(a | b)
+      assert(expr.toString == "1 | 2")
+    }
+
+    def `should use symbolic notation for !aBoolean` {
+      val expr = MacroExpr.expression(!aBoolean)
+      assert(expr.toString == "!true")
+    }
+
+    def `should use symbolic notation for +a` {
+      val expr = MacroExpr.expression(+a)
+      assert(expr.toString == "+1")
+    }
+
+    def `should use symbolic notation for -a` {
+      val expr = MacroExpr.expression(-a)
+      assert(expr.toString == "-1")
+    }
+
+    def `should use symbolic notation for ~a` {
+      val expr = MacroExpr.expression(~a)
+      assert(expr.toString == "~1")
+    }
+
+    def `should use symbolic notation for a != b` {
+      val expr = MacroExpr.expression(a != b)
+      assert(expr.toString == "1 != 2")
+    }
+
+    def `should use symbolic notation for aCustomInt :+ b` {
+      val expr = MacroExpr.expression(aCustomInt :+ b)
+      assert(expr.toString == "8 :+ 2")
+    }
+
   }
 
 }

@@ -201,12 +201,9 @@ object MacroExpr {
 
 private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]) extends MacroExpr[T] {
 
-  private val symbolicSet =
-    Set(
-      "=="
-    )
+  private val symbolicSet = Set("*", "/", "%", "+", "-", ":", "=", "!", "<", ">", "&", "^", "|")
 
-  private lazy val isSymbolic = symbolicSet.contains(decodedName) // TODO: better way to determine symbolic
+  private lazy val isSymbolic = symbolicSet.exists(e => decodedName.startsWith(e)) // TODO: better way to determine symbolic
 
   override def toString: String =
     if (isSymbolic)
@@ -220,7 +217,11 @@ private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name
   override def toString: String =
     qualifier match {
       case thisExpr: ThisExpr[_] => Prettifier.default(value)
-      case _ => Prettifier.default(qualifier) + "." + decodedName
+      case _ =>
+        if (decodedName.startsWith("unary_"))
+          decodedName.substring(6) +  Prettifier.default(qualifier)
+        else
+          Prettifier.default(qualifier) + "." + decodedName
     }
 }
 

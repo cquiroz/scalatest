@@ -82,7 +82,7 @@ object MacroExpr {
                 )
               val argsValDef =
                 apply.args.zipWithIndex.map { case (arg, idx) =>
-                  valDef("$org_scalautils_macro_apply_arg_" + idx, arg)  // TODO: probably should traverse arg also
+                  valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))  // TODO: probably should traverse arg also
                 }
               val argsNames = argsValDef.map(vd => Ident(vd.name))
               val newExpr =
@@ -94,7 +94,7 @@ object MacroExpr {
                     ),
                     select.name
                   ),
-                  argsNames
+                  argsNames.map(arg => Select(arg, newTermName("value")))
                 )
 
               val applyExprCall =
@@ -201,13 +201,31 @@ object MacroExpr {
 
 private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]) extends MacroExpr[T] {
 
+  private def notNested(expr: Any): Boolean =
+    expr match {
+      case apply: ApplyMacroExpr[_] => false
+      case _ => true
+    }
+
   private val symbolicSet = Set("*", "/", "%", "+", "-", ":", "=", "!", "<", ">", "&", "^", "|")
 
-  private lazy val isSymbolic = symbolicSet.exists(e => decodedName.startsWith(e)) // TODO: better way to determine symbolic
+  private lazy val isSymbolic: Boolean = symbolicSet.exists(e => decodedName.startsWith(e))
+
+  private lazy val isSingleNotNested: Boolean = args.length == 1 && notNested(args(0))
+
+  private def bracketIfNested(expr: Any): String =
+    expr match {
+      case apply: ApplyMacroExpr[_] => "(" + Prettifier.default(expr) + ")"
+      case _ => Prettifier.default(expr)
+    }
 
   override def toString: String =
-    if (isSymbolic)
-      Prettifier.default(qualifier) + " " + decodedName + " " + args.map(Prettifier.default(_)).mkString(", ")
+    if (isSymbolic) {
+      if (isSingleNotNested)
+        bracketIfNested(qualifier) + " " + decodedName + " " + args.map(Prettifier.default(_)).mkString(", ")
+      else
+        bracketIfNested(qualifier) + " " + decodedName + " (" + args.map(Prettifier.default(_)).mkString(", ") + ")"
+    }
     else
       Prettifier.default(qualifier) + "." + decodedName + "(" + args.map(Prettifier.default(_)).mkString(", ") + ")"
 }

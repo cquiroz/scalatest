@@ -134,6 +134,21 @@ class MacroExprSpec extends Spec {
       assert(expr.toString == "8 :+ 2")
     }
 
+    def `should get MacroExpr for a + (a * 2) correctly` {
+      val expr = MacroExpr.expression(a + (a * 2))
+      assert(expr.toString == "1 + (1 * 2)")
+    }
+
+    def `should get MacroExpr for a + a * 2 correctly` {
+      val expr = MacroExpr.expression(a + a * 2)
+      assert(expr.toString == "1 + (1 * 2)")
+    }
+
+    def `should get MacroExpr for (a + a) * 2 correctly` {
+      val expr = MacroExpr.expression((a + a) * 2)
+      assert(expr.toString == "(1 + 1) * 2")
+    }
+
   }
 
 }

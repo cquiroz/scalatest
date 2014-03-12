@@ -82,7 +82,7 @@ object MacroExpr {
                 )
               val argsValDef =
                 apply.args.zipWithIndex.map { case (arg, idx) =>
-                  valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))  // TODO: probably should traverse arg also
+                  valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))
                 }
               val argsNames = argsValDef.map(vd => Ident(vd.name))
               val newExpr =

@@ -149,6 +149,11 @@ class MacroExprSpec extends Spec {
       assert(expr.toString == "(1 + 1) * 2")
     }
 
+    def `should get MacroExpr for 2 * (a + a) correctly` {
+      val expr = MacroExpr.expression(2 * (a + a))
+      assert(expr.toString == "2 * (1 + 1)")
+    }
+
   }
 
 }

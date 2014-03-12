@@ -30,8 +30,8 @@ object MacroExpr {
   def selectExpr[T](value: T, qualifier: Any, name: String, decodedName: String): MacroExpr[T] =
     SelectMacroExpr(value, qualifier, name, decodedName)
 
-  def identExpr[T](value: T, name: String): MacroExpr[T] =
-    IdentMacroExpr(value, name)
+  def identExpr[T](value: T, name: String, decodedName: String): MacroExpr[T] =
+    IdentMacroExpr(value, name, decodedName)
 
   def thisExpr[T](value: T): MacroExpr[T] =
     ThisExpr(value)
@@ -173,7 +173,25 @@ object MacroExpr {
             )
           )
 
-        case ident: Ident => fallback(ident.duplicate)
+        case ident: Ident =>
+          Apply(
+            Select(
+              Select(
+                Select(
+                  Ident(newTermName("org")),
+                  newTermName("scalautils")
+                ),
+                newTermName("MacroExpr")
+              ),
+              newTermName("identExpr")
+            ),
+            List(
+              tree,
+              context.literal(ident.name.toString).tree,
+              context.literal(ident.name.decoded).tree
+            )
+          )
+
         case thisTree: This =>
           Apply(
             Select(
@@ -243,7 +261,9 @@ private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name
     }
 }
 
-private[scalautils] case class IdentMacroExpr[T](value: T, name: String) extends MacroExpr[T]
+private[scalautils] case class IdentMacroExpr[T](value: T, name: String, decodedName: String) extends MacroExpr[T] {
+  override def toString: String = Prettifier.default(value)
+}
 
 private[scalautils] case class ThisExpr[T](value: T) extends MacroExpr[T] {
   override def toString: String = "" // omit this in printing

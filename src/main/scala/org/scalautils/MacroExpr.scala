@@ -25,7 +25,7 @@ object MacroExpr {
   import scala.language.experimental.macros
 
   def applyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]): MacroExpr[T] =
-    ApplyMacroExpr(value, qualifier, name, decodedName, args)
+    new ApplyMacroExpr(value, qualifier, name, decodedName, args)
 
   def typeApplyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String], args: List[Any]): MacroExpr[T] =
     TypeApplyMacroExpr(value, qualifier, name, decodedName, types, args)
@@ -400,37 +400,6 @@ object MacroExpr {
 
 }
 
-private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]) extends MacroExpr[T] {
-
-  private def notNested(expr: Any): Boolean =
-    expr match {
-      case apply: ApplyMacroExpr[_] => false
-      case _ => true
-    }
-
-  private val symbolicSet = Set("*", "/", "%", "+", "-", ":", "=", "!", "<", ">", "&", "^", "|")
-
-  private lazy val isSymbolic: Boolean = symbolicSet.exists(e => decodedName.startsWith(e))
-
-  private lazy val isSingleNotNested: Boolean = args.length == 1 && notNested(args(0))
-
-  private def bracketIfNested(expr: Any): String =
-    expr match {
-      case apply: ApplyMacroExpr[_] => "(" + Prettifier.default(expr) + ")"
-      case _ => Prettifier.default(expr)
-    }
-
-  override def toString: String =
-    if (isSymbolic) {
-      if (isSingleNotNested)
-        bracketIfNested(qualifier) + " " + decodedName + " " + args.map(Prettifier.default(_)).mkString(", ")
-      else
-        bracketIfNested(qualifier) + " " + decodedName + " (" + args.map(Prettifier.default(_)).mkString(", ") + ")"
-    }
-    else
-      Prettifier.default(qualifier) + "." + decodedName + "(" + args.map(Prettifier.default(_)).mkString(", ") + ")"
-}
-
 private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String], args: List[Any]) extends MacroExpr[T] {
 
   private def notNested(expr: Any): Boolean =
@@ -451,7 +420,7 @@ private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, n
       case _ => Prettifier.default(expr)
     }
 
-  private def isRhsApply: Boolean = decodedName.startsWith(":")
+  private def isRhsApply: Boolean = decodedName.endsWith(":")
 
   private def typeParameters: String =
     if (types.length > 0)
@@ -463,11 +432,11 @@ private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, n
     if (isSymbolic) {
       val arguments =
         if (isSingleNotNested)
-          " " + args.map(bracketIfNested(_)).mkString(", ")
+          " " + args.map(Prettifier.default(_)).mkString(", ")
         else if (args.length == 0)
           ""
         else
-          " (" + args.map(bracketIfNested(_)).mkString(", ") + ")"
+          " (" + args.map(Prettifier.default(_)).mkString(", ") + ")"
 
       if (isRhsApply)
         arguments.trim + " " + decodedName + typeParameters + " " + bracketIfNested(qualifier)
@@ -479,10 +448,13 @@ private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, n
         if (args.length == 0)
           ""
         else
-          "(" + args.map(bracketIfNested(_)).mkString(", ") + ")"
+          "(" + args.map(Prettifier.default(_)).mkString(", ") + ")"
       Prettifier.default(qualifier) + "." + decodedName + typeParameters + arguments
     }
 }
+
+private[scalautils] class ApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]) extends
+  TypeApplyMacroExpr[T](value, qualifier, name, decodedName, List.empty, args)
 
 private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String) extends MacroExpr[T] {
 

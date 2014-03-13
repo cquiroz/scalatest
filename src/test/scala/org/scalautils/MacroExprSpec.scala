@@ -20,6 +20,7 @@ class MacroExprSpec extends Spec {
       val aString = "a string"
       val aBoolean = true
       val aCustomInt = new CustomInt(8)
+      val aList = List("one", "two", "three")
 
       def `should get MacroExpr for a.toChar correctly` {
         val expr = MacroExpr.expression(a.toChar)
@@ -159,6 +160,16 @@ class MacroExprSpec extends Spec {
       def `should get MacroExpr for aString.isInstanceOf[String] correct ` {
         val expr = MacroExpr.expression(aString.isInstanceOf[String])
         assert(expr.toString == "\"a string\".isInstanceOf[String]")
+      }
+
+      def `should get MacroExpr for "zero" :: aList correctly` {
+        val expr = MacroExpr.expression("zero" :: aList)
+        assert(expr.toString == "\"zero\" ::[String] List(\"one\", \"two\", \"three\")")
+      }
+
+      def `should get MacroExpr for aString :: aList correctly` {
+        val expr = MacroExpr.expression(aString :: aList)
+        assert(expr.toString == "\"a string\" ::[String] List(\"one\", \"two\", \"three\")")
       }
     }
 
@@ -346,6 +357,19 @@ class MacroExprSpec extends Spec {
         val expr = MacroExpr.expression(aString.isInstanceOf[String])
         assert(expr.toString == "\"a string\".isInstanceOf[String]")
       }
+
+      def `should get MacroExpr for "zero" :: aList correctly` {
+        val aList = List("one", "two", "three")
+        val expr = MacroExpr.expression("zero" :: aList)
+        assert(expr.toString == "\"zero\" ::[String] List(\"one\", \"two\", \"three\")")
+      }
+
+      def `should get MacroExpr for aString :: aList correctly` {
+        val aString = "a string"
+        val aList = List("one", "two", "three")
+        val expr = MacroExpr.expression(aString :: aList)
+        assert(expr.toString == "\"a string\" ::[String] List(\"one\", \"two\", \"three\")")
+      }
     }
 
     val a = 1
@@ -353,6 +377,7 @@ class MacroExprSpec extends Spec {
     val aString = "a string"
     val aBoolean = true
     val aCustomInt = new CustomInt(8)
+    val aList = List("one", "two", "three")
 
     object `when work with fields in outer scope` {
 
@@ -494,6 +519,16 @@ class MacroExprSpec extends Spec {
       def `should get MacroExpr for aString.isInstanceOf[String] correct ` {
         val expr = MacroExpr.expression(aString.isInstanceOf[String])
         assert(expr.toString == "\"a string\".isInstanceOf[String]")
+      }
+
+      def `should get MacroExpr for "zero" :: aList correctly` {
+        val expr = MacroExpr.expression("zero" :: aList)
+        assert(expr.toString == "\"zero\" ::[String] List(\"one\", \"two\", \"three\")")
+      }
+
+      def `should get MacroExpr for aString :: aList correctly` {
+        val expr = MacroExpr.expression(aString :: aList)
+        assert(expr.toString == "\"a string\" ::[String] List(\"one\", \"two\", \"three\")")
       }
     }
 

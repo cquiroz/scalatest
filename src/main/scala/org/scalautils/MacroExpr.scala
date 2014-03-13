@@ -17,7 +17,7 @@ package org.scalautils
 import reflect.macros.Context
 
 trait MacroExpr[T] {
-  val value: T
+  def value: T
 }
 
 object MacroExpr {
@@ -27,8 +27,8 @@ object MacroExpr {
   def applyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]): MacroExpr[T] =
     ApplyMacroExpr(value, qualifier, name, decodedName, args)
 
-  def typeApplyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String]): MacroExpr[T] =
-    TypeApplyMacroExpr(value, qualifier, name, decodedName, types)
+  def typeApplyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String], args: List[Any]): MacroExpr[T] =
+    TypeApplyMacroExpr(value, qualifier, name, decodedName, types, args)
 
   def selectExpr[T](value: T, qualifier: Any, name: String, decodedName: String): MacroExpr[T] =
     SelectMacroExpr(value, qualifier, name, decodedName)
@@ -74,7 +74,7 @@ object MacroExpr {
       )
 
     def transformAst(tree: Tree): Tree =
-       tree match {
+      tree match {
         case apply: Apply =>
           apply.fun match {
             case select: Select =>
@@ -138,6 +138,97 @@ object MacroExpr {
               val codeInBlock: List[Tree] = List(funValDef) ++ argsValDef ++ List(applyExprCall)
               Block(codeInBlock: _*)
 
+              case typeApply: TypeApply =>
+                typeApply.fun match {
+                  case select: Select =>
+                    val funValDef =
+                      valDef(
+                        "$org_scalautils_macro_apply_qualifier",
+                        transformAst(select.qualifier)
+                      )
+
+                    val types =
+                      typeApply.args.map(t => context.literal(show(t)).tree)
+
+                    val argsValDef =
+                      apply.args.zipWithIndex.map { case (arg, idx) =>
+                        valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))
+                      }
+                    val argsNames = argsValDef.map(vd => Ident(vd.name))
+
+                    val newExpr =
+                      Apply(
+                        TypeApply(
+                          Select(
+                            Select(
+                              Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                              newTermName("value")
+                            ),
+                            select.name
+                          ),
+                          typeApply.args
+                        ),
+                        argsNames.map(arg => Select(arg, newTermName("value")))
+                      )
+
+                    val typeApplyExprCall =
+                      Apply(
+                        Select(
+                          Select(
+                            Select(
+                              Ident(newTermName("org")),
+                              newTermName("scalautils")
+                            ),
+                            newTermName("MacroExpr")
+                          ),
+                          newTermName("typeApplyExpr")
+                        ),
+                        List(
+                          newExpr,
+                          Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                          context.literal(select.name.toString).tree,
+                          context.literal(select.name.decoded).tree,
+                          Apply(
+                            Select(
+                              Select(
+                                Select(
+                                  Select(
+                                    Ident(newTermName("scala")),
+                                    newTermName("collection")
+                                  ),
+                                  newTermName("immutable")
+                                ),
+                                newTermName("List")
+                              ),
+                              newTermName("apply")
+                            ),
+                            types
+                          ),
+                          Apply(
+                            Select(
+                              Select(
+                                Select(
+                                  Select(
+                                    Ident(newTermName("scala")),
+                                    newTermName("collection")
+                                  ),
+                                  newTermName("immutable")
+                                ),
+                                newTermName("List")
+                              ),
+                              newTermName("apply")
+                            ),
+                            argsNames
+                          )
+                        )
+                      )
+
+                    val codeInBlock: List[Tree] = List(funValDef) ++ argsValDef ++ List(typeApplyExprCall)
+                    Block(codeInBlock: _*)
+
+                  case _ => fallback(tree) // TODO: Not sure what to do here
+                }
+
             case _ => fallback(tree) // TODO: Not sure what to do here
           }
 
@@ -162,7 +253,7 @@ object MacroExpr {
                     ),
                     select.name
                   ),
-                  types
+                  typeApply.args
                 )
 
               val typeApplyExprCall =
@@ -197,6 +288,22 @@ object MacroExpr {
                         newTermName("apply")
                       ),
                       types
+                    ),
+                    Apply(
+                      Select(
+                        Select(
+                          Select(
+                            Select(
+                              Ident(newTermName("scala")),
+                              newTermName("collection")
+                            ),
+                            newTermName("immutable")
+                          ),
+                          newTermName("List")
+                        ),
+                        newTermName("apply")
+                      ),
+                      List.empty
                     )
                   )
                 )
@@ -277,6 +384,13 @@ object MacroExpr {
               tree
             )
           )
+
+        case block: Block  =>
+          Block(
+            block.stats,
+            transformAst(block.expr)
+          )
+
         case _ => fallback(tree)
       }
 
@@ -317,8 +431,57 @@ private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name:
       Prettifier.default(qualifier) + "." + decodedName + "(" + args.map(Prettifier.default(_)).mkString(", ") + ")"
 }
 
-private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String]) extends MacroExpr[T] {
-  override def toString: String = Prettifier.default(qualifier) + "." + decodedName + "[" + types.mkString(", ") + "]"
+private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String], args: List[Any]) extends MacroExpr[T] {
+
+  private def notNested(expr: Any): Boolean =
+    expr match {
+      case apply: ApplyMacroExpr[_] => false
+      case _ => true
+    }
+
+  private val symbolicSet = Set("*", "/", "%", "+", "-", ":", "=", "!", "<", ">", "&", "^", "|")
+
+  private def isSymbolic: Boolean = symbolicSet.exists(e => decodedName.startsWith(e))
+
+  private def isSingleNotNested: Boolean = args.length == 1 && notNested(args(0))
+
+  private def bracketIfNested(expr: Any): String =
+    expr match {
+      case apply: ApplyMacroExpr[_] => "(" + Prettifier.default(expr) + ")"
+      case _ => Prettifier.default(expr)
+    }
+
+  private def isRhsApply: Boolean = decodedName.startsWith(":")
+
+  private def typeParameters: String =
+    if (types.length > 0)
+      "[" + types.mkString(", ") + "]"
+    else
+      ""
+
+  override def toString: String =
+    if (isSymbolic) {
+      val arguments =
+        if (isSingleNotNested)
+          " " + args.map(bracketIfNested(_)).mkString(", ")
+        else if (args.length == 0)
+          ""
+        else
+          " (" + args.map(bracketIfNested(_)).mkString(", ") + ")"
+
+      if (isRhsApply)
+        arguments.trim + " " + decodedName + typeParameters + " " + bracketIfNested(qualifier)
+      else
+        bracketIfNested(qualifier) + " " + decodedName + typeParameters + arguments
+    }
+    else {
+      val arguments =
+        if (args.length == 0)
+          ""
+        else
+          "(" + args.map(bracketIfNested(_)).mkString(", ") + ")"
+      Prettifier.default(qualifier) + "." + decodedName + typeParameters + arguments
+    }
 }
 
 private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String) extends MacroExpr[T] {

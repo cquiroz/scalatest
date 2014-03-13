@@ -155,6 +155,11 @@ class MacroExprSpec extends Spec {
         val expr = MacroExpr.expression(2 * (a + a))
         assert(expr.toString == "2 * (1 + 1)")
       }
+
+      def `should get MacroExpr for aString.isInstanceOf[String] correct ` {
+        val expr = MacroExpr.expression(aString.isInstanceOf[String])
+        assert(expr.toString == "\"a string\".isInstanceOf[String]")
+      }
     }
 
     object `when work with local variables in scope` {
@@ -335,6 +340,12 @@ class MacroExprSpec extends Spec {
         val expr = MacroExpr.expression(2 * (a + a))
         assert(expr.toString == "2 * (1 + 1)")
       }
+
+      def `should get MacroExpr for aString.isInstanceOf[String] correct ` {
+        val aString = "a string"
+        val expr = MacroExpr.expression(aString.isInstanceOf[String])
+        assert(expr.toString == "\"a string\".isInstanceOf[String]")
+      }
     }
 
     val a = 1
@@ -478,6 +489,11 @@ class MacroExprSpec extends Spec {
       def `should get MacroExpr for 2 * (a + a) correctly ` {
         val expr = MacroExpr.expression(2 * (a + a))
         assert(expr.toString == "2 * (1 + 1)")
+      }
+
+      def `should get MacroExpr for aString.isInstanceOf[String] correct ` {
+        val expr = MacroExpr.expression(aString.isInstanceOf[String])
+        assert(expr.toString == "\"a string\".isInstanceOf[String]")
       }
     }
 

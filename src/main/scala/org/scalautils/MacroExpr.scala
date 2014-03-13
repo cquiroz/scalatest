@@ -27,6 +27,9 @@ object MacroExpr {
   def applyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, args: List[Any]): MacroExpr[T] =
     ApplyMacroExpr(value, qualifier, name, decodedName, args)
 
+  def typeApplyExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String]): MacroExpr[T] =
+    TypeApplyMacroExpr(value, qualifier, name, decodedName, types)
+
   def selectExpr[T](value: T, qualifier: Any, name: String, decodedName: String): MacroExpr[T] =
     SelectMacroExpr(value, qualifier, name, decodedName)
 
@@ -137,6 +140,72 @@ object MacroExpr {
 
             case _ => fallback(tree) // TODO: Not sure what to do here
           }
+
+        case typeApply: TypeApply =>
+          typeApply.fun match {
+            case select: Select =>
+              val funValDef =
+                valDef(
+                  "$org_scalautils_macro_apply_qualifier",
+                  transformAst(select.qualifier)
+                )
+
+              val types =
+                typeApply.args.map(t => context.literal(show(t)).tree)
+
+              val newExpr =
+                TypeApply(
+                  Select(
+                    Select(
+                      Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                      newTermName("value")
+                    ),
+                    select.name
+                  ),
+                  types
+                )
+
+              val typeApplyExprCall =
+                Apply(
+                  Select(
+                    Select(
+                      Select(
+                        Ident(newTermName("org")),
+                        newTermName("scalautils")
+                      ),
+                      newTermName("MacroExpr")
+                    ),
+                    newTermName("typeApplyExpr")
+                  ),
+                  List(
+                    newExpr,
+                    Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                    context.literal(select.name.toString).tree,
+                    context.literal(select.name.decoded).tree,
+                    Apply(
+                      Select(
+                        Select(
+                          Select(
+                            Select(
+                              Ident(newTermName("scala")),
+                              newTermName("collection")
+                            ),
+                            newTermName("immutable")
+                          ),
+                          newTermName("List")
+                        ),
+                        newTermName("apply")
+                      ),
+                      types
+                    )
+                  )
+                )
+              val codeInBlock: List[Tree] = List(funValDef, typeApplyExprCall)
+              Block(codeInBlock: _*)
+
+            case _ => fallback(tree) // TODO: Not sure what to do here
+          }
+
         case select: Select =>
           val qualifierValDef =
             valDef(
@@ -248,6 +317,10 @@ private[scalautils] case class ApplyMacroExpr[T](value: T, qualifier: Any, name:
       Prettifier.default(qualifier) + "." + decodedName + "(" + args.map(Prettifier.default(_)).mkString(", ") + ")"
 }
 
+private[scalautils] case class TypeApplyMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String, types: List[String]) extends MacroExpr[T] {
+  override def toString: String = Prettifier.default(qualifier) + "." + decodedName + "[" + types.mkString(", ") + "]"
+}
+
 private[scalautils] case class SelectMacroExpr[T](value: T, qualifier: Any, name: String, decodedName: String) extends MacroExpr[T] {
 
   override def toString: String =
@@ -270,7 +343,5 @@ private[scalautils] case class ThisExpr[T](value: T) extends MacroExpr[T] {
 }
 
 private[scalautils] case class FallbackExpr[T](value: T, expressionText: String) extends MacroExpr[T] {
-
   override def toString: String = Prettifier.default(value)
-
 }

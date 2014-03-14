@@ -73,83 +73,81 @@ object MacroExpr {
         )
       )
 
+    def list(elements: List[Tree]): Tree =
+      Apply(
+        Select(
+          Select(
+            Select(
+              Select(
+                Ident(newTermName("scala")),
+                newTermName("collection")
+              ),
+              newTermName("immutable")
+            ),
+            newTermName("List")
+          ),
+          newTermName("apply")
+        ),
+        elements
+      )
+
+    def macroExpr(methodName: String, args: List[Tree]): Tree =
+      Apply(
+        Select(
+          Select(
+            Select(
+              Ident(newTermName("org")),
+              newTermName("scalautils")
+            ),
+            newTermName("MacroExpr")
+          ),
+          newTermName(methodName)
+        ),
+        args
+      )
+
+    def selectQualifierValue(select: Select): Select =
+      Select(
+        Select(
+          Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+          newTermName("value")
+        ),
+        select.name
+      )
+
     def transformAst(tree: Tree): Tree =
       tree match {
         case apply: Apply =>
           apply.fun match {
             case select: Select =>
-              val funValDef =
-                valDef(
-                  "$org_scalautils_macro_apply_qualifier",
-                  transformAst(select.qualifier)
-                )
+              val funValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
               val argsValDef =
                 apply.args.zipWithIndex.map { case (arg, idx) =>
                   valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))
                 }
               val argsNames = argsValDef.map(vd => Ident(vd.name))
-              val newExpr =
-                Apply(
-                  Select(
-                    Select(
-                      Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
-                      newTermName("value")
-                    ),
-                    select.name
-                  ),
-                  argsNames.map(arg => Select(arg, newTermName("value")))
-                )
+              val newExpr = Apply(selectQualifierValue(select), argsNames.map(arg => Select(arg, newTermName("value"))))
 
               val applyExprCall =
-                Apply(
-                  Select(
-                    Select(
-                      Select(
-                        Ident(newTermName("org")),
-                        newTermName("scalautils")
-                      ),
-                      newTermName("MacroExpr")
-                    ),
-                    newTermName("applyExpr")
-                  ),
+                macroExpr(
+                  "applyExpr",
                   List(
                     newExpr,
                     Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
                     context.literal(select.name.toString).tree,
                     context.literal(select.name.decoded).tree,
-                    Apply(
-                      Select(
-                        Select(
-                          Select(
-                            Select(
-                              Ident(newTermName("scala")),
-                              newTermName("collection")
-                            ),
-                            newTermName("immutable")
-                          ),
-                          newTermName("List")
-                        ),
-                        newTermName("apply")
-                      ),
-                      argsNames
-                    )
+                    list(argsNames)
                   )
                 )
+
               val codeInBlock: List[Tree] = List(funValDef) ++ argsValDef ++ List(applyExprCall)
               Block(codeInBlock: _*)
 
               case typeApply: TypeApply =>
                 typeApply.fun match {
                   case select: Select =>
-                    val funValDef =
-                      valDef(
-                        "$org_scalautils_macro_apply_qualifier",
-                        transformAst(select.qualifier)
-                      )
-
-                    val types =
-                      typeApply.args.map(t => context.literal(show(t)).tree)
-
+                    val funValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
+                    val types = typeApply.args.map(t => context.literal(show(t)).tree)
                     val argsValDef =
                       apply.args.zipWithIndex.map { case (arg, idx) =>
                         valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))
@@ -158,73 +156,24 @@ object MacroExpr {
 
                     val newExpr =
                       Apply(
-                        TypeApply(
-                          Select(
-                            Select(
-                              Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
-                              newTermName("value")
-                            ),
-                            select.name
-                          ),
-                          typeApply.args
-                        ),
+                        TypeApply(selectQualifierValue(select), typeApply.args),
                         argsNames.map(arg => Select(arg, newTermName("value")))
                       )
 
                     val typeApplyExprCall =
-                      Apply(
-                        Select(
-                          Select(
-                            Select(
-                              Ident(newTermName("org")),
-                              newTermName("scalautils")
-                            ),
-                            newTermName("MacroExpr")
-                          ),
-                          newTermName("typeApplyExpr")
-                        ),
+                      macroExpr(
+                        "typeApplyExpr",
                         List(
                           newExpr,
                           Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
                           context.literal(select.name.toString).tree,
                           context.literal(select.name.decoded).tree,
-                          Apply(
-                            Select(
-                              Select(
-                                Select(
-                                  Select(
-                                    Ident(newTermName("scala")),
-                                    newTermName("collection")
-                                  ),
-                                  newTermName("immutable")
-                                ),
-                                newTermName("List")
-                              ),
-                              newTermName("apply")
-                            ),
-                            types
-                          ),
-                          Apply(
-                            Select(
-                              Select(
-                                Select(
-                                  Select(
-                                    Ident(newTermName("scala")),
-                                    newTermName("collection")
-                                  ),
-                                  newTermName("immutable")
-                                ),
-                                newTermName("List")
-                              ),
-                              newTermName("apply")
-                            ),
-                            argsNames
-                          )
+                          list(types),
+                          list(argsNames)
                         )
                       )
 
-                    val codeInBlock: List[Tree] = List(funValDef) ++ argsValDef ++ List(typeApplyExprCall)
-                    Block(codeInBlock: _*)
+                    Block(List(funValDef) ++ argsValDef, typeApplyExprCall)
 
                   case _ => fallback(tree) // TODO: Not sure what to do here
                 }
@@ -235,111 +184,36 @@ object MacroExpr {
         case typeApply: TypeApply =>
           typeApply.fun match {
             case select: Select =>
-              val funValDef =
-                valDef(
-                  "$org_scalautils_macro_apply_qualifier",
-                  transformAst(select.qualifier)
-                )
-
-              val types =
-                typeApply.args.map(t => context.literal(show(t)).tree)
-
-              val newExpr =
-                TypeApply(
-                  Select(
-                    Select(
-                      Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
-                      newTermName("value")
-                    ),
-                    select.name
-                  ),
-                  typeApply.args
-                )
+              val funValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
+              val types = typeApply.args.map(t => context.literal(show(t)).tree)
+              val newExpr = TypeApply(selectQualifierValue(select), typeApply.args)
 
               val typeApplyExprCall =
-                Apply(
-                  Select(
-                    Select(
-                      Select(
-                        Ident(newTermName("org")),
-                        newTermName("scalautils")
-                      ),
-                      newTermName("MacroExpr")
-                    ),
-                    newTermName("typeApplyExpr")
-                  ),
+                macroExpr(
+                  "typeApplyExpr",
                   List(
                     newExpr,
                     Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
                     context.literal(select.name.toString).tree,
                     context.literal(select.name.decoded).tree,
-                    Apply(
-                      Select(
-                        Select(
-                          Select(
-                            Select(
-                              Ident(newTermName("scala")),
-                              newTermName("collection")
-                            ),
-                            newTermName("immutable")
-                          ),
-                          newTermName("List")
-                        ),
-                        newTermName("apply")
-                      ),
-                      types
-                    ),
-                    Apply(
-                      Select(
-                        Select(
-                          Select(
-                            Select(
-                              Ident(newTermName("scala")),
-                              newTermName("collection")
-                            ),
-                            newTermName("immutable")
-                          ),
-                          newTermName("List")
-                        ),
-                        newTermName("apply")
-                      ),
-                      List.empty
-                    )
+                    list(types),
+                    list(List.empty)
                   )
                 )
-              val codeInBlock: List[Tree] = List(funValDef, typeApplyExprCall)
-              Block(codeInBlock: _*)
+
+              Block(List(funValDef), typeApplyExprCall)
 
             case _ => fallback(tree) // TODO: Not sure what to do here
           }
 
         case select: Select =>
-          val qualifierValDef =
-            valDef(
-              "$org_scalautils_macro_apply_qualifier",
-              transformAst(select.qualifier)
-            )
-          val newExpr =
-            Select(
-              Select(
-                Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
-                newTermName("value")
-              ),
-              select.name
-            )
+          val qualifierValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
+          val newExpr = selectQualifierValue(select)
+            
           Block(
-            qualifierValDef,
-            Apply(
-              Select(
-                Select(
-                  Select(
-                    Ident(newTermName("org")),
-                    newTermName("scalautils")
-                  ),
-                  newTermName("MacroExpr")
-                ),
-                newTermName("selectExpr")
-              ),
+            List(qualifierValDef),
+            macroExpr(
+              "selectExpr",
               List(
                 newExpr,
                 Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
@@ -350,17 +224,8 @@ object MacroExpr {
           )
 
         case ident: Ident =>
-          Apply(
-            Select(
-              Select(
-                Select(
-                  Ident(newTermName("org")),
-                  newTermName("scalautils")
-                ),
-                newTermName("MacroExpr")
-              ),
-              newTermName("identExpr")
-            ),
+          macroExpr(
+            "identExpr",
             List(
               tree,
               context.literal(ident.name.toString).tree,
@@ -369,21 +234,7 @@ object MacroExpr {
           )
 
         case thisTree: This =>
-          Apply(
-            Select(
-              Select(
-                Select(
-                  Ident(newTermName("org")),
-                  newTermName("scalautils")
-                ),
-                newTermName("MacroExpr")
-              ),
-              newTermName("thisExpr")
-            ),
-            List(
-              tree
-            )
-          )
+          macroExpr("thisExpr", List(tree))
 
         case block: Block  =>
           Block(

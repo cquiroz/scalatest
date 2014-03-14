@@ -143,40 +143,40 @@ object MacroExpr {
               val codeInBlock: List[Tree] = List(funValDef) ++ argsValDef ++ List(applyExprCall)
               Block(codeInBlock: _*)
 
-              case typeApply: TypeApply =>
-                typeApply.fun match {
-                  case select: Select =>
-                    val funValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
-                    val types = typeApply.args.map(t => context.literal(show(t)).tree)
-                    val argsValDef =
-                      apply.args.zipWithIndex.map { case (arg, idx) =>
-                        valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))
-                      }
-                    val argsNames = argsValDef.map(vd => Ident(vd.name))
+            case typeApply: TypeApply =>
+              typeApply.fun match {
+                case select: Select =>
+                  val funValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
+                  val types = typeApply.args.map(t => context.literal(show(t)).tree)
+                  val argsValDef =
+                    apply.args.zipWithIndex.map { case (arg, idx) =>
+                      valDef("$org_scalautils_macro_apply_arg_" + idx, transformAst(arg))
+                    }
+                  val argsNames = argsValDef.map(vd => Ident(vd.name))
 
-                    val newExpr =
-                      Apply(
-                        TypeApply(selectQualifierValue(select), typeApply.args),
-                        argsNames.map(arg => Select(arg, newTermName("value")))
+                  val newExpr =
+                    Apply(
+                      TypeApply(selectQualifierValue(select), typeApply.args),
+                      argsNames.map(arg => Select(arg, newTermName("value")))
+                    )
+
+                  val typeApplyExprCall =
+                    macroExpr(
+                      "typeApplyExpr",
+                      List(
+                        newExpr,
+                        Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
+                        context.literal(select.name.toString).tree,
+                        context.literal(select.name.decoded).tree,
+                        list(types),
+                        list(argsNames)
                       )
+                    )
 
-                    val typeApplyExprCall =
-                      macroExpr(
-                        "typeApplyExpr",
-                        List(
-                          newExpr,
-                          Ident(newTermName("$org_scalautils_macro_apply_qualifier")),
-                          context.literal(select.name.toString).tree,
-                          context.literal(select.name.decoded).tree,
-                          list(types),
-                          list(argsNames)
-                        )
-                      )
+                  Block(List(funValDef) ++ argsValDef, typeApplyExprCall)
 
-                    Block(List(funValDef) ++ argsValDef, typeApplyExprCall)
-
-                  case _ => fallback(tree) // TODO: Not sure what to do here
-                }
+                case _ => fallback(tree) // TODO: Not sure what to do here
+              }
 
             case _ => fallback(tree) // TODO: Not sure what to do here
           }
@@ -209,7 +209,7 @@ object MacroExpr {
         case select: Select =>
           val qualifierValDef = valDef("$org_scalautils_macro_apply_qualifier", transformAst(select.qualifier))
           val newExpr = selectQualifierValue(select)
-            
+
           Block(
             List(qualifierValDef),
             macroExpr(

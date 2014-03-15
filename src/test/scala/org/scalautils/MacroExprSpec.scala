@@ -4,6 +4,8 @@ import org.scalatest._
 
 class MacroExprSpec extends Spec {
 
+  val me = this
+
   object `MacroExpr ` {
 
     class CustomInt(value: Int) {
@@ -171,6 +173,11 @@ class MacroExprSpec extends Spec {
         val expr = MacroExpr.expression(aString :: aList)
         assert(expr.toString == "\"a string\" ::[String] List(\"one\", \"two\", \"three\")")
       }
+
+      /*def `should get MacroExpr for a === b correctly` {
+        val expr = MacroExpr.expression(convertToEqualizer(a))
+        assert(expr.toString == "1 === 2")
+      }*/
     }
 
     object `when work with local variables in scope` {

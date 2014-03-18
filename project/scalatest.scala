@@ -8,7 +8,7 @@ import com.typesafe.sbt.SbtPgp._
 
 object ScalatestBuild extends Build {
 
-  val scalaVersionToUse = "2.10.3"
+  val scalaVersionToUse = "2.11.0-RC2"
   val releaseVersion = "2.2.0-SNAPSHOT"
   val githubTag = "release-2.1.0-RC2-for-scala-2.10" // for scaladoc source urls
 
@@ -304,7 +304,8 @@ object ScalatestBuild extends Build {
 
    def scalatestDependencies = Seq(
      "org.scala-sbt" % "test-interface" % "1.0" % "optional",
-     "org.scalacheck" %% "scalacheck" % "1.11.0" % "optional",
+     "org.scalacheck" %% "scalacheck" % "1.11.3" % "optional",
+     "org.scala-lang.modules" %% "scala-xml" % "1.0.1" % "optional",
      "org.easymock" % "easymockclassextension" % "3.1" % "optional", 
      "org.jmock" % "jmock-legacy" % "2.5.1" % "optional", 
      "org.mockito" % "mockito-all" % "1.9.0" % "optional", 

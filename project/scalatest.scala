@@ -64,6 +64,8 @@ object ScalatestBuild extends Build {
                                                "-u", "target/junit", 
                                                "-fW", "target/result.txt"))
    )
+
+  lazy val macroProblem = Project("macroprob", file("macroprob")).dependsOn(scalatest)
    
   lazy val gentests = Project("gentests", file("gentests"))
    .settings(

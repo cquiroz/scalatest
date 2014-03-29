@@ -66,13 +66,13 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
 
   // Generate AST for:
   // assertionsHelper.methodName($org_scalatest_assert_macro_left, operator, $org_scalatest_assert_macro_right, $org_scalatest_assert_macro_result, clue)
-  def genCallAssertionsHelper(methodName: String, operator: String, clueTree: Tree): Apply =
+  def genCallAssertionsHelper(methodName: String, operator: String, clueTree: Tree)(left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
         Ident("assertionsHelper"),
         newTermName(methodName)
       ),
-      List(Ident(newTermName("$org_scalatest_assert_macro_left")), context.literal(operator).tree, Ident(newTermName("$org_scalatest_assert_macro_right")), Ident(newTermName("$org_scalatest_assert_macro_result")), clueTree)
+      List(Ident(left), context.literal(operator).tree, Ident(right), Ident(newTermName("$org_scalatest_assert_macro_result")), clueTree)
     )
 
   // Generate AST for:
@@ -88,25 +88,25 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
 
   // Generate AST for:
   // $org_scalatest_assert_macro_left operator $org_scalatest_assert_macro_right
-  def simpleSubstitute(select: Select): Apply =
+  def simpleSubstitute(select: Select)(left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
-        Ident("$org_scalatest_assert_macro_left"),
+        Ident(left),
         select.name
       ),
-      List(Ident("$org_scalatest_assert_macro_right"))
+      List(Ident(right))
     )
 
   // Generate AST for:
   // $org_scalatest_assert_macro_left.operator($org_scalatest_assert_macro_right)(arguments)
-  def nestedSubstitute(select: Select, apply: GenericApply): Apply =
+  def nestedSubstitute(select: Select, apply: GenericApply)(left: Symbol, right: Symbol): Apply =
     Apply(
       Apply(
         Select(
-          Ident("$org_scalatest_assert_macro_left"),
+          Ident(left),
           select.name
         ),
-        List(Ident("$org_scalatest_assert_macro_right"))
+        List(Ident(right))
       ),
       apply.args
     )
@@ -116,30 +116,54 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
   // val $org_scalatest_assert_macro_right = right
   // val $org_scalatest_assert_macro_result = subsitutedExpr
   // assertExpr
-  def genExpression(left: Tree, operator: String, right: Tree, subsitutedExpr: Apply, assertExpr: Apply): Expr[Unit] =
+  def genExpression(left: Tree, operator: String, right: Tree, subsitutedExpr: (Symbol, Symbol) => Apply, assertExpr: (Symbol, Symbol) => Apply): Expr[Unit] = {
+    def wrapInTempValAndFixup(name: String, tree: Tree): ValDef = {
+      // Step 1: Explicitly create the symbol for the temporary val we're generating
+      val powerContext = context.asInstanceOf[scala.reflect.macros.runtime.Context]
+      val global = powerContext.global
+      val enclosingOwner = powerContext.callsiteTyper.context.owner.asInstanceOf[Symbol]
+      val tempValSymbol = enclosingOwner.newTermSymbol(newTermName(name))
+      println(tree)
+      println(tree.tpe)
+      build.setTypeSignature(tempValSymbol, tree.tpe.widen)
+
+      // Step 2: Fixup the tree in order to rewire symbol chains
+      // These fixups are necessary to prevent bugs like https://github.com/scalatest/scalatest/issues/276
+      // Read up on https://groups.google.com/forum/#!topic/scala-internals/rIyJ4yHdPDU for more information
+      val tempValBody = tree.duplicate
+      val oldOwner = enclosingOwner.asInstanceOf[global.Symbol]
+      val newOwner = tempValSymbol.asInstanceOf[global.Symbol]
+      object changeOwner extends global.ChangeOwnerTraverser(oldOwner, newOwner) {
+        override def traverse(tree: global.Tree) {
+          tree match {
+            case _: global.DefTree => change(tree.symbol.moduleClass)
+            case _ =>
+          }
+          super.traverse(tree)
+        }
+      }
+      changeOwner.traverse(tempValBody.asInstanceOf[global.Tree])
+
+      // Step 3: Reap the results of our hard work
+      ValDef(tempValSymbol, tempValBody)
+    }
+
+    val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", left)
+    val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", right)
     context.Expr(
       Block(
-        ValDef(
-          Modifiers(),
-          newTermName("$org_scalatest_assert_macro_left"),
-          TypeTree(),
-          left.duplicate
-        ),
-        ValDef(
-          Modifiers(),
-          newTermName("$org_scalatest_assert_macro_right"),
-          TypeTree(),
-          right.duplicate
-        ),
+        tempValLeft,
+        tempValRight,
         ValDef(
           Modifiers(),
           newTermName("$org_scalatest_assert_macro_result"),
           TypeTree(),
-          subsitutedExpr
+          subsitutedExpr(tempValLeft.symbol, tempValRight.symbol)
         ),
-        assertExpr
+        assertExpr(tempValLeft.symbol, tempValRight.symbol)
       )
     )
+  }
 
   private val supportedOperations = Set("==", "!=", "===", "!==")
 
@@ -159,8 +183,8 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
           case select: Select if apply.args.size == 1 => // For simple assert(a == b)
             val operator: String = select.name.decoded
             if (isSupported(operator)) {
-              val sExpr: Apply = simpleSubstitute(select)
-              val assertExpr: Apply = genCallAssertionsHelper(methodName, operator, clueOption)
+              val sExpr: (Symbol, Symbol) => Apply = simpleSubstitute(select) _
+              val assertExpr: (Symbol, Symbol) => Apply = genCallAssertionsHelper(methodName, operator, clueOption) _
               genExpression(select.qualifier.duplicate, operator, apply.args(0).duplicate, sExpr, assertExpr)
             }
             else
@@ -170,8 +194,8 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
               case select: Select if funApply.args.size == 1 => // For === that takes Equality
                 val operator: String = select.name.decoded
                 if (isSupported(operator)) {
-                  val sExpr: Apply = nestedSubstitute(select, apply)
-                  val assertExpr: Apply = genCallAssertionsHelper(methodName, operator, clueOption)
+                  val sExpr: (Symbol, Symbol) => Apply = nestedSubstitute(select, apply) _
+                  val assertExpr: (Symbol, Symbol) => Apply = genCallAssertionsHelper(methodName, operator, clueOption) _
                   genExpression(select.qualifier.duplicate, operator, funApply.args(0).duplicate, sExpr, assertExpr)
                 }
                 else
@@ -181,8 +205,8 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
                   case select: Select if funApply.args.size == 1 => // For TypeCheckedTripleEquals
                     val operator: String = select.name.decoded
                     if (isSupported(operator)) {
-                      val sExpr: Apply = nestedSubstitute(select, apply)
-                      val assertExpr: Apply = genCallAssertionsHelper(methodName, operator, clueOption)
+                      val sExpr: (Symbol, Symbol) => Apply = nestedSubstitute(select, apply) _
+                      val assertExpr: (Symbol, Symbol) => Apply = genCallAssertionsHelper(methodName, operator, clueOption) _
                       genExpression(select.qualifier.duplicate, operator, funApply.args(0).duplicate, sExpr, assertExpr)
                     }
                     else

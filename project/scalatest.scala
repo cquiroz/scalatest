@@ -57,6 +57,7 @@ object ScalatestBuild extends Build {
          <artifact name="javax.servlet" type="orbit" ext="jar"/>
        </dependency>, 
      libraryDependencies ++= scalatestDependencies,
+     libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersionToUse % "provided",
      libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersionToUse, // this is needed to compile macro
      resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public",
      publishTo <<= version { v: String =>
@@ -179,6 +180,8 @@ object ScalatestBuild extends Build {
       )
    )
 
+  lazy val macroProblem = Project("macroprob", file("macroprob")).dependsOn(scalatest)
+
   lazy val scalautils = Project("scalautils", file("genscalautils"))
     .settings(
       projectTitle := "ScalaUtils",
@@ -187,6 +190,7 @@ object ScalatestBuild extends Build {
       scalaVersion := scalaVersionToUse,
       scalacOptions ++= Seq("-no-specialization", "-feature", "-target:jvm-1.5"),
       initialCommands in console := "import org.scalautils._",
+      libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersionToUse % "provided",
       libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersionToUse, // this is needed to compile macro
       resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public",
       publishTo <<= version { v: String =>

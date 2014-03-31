@@ -58,6 +58,35 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
       rhs
     )
 
+  def wrapInTempValAndFixup(name: String, tree: Tree): ValDef = {
+    // Step 1: Explicitly create the symbol for the temporary val we're generating
+    val powerContext = context.asInstanceOf[scala.reflect.macros.runtime.Context]
+    val global = powerContext.global
+    val enclosingOwner = powerContext.callsiteTyper.context.owner.asInstanceOf[Symbol]
+    val tempValSymbol = enclosingOwner.newTermSymbol(newTermName(name))
+    build.setTypeSignature(tempValSymbol, tree.tpe.widen)
+
+    // Step 2: Fixup the tree in order to rewire symbol chains
+    // These fixups are necessary to prevent bugs like https://github.com/scalatest/scalatest/issues/276
+    // Read up on https://groups.google.com/forum/#!topic/scala-internals/rIyJ4yHdPDU for more information
+    val tempValBody = tree.duplicate
+    val oldOwner = enclosingOwner.asInstanceOf[global.Symbol]
+    val newOwner = tempValSymbol.asInstanceOf[global.Symbol]
+    object changeOwner extends global.ChangeOwnerTraverser(oldOwner, newOwner) {
+      override def traverse(tree: global.Tree) {
+        tree match {
+          case _: global.DefTree => change(tree.symbol.moduleClass)
+          case _ =>
+        }
+        super.traverse(tree)
+      }
+    }
+    changeOwner.traverse(tempValBody.asInstanceOf[global.Tree])
+
+    // Step 3: Reap the results of our hard work
+    ValDef(tempValSymbol, tempValBody)
+  }
+
   private val logicOperators = Set("&&", "||", "&", "|")
 
   private val supportedBinaryOperations =
@@ -108,7 +137,7 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
     }
   }
 
-  def binaryMacroBool(select: Select): Apply =
+  def binaryMacroBool(select: Select, left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -121,20 +150,20 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("binaryMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
+        Ident(left),
         context.literal(select.name.decoded).tree,
-        Ident(newTermName("$org_scalatest_assert_macro_right")),
+        Ident(right),
         Apply(
           Select(
-            Ident(newTermName("$org_scalatest_assert_macro_left")),
+            Ident(left),
             select.name
           ),
-          List(Ident(newTermName("$org_scalatest_assert_macro_right")))
+          List(Ident(right))
         )
       )
     )
 
-  def typedBinaryMacroBool(select: Select, typeArgs: List[Tree]): Apply =
+  def typedBinaryMacroBool(select: Select, typeArgs: List[Tree], left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -147,23 +176,23 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("binaryMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
+        Ident(left),
         context.literal(select.name.decoded).tree,
-        Ident(newTermName("$org_scalatest_assert_macro_right")),
+        Ident(right),
         Apply(
           TypeApply(
             Select(
-              Ident(newTermName("$org_scalatest_assert_macro_left")),
+              Ident(left),
               select.name
             ),
             typeArgs
           ),
-          List(Ident(newTermName("$org_scalatest_assert_macro_right")))
+          List(Ident(right))
         )
       )
     )
 
-  def binaryMacroBool(select: Select, secondArg: Tree): Apply =
+  def binaryMacroBool(select: Select, secondArg: Tree, left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -176,16 +205,16 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("binaryMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
+        Ident(left),
         context.literal(select.name.decoded).tree,
-        Ident(newTermName("$org_scalatest_assert_macro_right")),
+        Ident(right),
         Apply(
           Apply(
             Select(
-              Ident("$org_scalatest_assert_macro_left"),
+              Ident(left),
               select.name
             ),
-            List(Ident("$org_scalatest_assert_macro_right"))
+            List(Ident(right))
           ),
           List(secondArg)
         )
@@ -210,7 +239,7 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
       )
     )
 
-  def notBool(target: Tree): Apply =
+  def notBool(left: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -223,11 +252,11 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("notBool")
       ),
       List(
-        target.duplicate
+        Ident(left)
       )
     )
 
-  def unaryMacroBool(select: Select): Apply =
+  def unaryMacroBool(select: Select, left: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -240,16 +269,16 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("unaryMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
+        Ident(left),
         context.literal(select.name.decoded).tree,
         Select(
-          Ident(newTermName("$org_scalatest_assert_macro_left")),
+          Ident(left),
           select.name
         )
       )
     )
 
-  def isInstanceOfMacroBool(select: Select, className: String, typeArg: Tree): Apply =
+  def isInstanceOfMacroBool(select: Select, className: String, typeArg: Tree, left: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -262,12 +291,12 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("isInstanceOfMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
+        Ident(left),
         context.literal(select.name.decoded).tree,
         context.literal(className).tree,
         TypeApply(
           Select(
-            Ident(newTermName("$org_scalatest_assert_macro_left")),
+            Ident(left),
             select.name
           ),
           List(typeArg)
@@ -275,7 +304,7 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
       )
     )
 
-  def lengthSizeMacroBool(select: Select): Apply =
+  def lengthSizeMacroBool(select: Select, left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -288,17 +317,17 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("lengthSizeMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
+        Ident(left),
         context.literal(select.name.decoded).tree,
         Select(
-          Ident("$org_scalatest_assert_macro_left"),
+          Ident(left),
           select.name
         ),
-        Ident(newTermName("$org_scalatest_assert_macro_right"))
+        Ident(right)
       )
     )
 
-  def existsMacroBool(select: Select, func: Function): Apply =
+  def existsMacroBool(select: Select, func: Function, left: Symbol, right: Symbol): Apply =
     Apply(
       Select(
         Select(
@@ -311,11 +340,11 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
         newTermName("existsMacroBool")
       ),
       List(
-        Ident(newTermName("$org_scalatest_assert_macro_left")),
-        Ident(newTermName("$org_scalatest_assert_macro_right")),
+        Ident(left),
+        Ident(right),
         Apply(
           Select(
-            Ident(newTermName("$org_scalatest_assert_macro_left")),
+            Ident(left),
             select.name
           ),
           List(
@@ -389,31 +418,39 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
                   case leftApply: Apply =>
                     leftApply.fun match {
                       case leftApplySelect: Select if isSupportedLengthSizeOperator(leftApplySelect.name.decoded) && leftApply.args.size == 0 => // support for a.length == xxx, a.size == xxxx
+                        val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftApplySelect.qualifier.duplicate)
+                        val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                         Block(
-                          valDef("$org_scalatest_assert_macro_left", leftApplySelect.qualifier.duplicate),
-                          valDef("$org_scalatest_assert_macro_right", rightTree),
-                          lengthSizeMacroBool(leftApplySelect.duplicate)
+                          tempValLeft,
+                          tempValRight,
+                          lengthSizeMacroBool(leftApplySelect.duplicate, tempValLeft.symbol, tempValRight.symbol)
                         )
                       case _ =>
+                        val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                        val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                         Block(
-                          valDef("$org_scalatest_assert_macro_left", leftTree),
-                          valDef("$org_scalatest_assert_macro_right", rightTree),
-                          binaryMacroBool(select.duplicate)
+                          tempValLeft,
+                          tempValRight,
+                          binaryMacroBool(select.duplicate, tempValLeft.symbol, tempValRight.symbol)
                         )
                     }
 
                   case leftSelect: Select if isSupportedLengthSizeOperator(leftSelect.name.decoded) => // support for a.length == xxx, a.size == xxxx
+                    val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftSelect.qualifier.duplicate)
+                    val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                     Block(
-                      valDef("$org_scalatest_assert_macro_left", leftSelect.qualifier.duplicate),
-                      valDef("$org_scalatest_assert_macro_right", rightTree),
-                      lengthSizeMacroBool(leftSelect.duplicate)
+                      tempValLeft,
+                      tempValRight,
+                      lengthSizeMacroBool(leftSelect.duplicate, tempValLeft.symbol, tempValRight.symbol)
                     )
 
                   case _ =>
+                    val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                    val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                     Block(
-                      valDef("$org_scalatest_assert_macro_left", leftTree),
-                      valDef("$org_scalatest_assert_macro_right", rightTree),
-                      binaryMacroBool(select.duplicate)
+                      tempValLeft,
+                      tempValRight,
+                      binaryMacroBool(select.duplicate, tempValLeft.symbol, tempValRight.symbol)
                     )
                 }
 
@@ -425,10 +462,12 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
                       case boolExprApply: Apply if boolExprApply.args.size == 1 =>
                         boolExprApply.fun match {
                           case boolExprApplySelect: Select if boolExprApplySelect.name.decoded == "==" =>
+                            val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                            val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", boolExprApply.args(0).duplicate)
                             Block(
-                              valDef("$org_scalatest_assert_macro_left", leftTree),
-                              valDef("$org_scalatest_assert_macro_right", boolExprApply.args(0).duplicate),
-                              existsMacroBool(select.duplicate, func.duplicate)
+                              tempValLeft,
+                              tempValRight,
+                              existsMacroBool(select.duplicate, func.duplicate, tempValLeft.symbol, tempValRight.symbol)
                             )
                           case _ => simpleMacroBool(tree.duplicate, getText(tree))
                         }
@@ -439,10 +478,12 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
                 }
 
               case _ =>
+                val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                 Block(
-                  valDef("$org_scalatest_assert_macro_left", leftTree),
-                  valDef("$org_scalatest_assert_macro_right", rightTree),
-                  binaryMacroBool(select.duplicate)
+                  tempValLeft,
+                  tempValRight,
+                  binaryMacroBool(select.duplicate, tempValLeft.symbol, tempValRight.symbol)
                 )
             }
 
@@ -450,10 +491,12 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
             funApply.fun match {
               case select: Select if select.name.decoded == "===" || select.name.decoded == "!==" =>
                 val (leftTree, rightTree) = traverseSelect(select, funApply.args(0))
+                val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                 Block(
-                  valDef("$org_scalatest_assert_macro_left", leftTree),
-                  valDef("$org_scalatest_assert_macro_right", rightTree),
-                  binaryMacroBool(select.duplicate, apply.args(0).duplicate) // TODO: should apply.args(0) be traversed also?
+                  tempValLeft,
+                  tempValRight,
+                  binaryMacroBool(select.duplicate, apply.args(0).duplicate, tempValLeft.symbol, tempValRight.symbol) // TODO: should apply.args(0) be traversed also?
                 )
               case typeApply: TypeApply =>
                 typeApply.fun match {
@@ -461,10 +504,12 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
                     val operator: String = select.name.decoded
                     if (operator == "===" || operator == "!==") {
                       val (leftTree, rightTree) = traverseSelect(select, funApply.args(0))
+                      val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                      val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                       Block(
-                        valDef("$org_scalatest_assert_macro_left", leftTree),
-                        valDef("$org_scalatest_assert_macro_right", rightTree),
-                        binaryMacroBool(select.duplicate, apply.args(0).duplicate) // TODO: should apply.args(0) be traversed also?
+                        tempValLeft,
+                        tempValRight,
+                        binaryMacroBool(select.duplicate, apply.args(0).duplicate, tempValLeft.symbol, tempValRight.symbol) // TODO: should apply.args(0) be traversed also?
                       )
                     }
                     else
@@ -478,10 +523,12 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
             funTypeApply.fun match {
               case select: Select if isSupportedBinaryOperator(select.name.decoded) =>
                 val (leftTree, rightTree) = traverseSelect(select, apply.args(0))
+                val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+                val tempValRight = wrapInTempValAndFixup("$org_scalatest_assert_macro_right", rightTree)
                 Block(
-                  valDef("$org_scalatest_assert_macro_left", leftTree),
-                  valDef("$org_scalatest_assert_macro_right", rightTree),
-                  typedBinaryMacroBool(select.duplicate, funTypeApply.args)
+                  tempValLeft,
+                  tempValRight,
+                  typedBinaryMacroBool(select.duplicate, funTypeApply.args, tempValLeft.symbol, tempValRight.symbol)
                 )
 
               case _ => simpleMacroBool(tree.duplicate, getText(tree))
@@ -492,9 +539,10 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
       case apply: Apply if apply.args.size == 0 => // for unary operation that takes 0 arguments
         apply.fun match {
           case select: Select if isSupportedUnaryOperator(select.name.decoded) =>
+            val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", select.qualifier.duplicate)
             Block(
-              valDef("$org_scalatest_assert_macro_left", select.qualifier.duplicate),
-              unaryMacroBool(select.duplicate)
+              tempValLeft,
+              unaryMacroBool(select.duplicate, tempValLeft.symbol)
             )
           case _ => simpleMacroBool(tree.duplicate, getText(tree))
         }
@@ -505,9 +553,10 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
             if (operator == "isInstanceOf") {
               typeApply.args(0).tpe match {
                 case typeRef: TypeRef =>
+                  val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", select.qualifier.duplicate)
                   Block(
-                    valDef("$org_scalatest_assert_macro_left", select.qualifier.duplicate),
-                    isInstanceOfMacroBool(select.duplicate, typeRef.sym.fullName, typeApply.args(0).duplicate)
+                    tempValLeft,
+                    isInstanceOfMacroBool(select.duplicate, typeRef.sym.fullName, typeApply.args(0).duplicate, tempValLeft.symbol)
                   )
                 case _ => simpleMacroBool(tree.duplicate, getText(tree))
               }
@@ -525,12 +574,14 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
                 case selectTypeApply: TypeApply => transformAst(selectTypeApply.duplicate)
                 case _ => simpleMacroBool(select.qualifier.duplicate, getText(select.qualifier))
               }
-            notBool(leftTree.duplicate)
+            val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", leftTree)
+            notBool(tempValLeft.symbol)
           }
           else {
+            val tempValLeft = wrapInTempValAndFixup("$org_scalatest_assert_macro_left", select.qualifier.duplicate)
             Block(
-              valDef("$org_scalatest_assert_macro_left", select.qualifier.duplicate),
-              unaryMacroBool(select.duplicate)
+              tempValLeft,
+              unaryMacroBool(select.duplicate, tempValLeft.symbol)
             )
           }
       case _ =>

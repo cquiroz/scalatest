@@ -116,15 +116,14 @@ private[scalatest] class AssertionsMacro[C <: Context](val context: C) {
   // val $org_scalatest_assert_macro_right = right
   // val $org_scalatest_assert_macro_result = subsitutedExpr
   // assertExpr
-  def genExpression(left: Tree, operator: String, right: Tree, subsitutedExpr: (Symbol, Symbol) => Apply, assertExpr: (Symbol, Symbol) => Apply): Expr[Unit] = {
+  def ge
+  nExpression(left: Tree, operator: String, right: Tree, subsitutedExpr: (Symbol, Symbol) => Apply, assertExpr: (Symbol, Symbol) => Apply): Expr[Unit] = {
     def wrapInTempValAndFixup(name: String, tree: Tree): ValDef = {
       // Step 1: Explicitly create the symbol for the temporary val we're generating
       val powerContext = context.asInstanceOf[scala.reflect.macros.runtime.Context]
       val global = powerContext.global
       val enclosingOwner = powerContext.callsiteTyper.context.owner.asInstanceOf[Symbol]
       val tempValSymbol = enclosingOwner.newTermSymbol(newTermName(name))
-      println(tree)
-      println(tree.tpe)
       build.setTypeSignature(tempValSymbol, tree.tpe.widen)
 
       // Step 2: Fixup the tree in order to rewire symbol chains

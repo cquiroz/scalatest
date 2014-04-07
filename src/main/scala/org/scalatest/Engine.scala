@@ -108,6 +108,8 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModResou
       new Bundle(currentBranch, testNamesList, testsMap, tagsMap, registrationClosed)
   }
 
+  private[scalatest] case class StackDepthInfo(resourceName: String, methodName: String, stackDepth: Int, adjustment: Int)
+
   final val atomic = new AtomicReference[Bundle](Bundle(Trunk, List(), Map(), Map(), false))
 
   def updateAtomic(oldBundle: Bundle, newBundle: Bundle) {

@@ -92,8 +92,6 @@ trait FunSpecLike extends Suite with TestRegistration with Informing with Notify
    */
   protected def markup: Documenter = atomicDocumenter.get
 
-  private case class StackDepthInfo(resourceName: String, methodName: String, stackDepth: Int, adjustment: Int)
-
   private val registerTestThreadLocal = new ThreadLocal[Option[StackDepthInfo]]
   registerTestThreadLocal.set(None)
 

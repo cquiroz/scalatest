@@ -39,7 +39,7 @@ import scala.annotation.tailrec
  * <code>Collecting</code> companion object.
  * </p>
  */
-trait Collecting[E, C] {
+trait Collecting[E, -C] {
 
   /**
    * Implements the <code>loneElement</code> syntax of trait <code>LoneElement</code>.

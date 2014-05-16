@@ -2949,7 +2949,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *                               ^
    * </pre>
    */
-  def theSameElementsAs(xs: GenTraversable[_]) = new ResultOfTheSameElementsAsApplication(xs)
+  def theSameElementsAs[R](xs: R)(implicit collecting: Collecting[_, R]) = new ResultOfTheSameElementsAsApplication(collecting.genTraversableFrom(xs))
   
   /**
    * This method enables the following syntax: 

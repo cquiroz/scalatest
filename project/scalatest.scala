@@ -266,6 +266,32 @@ object ScalatestBuild extends Build {
   import scala.scalajs.sbtplugin.ScalaJSPlugin._
   import ScalaJSKeys._
 
+  lazy val scalatest_js = Project("scalatest-js", file("genscalatest-js"))
+    .settings(scalaJSSettings: _*)
+    .settings(sharedSettings: _*)
+    .settings(
+      projectTitle := "ScalaTest-js",
+      organization := "org.scalatest",
+      initialCommands in console := "import org.scalatest._",
+      sourceGenerators in Compile <+=
+        (baseDirectory, sourceManaged in Compile, scalaVersion) map genFiles("", "GenScalaTestJs.scala")(GenScalaTestJs.genMainScala),
+      sourceGenerators in Compile <+=
+        (baseDirectory, sourceManaged in Compile) map genJavaFiles("", "GenScalaTestJs.scala")(GenScalaTestJs.genMainJava),
+      sourceGenerators in Test <+=
+        (baseDirectory, sourceManaged in Test, scalaVersion) map genFiles("", "GenScalaTestJs.scala")(GenScalaTestJs.genTest),
+      scalatestDocTaskSetting
+    ).settings(osgiSettings: _*).settings(
+      OsgiKeys.exportPackage := Seq(
+        "org.scalatest"
+      ),
+      OsgiKeys.additionalHeaders:= Map(
+        "Bundle-Name" -> "ScalaTest",
+        "Bundle-Description" -> "ScalaTest is an open-source library for Scala projects.",
+        "Bundle-DocURL" -> "http://www.scalatest.org/",
+        "Bundle-Vendor" -> "Artima, Inc."
+      )
+    )
+
   lazy val scalactic_js = Project("scalactic-js", file("genscalactic-js"))
     .settings(scalaJSSettings: _*)
     .settings(sharedSettings: _*)
@@ -424,6 +450,17 @@ object ScalatestBuild extends Build {
     if (results.isEmpty || results.exists(_.lastModified < genSource.lastModified)) {
       tdir.mkdirs()
       gen(tdir, theScalaVersion)
+    }
+    results
+  }
+
+  def genJavaFiles(name: String, generatorSource: String)(gen: (File) => Unit)(basedir: File, outDir: File): Seq[File] = {
+    val tdir = outDir / "java" / name
+    val genSource = basedir / "project" / generatorSource
+    def results = (tdir ** "*.java").get
+    if (results.isEmpty || results.exists(_.lastModified < genSource.lastModified)) {
+      tdir.mkdirs()
+      gen(tdir)
     }
     results
   }

@@ -38,12 +38,26 @@ object GenScalaTestJs {
   val skipPackages =
     Set(
       "junit",
-      "testng"
+      "testng",
+      "mock",
+      "matchers",
+      "prop",
+      "selenium"
     )
 
   val skipFiles =
     Set(
-      "org/scalatest/DispatchReporter.scala"
+      "org/scalatest/Matchers.scala",
+      "org/scalatest/MatchersHelper.scala",
+      "org/scalatest/package.scala",
+      "org/scalatest/tools/Framework.scala",
+      "org/scalatest/tools/ScalaTestFramework.scala",
+      "org/scalatest/tools/ScalaTestAntTask.scala",
+      "org/scalatest/tools/HtmlReporter.scala",
+      "org/scalatest/tools/RunnerJFrame.scala",
+      "org/scalatest/tools/EventHolder.scala",
+      "org/scalatest/tools/IconEmbellishedListCellRenderer.scala",
+      "org/scalatest/tools/ReporterFactory.scala"
     )
 
   def copyDir(targetDir: File, packagePath: String, sourceType: String) {

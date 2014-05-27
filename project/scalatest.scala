@@ -263,6 +263,33 @@ object ScalatestBuild extends Build {
       )
     ).dependsOn(scalatest)
 
+  import scala.scalajs.sbtplugin.ScalaJSPlugin._
+  import ScalaJSKeys._
+
+  lazy val scalactic_js = Project("scalactic-js", file("genscalactic-js"))
+    .settings(scalaJSSettings: _*)
+    .settings(sharedSettings: _*)
+    .settings(
+      projectTitle := "Scalactic-js",
+      organization := "org.scalactic",
+      initialCommands in console := "import org.scalactic._",
+      sourceGenerators in Compile <+=
+        (baseDirectory, sourceManaged in Compile, scalaVersion) map genFiles("", "GenScalacticJs.scala")(GenScalacticJs.genMain),
+      sourceGenerators in Test <+=
+        (baseDirectory, sourceManaged in Test, scalaVersion) map genFiles("", "GenScalacticJs.scala")(GenScalacticJs.genTest),
+      scalacticDocTaskSetting
+    ).settings(osgiSettings: _*).settings(
+      OsgiKeys.exportPackage := Seq(
+        "org.scalactic"
+      ),
+      OsgiKeys.additionalHeaders:= Map(
+        "Bundle-Name" -> "Scalactic",
+        "Bundle-Description" -> "Scalactic is an open-source library for Scala projects.",
+        "Bundle-DocURL" -> "http://www.scalactic.org/",
+        "Bundle-Vendor" -> "Artima, Inc."
+      )
+    ).dependsOn(scalatest)
+
   def gentestsLibraryDependencies =
     Seq(
       "org.mockito" % "mockito-all" % "1.9.0" % "optional",

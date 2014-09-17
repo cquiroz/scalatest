@@ -497,7 +497,7 @@ trait FreeSpecLike extends org.scalatest.Suite with OneInstancePerTest with Info
    * @throws NullPointerException if any of <code>testName</code>, <code>reporter</code>, <code>stopper</code>, or <code>configMap</code>
    *     is <code>null</code>.
    */
-  final protected override def runTest(testName: String, args: Args): Status = {
+  final protected override def runTestInNewInstance(testName: String, args: Args): Status = {
 
     ensureTestResultsRegistered(thisSuite)
     

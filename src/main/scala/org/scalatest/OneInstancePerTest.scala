@@ -118,8 +118,10 @@ trait OneInstancePerTest extends SuiteMixin {
    * @param args the <code>Args</code> for this run
    * @return a <code>Status</code> object that indicates when the test started by this method has completed, and whether or not it failed .
    */
-  protected abstract override def runTest(testName: String, args: Args): Status = {
+  final protected abstract override def runTest(testName: String, args: Args): Status =
+    runTestInNewInstance(testName, args)
 
+  protected def runTestInNewInstance(testName: String, args: Args): Status = {
     if (args.runTestInNewInstance) {
       // In initial instance, so create a new test-specific instance for this test and invoke run on it.
       val oneInstance = newInstance

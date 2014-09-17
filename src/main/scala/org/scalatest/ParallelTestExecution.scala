@@ -146,7 +146,7 @@ trait ParallelTestExecution extends OneInstancePerTest { this: Suite =>
    * @param args the <code>Args</code> for this run
    * @return a <code>Status</code> object that indicates when the test started by this method has completed, and whether or not it failed .
    */
-  final protected abstract override def runTest(testName: String, args: Args): Status = {
+  final protected abstract override def runTestInNewInstance(testName: String, args: Args): Status = {
 
     args.distributor match {
       case Some(distribute) =>
@@ -162,7 +162,7 @@ trait ParallelTestExecution extends OneInstancePerTest { this: Suite =>
           // In test-specific (distributed) instance, so just run the test. (RTINI was
           // removed by OIPT's implementation of runTests.)
           try {
-            super.runTest(testName, args)
+            super.runTestInNewInstance(testName, args)
           }
           finally {
             // Tell the TSR that the distributed test has completed
@@ -170,7 +170,7 @@ trait ParallelTestExecution extends OneInstancePerTest { this: Suite =>
               sorter.completedTest(testName)
           }
         }
-      case None => super.runTest(testName, args)
+      case None => super.runTestInNewInstance(testName, args)
     }
   }
 

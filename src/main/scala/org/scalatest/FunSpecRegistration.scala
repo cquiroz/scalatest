@@ -149,8 +149,8 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
      * @throws TestRegistrationClosedException if invoked after <code>run</code> has been invoked on this suite
      * @throws NullPointerException if <code>specText</code> or any passed test tag is <code>null</code>
      */
-    def apply(specText: String, testTags: Tag*)(testFun: => Unit) {
-      engine.registerTest(specText, Transformer(testFun _), "itCannotAppearInsideAnotherItOrThey", sourceFileName, "apply", 3, -2, None, None, None, testTags: _*)
+    def apply(specText: String, testTags: Tag*)(testFun: => Registration) {
+      engine.registerTest(specText, transformResult(testFun), "itCannotAppearInsideAnotherItOrThey", sourceFileName, "apply", 3, -2, None, None, None, testTags: _*)
     }
 
     /**
@@ -261,8 +261,8 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
      * @throws TestRegistrationClosedException if invoked after <code>run</code> has been invoked on this suite
      * @throws NullPointerException if <code>specText</code> or any passed test tag is <code>null</code>
      */
-    def apply(specText: String, testTags: Tag*)(testFun: => Unit) {
-      engine.registerTest(specText, Transformer(testFun _), "theyCannotAppearInsideAnotherItOrThey", sourceFileName, "apply", 3, -2, None, None, None, testTags: _*)
+    def apply(specText: String, testTags: Tag*)(testFun: => Registration) {
+      engine.registerTest(specText, transformResult(testFun), "theyCannotAppearInsideAnotherItOrThey", sourceFileName, "apply", 3, -2, None, None, None, testTags: _*)
     }
 
     /**
@@ -345,9 +345,9 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
    * @throws TestRegistrationClosedException if invoked after <code>run</code> has been invoked on this suite
    * @throws NullPointerException if <code>specText</code> or any passed test tag is <code>null</code>
    */
-  protected def ignore(testText: String, testTags: Tag*)(testFun: => Unit) {
+  protected def ignore(testText: String, testTags: Tag*)(testFun: => Registration) {
     //engine.
-    engine.registerIgnoredTest(testText, Transformer(testFun _), "ignoreCannotAppearInsideAnItOrAThey", sourceFileName, "ignore", 4, -2, None, testTags: _*)
+    engine.registerIgnoredTest(testText, transformResult(testFun), "ignoreCannotAppearInsideAnItOrAThey", sourceFileName, "ignore", 4, -2, None, testTags: _*)
   }
 
   /**

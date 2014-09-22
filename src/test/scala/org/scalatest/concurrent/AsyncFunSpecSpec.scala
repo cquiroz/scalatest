@@ -41,7 +41,7 @@ class AsyncFunSpecSpec extends FunSpec {
         }
 
         it("test 3") {
-          Done
+          Future { Done }
         }
       }
 
@@ -50,6 +50,48 @@ class AsyncFunSpecSpec extends FunSpec {
       val status = spec.run(None, Args(reporter = rep))
       status.waitUntilCompleted()
       assert(rep.testSucceededEventsReceived.size == 3)
+    }
+
+    it("can be used to support different output type") {
+
+      class RolandSpec extends AsyncFunSpecRegistration {
+        type Registration = Future[ConcurrentTestResult]
+
+        override protected def transformResult(testFun: => Future[ConcurrentTestResult]): () => Outcome =
+          () => {
+            println("###here!!!")
+            try {
+              val result = scala.concurrent.Await.result(testFun, atMost)
+              result match {
+                case AsyncErrorReporter(msg: String) => Failed(new TestFailedException(msg, 1))
+                case Done => Succeeded
+              }
+            }
+            catch {
+              case ex: exceptions.TestCanceledException => Canceled(ex)
+              case _: exceptions.TestPendingException => Pending
+              case tfe: exceptions.TestFailedException => Failed(tfe)
+              case ex: Throwable if !Suite.anExceptionThatShouldCauseAnAbort(ex) => Failed(ex)
+            }
+          }
+      }
+
+      class ExampleSpec extends RolandSpec {
+        it("hi") {
+          Future { Done }
+        }
+        it("ho") {
+          Future { AsyncErrorReporter("off we go") }
+        }
+        //it("ha") (Pending)
+      }
+
+      val spec = new ExampleSpec
+      val rep = new EventRecordingReporter
+      val status = spec.run(None, Args(reporter = rep))
+      status.waitUntilCompleted()
+      assert(rep.testSucceededEventsReceived.size == 1)
+
     }
 
   }

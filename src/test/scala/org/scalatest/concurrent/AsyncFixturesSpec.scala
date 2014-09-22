@@ -35,6 +35,55 @@ class AsyncFixturesSpec extends FunSpec {
       assert(tfe.throwable.get.isInstanceOf[NotAllowedException])
     }
 
+    /*it("can be used to support concurrent tests") {
+
+      import scala.concurrent._
+      import org.scalatest.exceptions.{TestFailedException, TestFailedDueToTimeoutException}
+
+      sealed trait ConcurrentTestResult
+      case class AsyncErrorReporter(msg: String) extends ConcurrentTestResult
+      case object Done extends ConcurrentTestResult
+
+      trait ConcurrentTests extends SuiteMixin with AsyncFixtures { this: Suite with TestRegistration =>
+        type Registration = Future[Outcome]
+        implicit def defaultExecutionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+        implicit def convert(ctr: ConcurrentTestResult): Outcome = {
+          ctr match {
+            case AsyncErrorReporter(msg: String) => Failed(new TestFailedException(msg, 1))
+            case Done => Succeeded
+          }
+        }
+        implicit def convertToFuture(outcome: Outcome): Future[Outcome] = Future.successful(outcome)
+      }
+
+      trait ConcurrentFunSuite extends FunSuiteRegistration with ConcurrentTests {
+
+      }
+
+      class ExampleSpec extends ConcurrentFunSuite {
+        override def withAsyncFixture(test: NoArgAsyncTest): Future[Outcome] = {
+          test() map {
+            case Failed(ex: TestFailedDueToTimeoutException) => Canceled(ex)
+            case outcome => outcome
+          }
+        }
+        test("hi") {
+          Future { Done }
+        }
+        test("ho") {
+          Future { AsyncErrorReporter("off we go") }
+        }
+        test("ha") (Pending)
+      }
+
+      val spec = new ExampleSpec
+      val rep = new EventRecordingReporter
+      val status = spec.run(None, Args(reporter = rep))
+      status.waitUntilCompleted()
+      assert(rep.testSucceededEventsReceived.size == 1)
+
+    }*/
+
   }
 
 }

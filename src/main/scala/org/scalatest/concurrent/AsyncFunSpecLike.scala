@@ -19,26 +19,11 @@ import org.scalatest._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
-trait AsyncFunSpecLike extends FunSpecRegistration with AsyncTests { thisSuite =>
+trait AsyncFunSpecRegistration extends FunSpecRegistration with AsyncFixtures { thisSuite =>
 
   import engine._
 
   val atMost = Duration(1000, MILLISECONDS)
-
-  // TODO: Any better way?
-  override protected def transformResult(testFun: => Future[Unit]): () => Outcome =
-    () => {
-      try {
-        Await.result(testFun, atMost)
-        Succeeded
-      }
-      catch {
-        case ex: exceptions.TestCanceledException => Canceled(ex)
-        case _: exceptions.TestPendingException => Pending
-        case tfe: exceptions.TestFailedException => Failed(tfe)
-        case ex: Throwable if !Suite.anExceptionThatShouldCauseAnAbort(ex) => Failed(ex)
-      }
-    }
 
   protected override def runTest(testName: String, args: Args): Status = {
 
@@ -62,4 +47,20 @@ trait AsyncFunSpecLike extends FunSpecRegistration with AsyncTests { thisSuite =
     runAsyncTestImpl(thisSuite, testName, args, true, invokeWithFixture, atMost)
   }
 
+}
+
+trait AsyncFunSpecLike extends AsyncFunSpecRegistration with AsyncTests {
+  override protected def transformResult(testFun: => Future[Unit]): () => Outcome =
+    () => {
+      try {
+        Await.result(testFun, atMost)
+        Succeeded
+      }
+      catch {
+        case ex: exceptions.TestCanceledException => Canceled(ex)
+        case _: exceptions.TestPendingException => Pending
+        case tfe: exceptions.TestFailedException => Failed(tfe)
+        case ex: Throwable if !Suite.anExceptionThatShouldCauseAnAbort(ex) => Failed(ex)
+      }
+    }
 }

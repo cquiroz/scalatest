@@ -505,7 +505,8 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModResou
 
     try {
 
-      scala.concurrent.Await.result(invokeWithFixture(theTest), atMost)
+      val outcome = scala.concurrent.Await.result(invokeWithFixture(theTest), atMost)
+      outcome.toUnit
 
       val duration = System.currentTimeMillis - testStartTime
       val durationToReport = theTest.recordedDuration.getOrElse(duration)

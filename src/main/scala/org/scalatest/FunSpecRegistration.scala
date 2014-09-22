@@ -44,7 +44,7 @@ import Suite.autoTagClassAnnotations
 @Finders(Array("org.scalatest.finders.FunSpecFinder"))
 trait FunSpecRegistration extends Suite with TestRegistration with Informing with Notifying with Alerting with Documenting { thisSuite =>
 
-  private final val engine = new Engine("concurrentSpecMod", "FunSpec")
+  private[scalatest] final val engine = new Engine("concurrentSpecMod", "FunSpec")
   import engine._
 
   // TODO: Probably make this private final val sourceFileName in a singleton object so it gets compiled in rather than carried around in each instance
@@ -92,12 +92,15 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
    */
   protected def markup: Documenter = atomicDocumenter.get
 
+  protected def transformResult(testFun: => Registration): () => Outcome =
+    Transformer(testFun _)
+
   final def registerTest(testText: String, testTags: Tag*)(testFun: => Registration) {
-    engine.registerTest(testText, Transformer(testFun _), "testCannotBeNestedInsideAnotherTest", sourceFileName, "registerTest", 5, -2, None, None, None, testTags: _*)
+    engine.registerTest(testText, transformResult(testFun), "testCannotBeNestedInsideAnotherTest", sourceFileName, "registerTest", 5, -2, None, None, None, testTags: _*)
   }
 
   final def registerIgnoredTest(testText: String, testTags: Tag*)(testFun: => Registration) {
-    engine.registerIgnoredTest(testText, Transformer(testFun _), "testCannotBeNestedInsideAnotherTest", sourceFileName, "registerIgnoredTest", 4, -2, None, testTags: _*)
+    engine.registerIgnoredTest(testText, transformResult(testFun), "testCannotBeNestedInsideAnotherTest", sourceFileName, "registerIgnoredTest", 4, -2, None, testTags: _*)
   }
 
   /**

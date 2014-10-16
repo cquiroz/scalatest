@@ -6951,55 +6951,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
     }
   }
 
-  /**
-   * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="Matchers.html"><code>Matchers</code></a> for an overview of
-   * the matchers DSL.
-   *
-   * <p>
-   * This class is used in conjunction with an implicit conversion to enable <code>should</code> methods to
-   * be invoked on objects of type <code>Any</code>.
-   * </p>
-   *
-   * @author Bill Venners
-   */
-  sealed class AnyShouldWrapper[T](val leftSideValue: T) {
-
-    /**
-     * This method enables syntax such as the following:
-     *
-     * <pre class="stHighlight">
-     * result should be (3)
-     *        ^
-     * </pre>
-     */
-    def should(rightMatcherX1: Matcher[T]) {
-      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherX1)
-    }
-
-    /**
-     * This method enables syntax such as the following:
-     *
-     * <pre class="stHighlight">
-     * result should equal (3)
-     *        ^
-     * </pre>
-     */
-    def should[TYPECLASS1[_]](rightMatcherFactory1: MatcherFactory1[T, TYPECLASS1])(implicit typeClass1: TYPECLASS1[T]) {
-      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory1.matcher)
-    }
-
-    /**
-     * This method enables syntax such as the following:
-     *
-     * <pre class="stHighlight">
-     * result should (equal (expected) and have length 3)
-     *        ^
-     * </pre>
-     */
-    def should[TYPECLASS1[_], TYPECLASS2[_]](rightMatcherFactory2: MatcherFactory2[T, TYPECLASS1, TYPECLASS2])(implicit typeClass1: TYPECLASS1[T], typeClass2: TYPECLASS2[T]) {
-      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory2.matcher)
-    }
-
+  sealed class AdditionalAnyShouldWrapper[T](val leftSideValue: T) {
     /**
      * This method enables syntax such as the following:
      *
@@ -7082,6 +7034,56 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      */
     def should[TYPECLASS1[_], TYPECLASS2[_], TYPECLASS3[_], TYPECLASS4[_], TYPECLASS5[_], TYPECLASS6[_], TYPECLASS7[_], TYPECLASS8[_], TYPECLASS9[_]](rightMatcherFactory9: MatcherFactory9[T, TYPECLASS1, TYPECLASS2, TYPECLASS3, TYPECLASS4, TYPECLASS5, TYPECLASS6, TYPECLASS7, TYPECLASS8, TYPECLASS9])(implicit typeClass1: TYPECLASS1[T], typeClass2: TYPECLASS2[T], typeClass3: TYPECLASS3[T], typeClass4: TYPECLASS4[T], typeClass5: TYPECLASS5[T], typeClass6: TYPECLASS6[T], typeClass7: TYPECLASS7[T], typeClass8: TYPECLASS8[T], typeClass9: TYPECLASS9[T]) {
       ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory9.matcher)
+    }
+  }
+
+  /**
+   * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="Matchers.html"><code>Matchers</code></a> for an overview of
+   * the matchers DSL.
+   *
+   * <p>
+   * This class is used in conjunction with an implicit conversion to enable <code>should</code> methods to
+   * be invoked on objects of type <code>Any</code>.
+   * </p>
+   *
+   * @author Bill Venners
+   */
+  sealed class AnyShouldWrapper[T](val leftSideValue: T) {
+
+    /**
+     * This method enables syntax such as the following:
+     *
+     * <pre class="stHighlight">
+     * result should be (3)
+     *        ^
+     * </pre>
+     */
+    def should(rightMatcherX1: Matcher[T]) {
+      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherX1)
+    }
+
+    /**
+     * This method enables syntax such as the following:
+     *
+     * <pre class="stHighlight">
+     * result should equal (3)
+     *        ^
+     * </pre>
+     */
+    def should[TYPECLASS1[_]](rightMatcherFactory1: MatcherFactory1[T, TYPECLASS1])(implicit typeClass1: TYPECLASS1[T]) {
+      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory1.matcher)
+    }
+
+    /**
+     * This method enables syntax such as the following:
+     *
+     * <pre class="stHighlight">
+     * result should (equal (expected) and have length 3)
+     *        ^
+     * </pre>
+     */
+    def should[TYPECLASS1[_], TYPECLASS2[_]](rightMatcherFactory2: MatcherFactory2[T, TYPECLASS1, TYPECLASS2])(implicit typeClass1: TYPECLASS1[T], typeClass2: TYPECLASS2[T]) {
+      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory2.matcher)
     }
 
     /**
@@ -8097,6 +8099,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * to enable <code>should</code> methods to be invokable on that object.
    */
   implicit def convertToAnyShouldWrapper[T](o: T): AnyShouldWrapper[T] = new AnyShouldWrapper(o)
+
+  implicit def convertToAdditionalAnyShouldWrapper[T](o: T): AdditionalAnyShouldWrapper[T] = new AdditionalAnyShouldWrapper(o)
 
   /**
    * Implicitly converts an object of type <code>java.lang.String</code> to a <code>StringShouldWrapper</code>,

@@ -1103,6 +1103,8 @@ one error found
     runTestImpl(thisSuite, testName, args, true, invokeWithFixture)
   }
 
+  private[scalatest] def getOneAfterAnotherAsync: Boolean = false
+
   /**
    * Run zero to many of this <code>WordSpec</code>'s tests.
    *
@@ -1159,7 +1161,7 @@ one error found
    *     exists in this <code>Suite</code>
    */
   protected override def runTests(testName: Option[String], args: Args): Status = {
-    runTestsImpl(thisSuite, testName, args, info, true, runTest)
+    runTestsImpl(thisSuite, testName, args, info, true, getOneAfterAnotherAsync, runTest)
   }
 
   /**

@@ -479,6 +479,8 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
     runTestImpl(thisSuite, testName, args, true, invokeWithFixture)
   }
 
+  private[scalatest] def getOneAfterAnotherAsync: Boolean = false
+
   /**
    * <p>
    * Run zero to many of this <code>FunSpec</code>'s tests.
@@ -520,7 +522,7 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
    */
   protected override def runTests(testName: Option[String], args: Args): Status = {
 
-    runTestsImpl(thisSuite, testName, args, info, true, runTest)
+    runTestsImpl(thisSuite, testName, args, info, true, getOneAfterAnotherAsync, runTest)
   }
 
   /**

@@ -323,7 +323,7 @@ trait SpecLike extends Suite with Informing with Notifying with Alerting with Do
    */
   protected override def runTests(testName: Option[String], args: Args): Status = {
     ensureScopesAndTestsRegistered()
-    runTestsImpl(thisSuite, testName, args, info, true, runTest)
+    runTestsImpl(thisSuite, testName, args, info, true, false, runTest)
   }
 
   override def run(testName: Option[String], args: Args): Status = {

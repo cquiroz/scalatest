@@ -556,6 +556,8 @@ trait FreeSpecRegistration extends Suite with TestRegistration with Informing wi
     runTestImpl(thisSuite, testName, args, true, invokeWithFixture)
   }
 
+  private[scalatest] def getOneAfterAnotherAsync: Boolean = false
+
   /**
    * <p>
    * Run zero to many of this <code>FreeSpec</code>'s tests.
@@ -596,7 +598,7 @@ trait FreeSpecRegistration extends Suite with TestRegistration with Informing wi
    * @throws NullArgumentException if <code>testName</code> or <code>args</code> is <code>null</code>.
    */
   protected override def runTests(testName: Option[String], args: Args): Status = {
-    runTestsImpl(thisSuite, testName, args, info, true, runTest)
+    runTestsImpl(thisSuite, testName, args, info, true, getOneAfterAnotherAsync, runTest)
   }
 
   /**

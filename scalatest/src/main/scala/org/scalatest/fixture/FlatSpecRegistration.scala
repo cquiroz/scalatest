@@ -2144,6 +2144,8 @@ trait FlatSpecRegistration extends Suite with TestRegistration with ShouldVerb w
     runTestImpl(thisSuite, testName, args, true, invokeWithFixture)
   }
 
+  private[scalatest] def getOneAfterAnotherAsync: Boolean = false
+
   /**
    * <p>
    * Run zero to many of this <code>FlatSpec</code>'s tests.
@@ -2184,7 +2186,7 @@ trait FlatSpecRegistration extends Suite with TestRegistration with ShouldVerb w
    * @throws NullArgumentException if any of <code>testName</code> or <code>args</code> is <code>null</code>.
    */
   protected override def runTests(testName: Option[String], args: Args): Status = {
-    runTestsImpl(thisSuite, testName, args, info, true, runTest)
+    runTestsImpl(thisSuite, testName, args, info, true, getOneAfterAnotherAsync, runTest)
   }
 
   /**

@@ -391,6 +391,7 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModMessa
     branch: Branch,
     args: Args,
     includeIcon: Boolean,
+    oneAfterAnotherAsync: Boolean,
     runTest: (String, Args) => Status
   ): Status = {
 
@@ -428,8 +429,17 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModMessa
                   val theTest = atomic.get.testsMap(testName)
                   reportTestIgnored(theSuite, args.reporter, args.tracker, testName, testTextWithOptionalPrefix, getIndentedTextForTest(testTextWithOptionalPrefix, testLeaf.indentationLevel, true), theTest.location)
                 }
-                else
-                  statusList += runTest(testName, args)
+                else {
+                  synchronized {
+                    statusList +=
+                      (if (!oneAfterAnotherAsync || statusList.isEmpty) // If oneAfterAnotherAsync, first time just go for it
+                        runTest(testName, args)
+                      else
+                        statusList.last thenRun {
+                          runTest(testName, args)
+                        }) // Only if oneAfterAnotherAsync, after first Status
+                  }
+                }
 
             case infoLeaf @ InfoLeaf(_, message, payload, location) =>
               reportInfoProvided(theSuite, args.reporter, args.tracker, None, message, payload, infoLeaf.indentationLevel, location, true, includeIcon)
@@ -443,7 +453,7 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModMessa
             case markupLeaf @ MarkupLeaf(_, message, location) =>
               reportMarkupProvided(theSuite, args.reporter, args.tracker, None, message, markupLeaf.indentationLevel, location, true, includeIcon)
 
-            case branch: Branch => statusList += runTestsInBranch(theSuite, branch, args, includeIcon, runTest)
+            case branch: Branch => statusList += runTestsInBranch(theSuite, branch, args, includeIcon, oneAfterAnotherAsync, runTest)
           }
         }
       }
@@ -463,6 +473,7 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModMessa
     args: Args,
     info: Informer,
     includeIcon: Boolean,
+    oneAfterAnotherAsync: Boolean,
     runTest: (String, Args) => Status
   ): Status = {
     requireNonNull(testName, args)
@@ -494,7 +505,7 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModMessa
             statusBuffer += runTest(tn, newArgs)
           }
         }
-      case None => statusBuffer += runTestsInBranch(theSuite, Trunk, newArgs, includeIcon, runTest)
+      case None => statusBuffer += runTestsInBranch(theSuite, Trunk, newArgs, includeIcon, oneAfterAnotherAsync, runTest)
     }
     new CompositeStatus(Set.empty ++ statusBuffer)
   }
@@ -1118,7 +1129,7 @@ private[scalatest] class PathEngine(concurrentBundleModMessageFun: => String, si
     atomicDocumenter.set(documenterForThisSuite)
 
     try {
-     runTestsImpl(theSuite, testName, newArgs, info, true, runTest)
+     runTestsImpl(theSuite, testName, newArgs, info, true, false, runTest)
     }
     finally {
       val shouldBeInformerForThisSuite = atomicInformer.getAndSet(zombieInformer)

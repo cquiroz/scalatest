@@ -21,6 +21,10 @@ import org.scalatest._
 //SCALATESTJS-ONLY @scala.scalajs.js.annotation.JSExportDescendentClasses(ignoreInvalidDescendants = true)
 trait AsyncPropSpecLike extends PropSpecRegistration with AsyncTests with org.scalatest.OneInstancePerTest { thisSuite =>
 
+  protected val oneAfterAnotherAsync: Boolean = false
+
+  final override private[scalatest] def getOneAfterAnotherAsync = oneAfterAnotherAsync
+
   implicit def executionContext: ExecutionContext
 
   override private[scalatest] def transformToOutcome(testFun: FixtureParam => Registration): FixtureParam => AsyncOutcome =

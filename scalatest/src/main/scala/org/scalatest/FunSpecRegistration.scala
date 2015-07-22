@@ -486,6 +486,8 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
    */
   override def tags: Map[String, Set[String]] = autoTagClassAnnotations(atomic.get.tagsMap, this)
 
+  private[scalatest] def getOneAfterAnotherAsync: Boolean = false
+
   /**
    * Run zero to many of this <code>FunSpec</code>'s tests.
    *
@@ -499,7 +501,7 @@ trait FunSpecRegistration extends Suite with TestRegistration with Informing wit
    *     exists in this <code>Suite</code>
    */
   protected override def runTests(testName: Option[String], args: Args): Status = {
-    runTestsImpl(thisSuite, testName, args, info, true, runTest)
+    runTestsImpl(thisSuite, testName, args, info, true, getOneAfterAnotherAsync, runTest)
   }
 
   override def run(testName: Option[String], args: Args): Status = {

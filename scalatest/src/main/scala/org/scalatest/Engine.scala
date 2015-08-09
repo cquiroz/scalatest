@@ -430,13 +430,19 @@ private[scalatest] sealed abstract class SuperEngine[T](concurrentBundleModMessa
                   reportTestIgnored(theSuite, args.reporter, args.tracker, testName, testTextWithOptionalPrefix, getIndentedTextForTest(testTextWithOptionalPrefix, testLeaf.indentationLevel, true), theTest.location)
                 }
                 else {
-                  statusList +=
+                  /*statusList +=
                     (if (!oneAfterAnotherAsync || statusList.isEmpty) // If oneAfterAnotherAsync, first time just go for it
                       runTest(testName, args)
                     else
                       statusList.last thenRun {
                         runTest(testName, args)
-                      }) // Only if oneAfterAnotherAsync, after first Status
+                      }) // Only if oneAfterAnotherAsync, after first Status*/
+                  val testStatus = runTest(testName, args)
+                  // SKIP-SCALATESTJS-START
+                  if (oneAfterAnotherAsync)
+                    testStatus.waitUntilCompleted()
+                  // SKIP-SCALATESTJS-END
+                  statusList += testStatus
                 }
 
             case infoLeaf @ InfoLeaf(_, message, payload, location) =>

@@ -22,13 +22,13 @@ import Configuration._
 class PropertyCheckConfigSuite extends FunSuite with Matchers {
 
   test("minSuccussful throws IAE if less than 1") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSuccessful = 0)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSuccessful = -1)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSuccessful = -2)
     }
   }
@@ -40,10 +40,10 @@ class PropertyCheckConfigSuite extends FunSuite with Matchers {
   }
 
   test("maxDiscarded throws IAE if less than 0") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(maxDiscarded = -1)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(maxDiscarded = -2)
     }
   }
@@ -56,10 +56,10 @@ class PropertyCheckConfigSuite extends FunSuite with Matchers {
   }
 
   test("minSize throws IAE if less than 0") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSize = -1)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSize = -2)
     }
   }
@@ -73,10 +73,10 @@ class PropertyCheckConfigSuite extends FunSuite with Matchers {
   }
 
   test("maxSize throws IAE if less than 0") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(maxSize = -1)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(maxSize = -2)
     }
   }
@@ -89,13 +89,13 @@ class PropertyCheckConfigSuite extends FunSuite with Matchers {
   }
 
   test("workers throws IAE if less than 1") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(workers = 0)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(workers = -1)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(workers = -2)
     }
   }
@@ -107,7 +107,7 @@ class PropertyCheckConfigSuite extends FunSuite with Matchers {
   }
 
   test("Should throw IAE if minSize > maxSize") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSize = 5, maxSize = 4)
     }
   }
@@ -117,16 +117,16 @@ class PropertyCheckConfigSuite extends FunSuite with Matchers {
   }
 
   test("Should throw IAE if specified minSize > specified maxSize") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSize = 5, maxSize = 4)
     }
   }
 
   test("Should throw IAE if specified minSize > default maxSize of 100") {
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSize = 101)
     }
-    intercept[IllegalArgumentException] {
+    assertThrows[IllegalArgumentException] {
       PropertyCheckConfig(minSize = 200)
     }
   }

@@ -1525,16 +1525,19 @@ class WebBrowserSpec extends JettySpec with Matchers with SpanSugar with WebBrow
       clickOn(linkText("Test Click"))
       clickOn(partialLinkText("Click"))
       clickOn(tagName("a"))
+      succeed
     }
     it("should be able to clickOn Element") {
       go to (host + "click.html")
       val element = id("aLink").element
       clickOn(element)
+      succeed
     }
     it("should be able to click on WebElement") {
       go to (host + "click.html")
       val webElement = id("aLink").webElement
       clickOn(webElement)
+      succeed
     }
   }
   
@@ -2030,7 +2033,6 @@ class WebBrowserSpec extends JettySpec with Matchers with SpanSugar with WebBrow
   }
   describe("Page trait") {
     it("should be independent from WebBrowser trait") {
-      val code =
       """
       class HomePage extends Page {
         val url = "localhost:9000/index.html"

@@ -70,7 +70,7 @@ class OnlyFirstTestExecutedOnCreationExamples extends PathSuiteExamples {
     describe("A subject") {
     }
     describe("Another subject") {
-      it("first test") { firstTestCount += 1 }
+      it("first test") { firstTestCount += 1; succeed }
     }
     override def newInstance = new OneTestSiblingEmptyNestedPathFunSpecExample(counts)
     override val expectedTotalTestsCount = 1
@@ -84,7 +84,7 @@ class OnlyFirstTestExecutedOnCreationExamples extends PathSuiteExamples {
     }
     describe("Another subject") {
       describe("when created") {
-        it("first test") { firstTestCount += 1 }
+        it("first test") { firstTestCount += 1; succeed }
       }
     }
     override def newInstance = new OneTestSiblingEmptyDeeplyNestedPathFunSpecExample(counts)

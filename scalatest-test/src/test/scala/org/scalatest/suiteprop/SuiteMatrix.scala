@@ -29,6 +29,7 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         testStartingIndex should be < testSucceededIndex
       }
     }
+    succeed
   }
   
   // Add a property for completely empty suites and their empty tags
@@ -38,6 +39,7 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         suite.tags should be (empty)
       }
     }
+    succeed
   }
   
   property("should, if the first test is marked as ignored, return a tags map from the tags method that says the first test is ignored") {
@@ -47,6 +49,7 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         suite.tags should be (Map(firstTestName -> Set("org.scalatest.Ignore")))
       }
     }
+    succeed
   }
 
   property("should, if the second test is marked as ignored, return a tags map from the tags method that says the second test is ignored") {
@@ -56,6 +59,7 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         suite.tags should be (Map(secondTestName -> Set("org.scalatest.Ignore")))
       }
     }
+    succeed
   }
 
   property("should, if two tests is marked as ignored, return a tags map from the tags method that says that both tests are ignored") {
@@ -66,6 +70,7 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         suite.tags should be (Map(firstTestName -> Set("org.scalatest.Ignore"), secondTestName -> Set("org.scalatest.Ignore")))
       }
     }
+    succeed
   }
   
   property("should, if both the second test is marked as ignored and both are marked Slow, return a tags map from the tags method that says the second test is ignored and both are Slow") {
@@ -82,6 +87,7 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         )
       }
     }
+    succeed
   }
   
   property("should, if both tests are marked Slow and the first test Weak, return a tags map from the tags method that says both are Slow and the first also Weak") {
@@ -98,5 +104,6 @@ class SuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChecks 
         )
       }
     }
+    succeed
   }
 }

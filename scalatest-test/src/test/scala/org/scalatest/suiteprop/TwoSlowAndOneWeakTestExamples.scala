@@ -64,67 +64,67 @@ class TwoSlowAndOneWeakTestExamples extends SuiteExamples {
   // SKIP-SCALATESTJS-END
 
   class FunSuiteExample extends FunSuite with Services {
-    test("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-    test("second test", mytags.SlowAsMolasses) {}
+    test("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+    test("second test", mytags.SlowAsMolasses) { succeed }
   }
 
   class FixtureFunSuiteExample extends StringFixtureFunSuite with Services {
-    test("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-    test("second test", mytags.SlowAsMolasses) { s => }
+    test("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+    test("second test", mytags.SlowAsMolasses) { s => succeed }
   }
 
   class FunSpecExample extends FunSpec with Services {
-    it("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-    it("second test", mytags.SlowAsMolasses) {}
+    it("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+    it("second test", mytags.SlowAsMolasses) { succeed }
   }
 
   class NestedFunSpecExample extends FunSpec with NestedTestNames {
     describe("A subject") {
-      it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-      it("should second test", mytags.SlowAsMolasses) {}
+      it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+      it("should second test", mytags.SlowAsMolasses) { succeed }
     }
   }
 
   class DeeplyNestedFunSpecExample extends FunSpec with DeeplyNestedTestNames {
     describe("A subject") {
       describe("when created") {
-        it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-        it("should second test", mytags.SlowAsMolasses) {}
+        it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+        it("should second test", mytags.SlowAsMolasses) { succeed }
       }
     }
   }
 
   class FixtureFunSpecExample extends StringFixtureFunSpec with Services {
-      it("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-      it("second test", mytags.SlowAsMolasses) { s => }
+      it("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+      it("second test", mytags.SlowAsMolasses) { s => succeed }
   }
   
   class NestedFixtureFunSpecExample extends StringFixtureFunSpec with NestedTestNames {
     describe("A subject") {
-      it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-      it("should second test", mytags.SlowAsMolasses) { s => }
+      it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+      it("should second test", mytags.SlowAsMolasses) { s => succeed }
     }
   }
 
   class DeeplyNestedFixtureFunSpecExample extends StringFixtureFunSpec with DeeplyNestedTestNames {
     describe("A subject") {
       describe("when created") {
-        it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-        it("should second test", mytags.SlowAsMolasses) { s => }
+        it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+        it("should second test", mytags.SlowAsMolasses) { s => succeed }
       }
     }
   }
 
   class PathFunSpecExample extends path.FunSpec with Services {
-    it("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-    it("second test", mytags.SlowAsMolasses) {}
+    it("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+    it("second test", mytags.SlowAsMolasses) { succeed }
     override def newInstance = new PathFunSpecExample
   }
 
   class NestedPathFunSpecExample extends path.FunSpec with NestedTestNames {
     describe("A subject") {
-      it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-      it("should second test", mytags.SlowAsMolasses) {}
+      it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+      it("should second test", mytags.SlowAsMolasses) { succeed }
     }
     override def newInstance = new NestedPathFunSpecExample
   }
@@ -132,273 +132,273 @@ class TwoSlowAndOneWeakTestExamples extends SuiteExamples {
   class DeeplyNestedPathFunSpecExample extends path.FunSpec with DeeplyNestedTestNames {
     describe("A subject") {
       describe("when created") {
-        it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-        it("should second test", mytags.SlowAsMolasses) {}
+        it("should first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+        it("should second test", mytags.SlowAsMolasses) { succeed }
       }
     }
     override def newInstance = new DeeplyNestedPathFunSpecExample
   }
 
   class WordSpecExample extends WordSpec with Services {
-    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
   }
 
   class NestedWordSpecExample extends WordSpec with NestedTestNames {
     "A subject" should {
-      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-      "second test" taggedAs (mytags.SlowAsMolasses) in {}
+      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+      "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     }
   }
 
   class DeeplyNestedWordSpecExample extends WordSpec with DeeplyNestedTestNames {
     "A subject" when {
       "created" should {
-        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-        "second test" taggedAs (mytags.SlowAsMolasses) in {}
+        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+        "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
       }
     }
   }
 
   class FixtureWordSpecExample extends StringFixtureWordSpec with Services {
-    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
   }
 
   class NestedFixtureWordSpecExample extends StringFixtureWordSpec with NestedTestNames {
     "A subject" should {
-      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-      "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+      "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     }
   }
 
   class DeeplyNestedFixtureWordSpecExample extends StringFixtureWordSpec with DeeplyNestedTestNames {
     "A subject" when {
       "created" should {
-        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-        "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+        "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
       }
     }
   }
 
   class NestedWordSpecWithMustExample extends WordSpec with NestedTestNamesWithMust {
     "A subject" must {
-      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-      "second test" taggedAs (mytags.SlowAsMolasses) in {}
+      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+      "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     }
   }
 
   class DeeplyNestedWordSpecWithMustExample extends WordSpec with DeeplyNestedTestNamesWithMust {
     "A subject" when {
       "created" must {
-        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-        "second test" taggedAs (mytags.SlowAsMolasses) in {}
+        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+        "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
       }
     }
   }
 
   class NestedFixtureWordSpecWithMustExample extends StringFixtureWordSpec with NestedTestNamesWithMust {
     "A subject" must {
-      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-      "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+      "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     }
   }
 
   class DeeplyNestedFixtureWordSpecWithMustExample extends StringFixtureWordSpec with DeeplyNestedTestNamesWithMust {
     "A subject" when {
       "created" must {
-        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-        "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+        "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
       }
     }
   }
 
   class NestedWordSpecWithCanExample extends WordSpec with NestedTestNamesWithCan {
     "A subject" can {
-      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-      "second test" taggedAs (mytags.SlowAsMolasses) in {}
+      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+      "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     }
   }
 
   class DeeplyNestedWordSpecWithCanExample extends WordSpec with DeeplyNestedTestNamesWithCan {
     "A subject" when {
       "created" can {
-        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-        "second test" taggedAs (mytags.SlowAsMolasses) in {}
+        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+        "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
       }
     }
   }
 
   class NestedFixtureWordSpecWithCanExample extends StringFixtureWordSpec with NestedTestNamesWithCan {
     "A subject" can {
-      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-      "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+      "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+      "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     }
   }
 
   class DeeplyNestedFixtureWordSpecWithCanExample extends StringFixtureWordSpec with DeeplyNestedTestNamesWithCan {
     "A subject" when {
       "created" can {
-        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-        "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+        "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+        "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
       }
     }
   }
 
   class FlatSpecExample extends FlatSpec with Services {
-    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it should "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it should "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     override val theTestNames = Vector("should first test", "should second test")
    }
 
   class SubjectFlatSpecExample extends FlatSpec with NestedTestNames {
     behavior of "A subject"
-    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it should "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it should "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
    }
 
   class ShorthandSubjectFlatSpecExample extends FlatSpec with NestedTestNames {
-    "A subject" should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it should "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    "A subject" should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it should "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
    }
 
   class FixtureFlatSpecExample extends StringFixtureFlatSpec with Services {
-    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it should "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it should "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     override val theTestNames = Vector("should first test", "should second test")
   }
 
   class SubjectFixtureFlatSpecExample extends StringFixtureFlatSpec with NestedTestNames {
     behavior of "A subject"
-    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it should "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    it should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it should "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
    }
 
   class ShorthandSubjectFixtureFlatSpecExample extends StringFixtureFlatSpec with NestedTestNames {
-    "A subject" should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it should "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    "A subject" should "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it should "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
    }
 
   class FlatSpecWithMustExample extends FlatSpec with Services {
-    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it must "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it must "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     override val theTestNames = Vector("must first test", "must second test")
    }
 
   class SubjectFlatSpecWithMustExample extends FlatSpec with NestedTestNamesWithMust {
     behavior of "A subject"
-    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it must "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it must "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
    }
 
   class ShorthandSubjectFlatSpecWithMustExample extends FlatSpec with NestedTestNamesWithMust {
-    "A subject" must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it must "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    "A subject" must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it must "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
    }
 
   class FixtureFlatSpecWithMustExample extends StringFixtureFlatSpec with Services {
-    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it must "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it must "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     override val theTestNames = Vector("must first test", "must second test")
   }
 
   class SubjectFixtureFlatSpecWithMustExample extends StringFixtureFlatSpec with NestedTestNamesWithMust {
     behavior of "A subject"
-    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it must "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    it must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it must "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
    }
 
   class ShorthandSubjectFixtureFlatSpecWithMustExample extends StringFixtureFlatSpec with NestedTestNamesWithMust {
-    "A subject" must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it must "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    "A subject" must "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it must "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
    }
 
   class FlatSpecWithCanExample extends FlatSpec with Services {
-    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it can "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it can "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     override val theTestNames = Vector("can first test", "can second test")
    }
 
   class SubjectFlatSpecWithCanExample extends FlatSpec with NestedTestNamesWithCan {
     behavior of "A subject"
-    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it can "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it can "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
    }
 
   class ShorthandSubjectFlatSpecWithCanExample extends FlatSpec with NestedTestNamesWithCan {
-    "A subject" can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    it can "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    "A subject" can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    it can "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
    }
 
   class FixtureFlatSpecWithCanExample extends StringFixtureFlatSpec with Services {
-    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it can "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it can "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     override val theTestNames = Vector("can first test", "can second test")
   }
 
   class SubjectFixtureFlatSpecWithCanExample extends StringFixtureFlatSpec with NestedTestNamesWithCan {
     behavior of "A subject"
-    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it can "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    it can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it can "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
    }
 
   class ShorthandSubjectFixtureFlatSpecWithCanExample extends StringFixtureFlatSpec with NestedTestNamesWithCan {
-    "A subject" can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    it can "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    "A subject" can "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    it can "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
    }
 
   class FreeSpecExample extends FreeSpec with Services {
-    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
   }
 
   class NestedFreeSpecExample extends FreeSpec with NestedTestNames {
     "A subject" - {
-      "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-      "should second test" taggedAs (mytags.SlowAsMolasses) in {}
+      "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+      "should second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     }
   }
 
   class DeeplyNestedFreeSpecExample extends FreeSpec with DeeplyNestedTestNames {
     "A subject" - {
       "when created" - {
-        "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-        "should second test" taggedAs (mytags.SlowAsMolasses) in {}
+        "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+        "should second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
       }
     }
   }
 
   class FixtureFreeSpecExample extends StringFixtureFreeSpec with Services {
-    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-    "second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+    "second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
   }
 
   class NestedFixtureFreeSpecExample extends StringFixtureFreeSpec with NestedTestNames {
     "A subject" - {
-      "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-      "should second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+      "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+      "should second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
     }
   }
 
   class DeeplyNestedFixtureFreeSpecExample extends StringFixtureFreeSpec with DeeplyNestedTestNames {
     "A subject" - {
       "when created" - {
-        "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => }
-        "should second test" taggedAs (mytags.SlowAsMolasses) in { s => }
+        "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { s => succeed }
+        "should second test" taggedAs (mytags.SlowAsMolasses) in { s => succeed }
       }
     }
   }
 
   class PathFreeSpecExample extends path.FreeSpec with Services {
-    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-    "second test" taggedAs (mytags.SlowAsMolasses) in {}
+    "first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+    "second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     override def newInstance = new PathFreeSpecExample
   }
 
   class NestedPathFreeSpecExample extends path.FreeSpec with NestedTestNames {
     "A subject" - {
-      "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-      "should second test" taggedAs (mytags.SlowAsMolasses) in {}
+      "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+      "should second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
     }
     override def newInstance = new NestedPathFreeSpecExample
   }
@@ -406,49 +406,49 @@ class TwoSlowAndOneWeakTestExamples extends SuiteExamples {
   class DeeplyNestedPathFreeSpecExample extends path.FreeSpec with DeeplyNestedTestNames {
     "A subject" - {
       "when created" - {
-        "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in {}
-        "should second test" taggedAs (mytags.SlowAsMolasses) in {}
+        "should first test" taggedAs (mytags.SlowAsMolasses, mytags.WeakAsAKitten) in { succeed }
+        "should second test" taggedAs (mytags.SlowAsMolasses) in { succeed }
       }
     }
     override def newInstance = new DeeplyNestedPathFreeSpecExample
   }
 
   class FeatureSpecExample extends FeatureSpec with Services {
-    scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-    scenario("second test", mytags.SlowAsMolasses) {}
+    scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+    scenario("second test", mytags.SlowAsMolasses) { succeed }
     override val theTestNames = Vector("Scenario: first test", "Scenario: second test")
   }
 
   class NestedFeatureSpecExample extends FeatureSpec with Services {
     feature("A feature") {
-      scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-      scenario("second test", mytags.SlowAsMolasses) {}
+      scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+      scenario("second test", mytags.SlowAsMolasses) { succeed }
     }
     override val theTestNames = Vector("Feature: A feature Scenario: first test", "Feature: A feature Scenario: second test")
   }
 
   class FixtureFeatureSpecExample extends StringFixtureFeatureSpec with Services {
-    scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-    scenario("second test", mytags.SlowAsMolasses) { s => }
+    scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+    scenario("second test", mytags.SlowAsMolasses) { s => succeed }
     override val theTestNames = Vector("Scenario: first test", "Scenario: second test")
   }
 
   class NestedFixtureFeatureSpecExample extends StringFixtureFeatureSpec with Services {
     feature("A feature") {
-      scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-      scenario("second test", mytags.SlowAsMolasses) { s => }
+      scenario("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+      scenario("second test", mytags.SlowAsMolasses) { s => succeed }
     }
     override val theTestNames = Vector("Feature: A feature Scenario: first test", "Feature: A feature Scenario: second test")
   }
 
   class PropSpecExample extends PropSpec with Services {
-    property("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) {}
-    property("second test", mytags.SlowAsMolasses) {}
+    property("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { succeed }
+    property("second test", mytags.SlowAsMolasses) { succeed }
   }
 
   class FixturePropSpecExample extends StringFixturePropSpec with Services {
-    property("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => }
-    property("second test", mytags.SlowAsMolasses) { s => }
+    property("first test", mytags.SlowAsMolasses, mytags.WeakAsAKitten) { s => succeed }
+    property("second test", mytags.SlowAsMolasses) { s => succeed }
   }
 
   // SKIP-SCALATESTJS-START

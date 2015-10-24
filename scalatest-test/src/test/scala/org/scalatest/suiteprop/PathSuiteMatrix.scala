@@ -31,6 +31,8 @@ class PathSuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChe
         suite.counts.instanceCount should be (1)
       }
     }
+
+    succeed
   }
 
   property("A path trait should run each test once, in its own instance") {
@@ -44,6 +46,7 @@ class PathSuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChe
         suite.counts.instanceCount should be (suite.expectedInstanceCount)
       }
     }
+    succeed
   }
 
   property("A path trait should run only the path to and from each test") {
@@ -55,6 +58,7 @@ class PathSuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChe
         suite.counts should be (suite.expectedCounts)
       }
     }
+    succeed
   }
 
   property("A path trait properly written to test ListBuffer should execute without any test failures") {
@@ -66,5 +70,6 @@ class PathSuiteMatrix extends PropSpec with Matchers with TableDrivenPropertyChe
         suite.counts.instanceCount should be (suite.expectedInstanceCount)
       }
     }
+    succeed
   }
 }

@@ -81,7 +81,7 @@ trait OutcomeOf {
    * @return an <code>Outcome</code> representing the outcome of executing the block of code
    */
   def outcomeOf(f: => Unit): Outcome = {
-    try {                                         
+    try {
       f                                           
       Succeeded
     }                                             

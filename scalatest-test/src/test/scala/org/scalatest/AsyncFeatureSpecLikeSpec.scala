@@ -20,6 +20,8 @@ import scala.concurrent.{Promise, ExecutionContext, Future}
 import org.scalatest.concurrent.SleepHelper
 
 import scala.util.Success
+import SharedHelpers.{ensureTestFailedEventReceived, thisLineNumber}
+import org.scalatest.exceptions.TestFailedException
 
 class AsyncFeatureSpecLikeSpec extends FunSpec {
 
@@ -469,6 +471,127 @@ class AsyncFeatureSpecLikeSpec extends FunSpec {
       assert(rep.testSucceededEventsReceived(0).testName == "Scenario: test 1")
       assert(rep.testSucceededEventsReceived(1).testName == "Scenario: test 2")
       assert(rep.testSucceededEventsReceived(2).testName == "Scenario: test 3")
+    }
+
+    it("should return the correct test count from its expectedTestCount method when uses registerTest and registerIgnoredTest to register tests") {
+
+      val a = new AsyncFeatureSpec {
+        registerTest("test this") {/* ASSERTION_SUCCEED */}
+        registerTest("test that") {/* ASSERTION_SUCCEED */}
+      }
+      assert(a.expectedTestCount(Filter()) === 2)
+
+      val b = new AsyncFeatureSpec {
+        registerIgnoredTest("test this") {/* ASSERTION_SUCCEED */}
+        registerTest("test that") {/* ASSERTION_SUCCEED */}
+      }
+      assert(b.expectedTestCount(Filter()) === 1)
+
+      val c = new AsyncFeatureSpec {
+        registerTest("test this", mytags.FastAsLight) {/* ASSERTION_SUCCEED */}
+        registerTest("test that") {/* ASSERTION_SUCCEED */}
+      }
+      assert(c.expectedTestCount(Filter(Some(Set("org.scalatest.FastAsLight")), Set())) === 1)
+      assert(c.expectedTestCount(Filter(None, Set("org.scalatest.FastAsLight"))) === 1)
+
+      val d = new AsyncFeatureSpec {
+        registerTest("test this", mytags.FastAsLight, mytags.SlowAsMolasses) {/* ASSERTION_SUCCEED */}
+        registerTest("test that", mytags.SlowAsMolasses) {/* ASSERTION_SUCCEED */}
+        registerTest("test the other thing") {/* ASSERTION_SUCCEED */}
+      }
+      assert(d.expectedTestCount(Filter(Some(Set("org.scalatest.FastAsLight")), Set())) === 1)
+      assert(d.expectedTestCount(Filter(Some(Set("org.scalatest.SlowAsMolasses")), Set("org.scalatest.FastAsLight"))) === 1)
+      assert(d.expectedTestCount(Filter(None, Set("org.scalatest.SlowAsMolasses"))) === 1)
+      assert(d.expectedTestCount(Filter()) === 3)
+
+      val e = new AsyncFeatureSpec {
+        registerTest("test this", mytags.FastAsLight, mytags.SlowAsMolasses) {/* ASSERTION_SUCCEED */}
+        registerTest("test that", mytags.SlowAsMolasses) {/* ASSERTION_SUCCEED */}
+        registerIgnoredTest("test the other thing") {/* ASSERTION_SUCCEED */}
+      }
+      assert(e.expectedTestCount(Filter(Some(Set("org.scalatest.FastAsLight")), Set())) === 1)
+      assert(e.expectedTestCount(Filter(Some(Set("org.scalatest.SlowAsMolasses")), Set("org.scalatest.FastAsLight"))) === 1)
+      assert(e.expectedTestCount(Filter(None, Set("org.scalatest.SlowAsMolasses"))) === 0)
+      assert(e.expectedTestCount(Filter()) === 2)
+
+      val f = new Suites(a, b, c, d, e)
+      assert(f.expectedTestCount(Filter()) === 10)
+    }
+
+    it("should, if they call a nested registerTest with tags from within a registerTest clause, result in a TestFailedException when running the test") {
+
+      class MySpec extends AsyncFeatureSpec {
+        registerTest("should blow up") {
+          registerTest("should never run", mytags.SlowAsMolasses) {
+            assert(1 === 1)
+          }
+          /* ASSERTION_SUCCEED */
+        }
+      }
+
+      val spec = new MySpec
+      ensureTestFailedEventReceived(spec, "Scenario: should blow up")
+    }
+
+    it("should, if they call a nested registerIgnoredTest with tags from within a registerTest clause, result in a TestFailedException when running the test") {
+
+      class MySpec extends AsyncFeatureSpec {
+        registerTest("should blow up") {
+          registerIgnoredTest("should never run", mytags.SlowAsMolasses) {
+            assert(1 === 1)
+          }
+          /* ASSERTION_SUCCEED */
+        }
+      }
+
+      val spec = new MySpec
+      ensureTestFailedEventReceived(spec, "Scenario: should blow up")
+    }
+
+    it("should allow test registration with registerTest and registerIgnoredTest") {
+      class TestSpec extends AsyncFeatureSpec {
+        val a = 1
+        registerTest("test 1") {
+          val e = intercept[TestFailedException] {
+            assert(a == 2)
+          }
+          assert(e.message == Some("1 did not equal 2"))
+          assert(e.failedCodeFileName == Some("AsyncFeatureSpecLikeSpec.scala"))
+          assert(e.failedCodeLineNumber == Some(thisLineNumber - 4))
+        }
+        registerTest("test 2") {
+          assert(a == 2)
+        }
+        registerTest("test 3") {
+          pending
+        }
+        registerTest("test 4") {
+          cancel
+        }
+        registerIgnoredTest("test 5") {
+          assert(a == 2)
+        }
+      }
+
+      val rep = new EventRecordingReporter
+      val s = new TestSpec
+      val status = s.run(None, Args(rep))
+
+      // SKIP-SCALATESTJS-START
+      status.waitUntilCompleted()
+      // SKIP-SCALATESTJS-END
+
+      assert(rep.testStartingEventsReceived.length == 4)
+      assert(rep.testSucceededEventsReceived.length == 1)
+      assert(rep.testSucceededEventsReceived(0).testName == "Scenario: test 1")
+      assert(rep.testFailedEventsReceived.length == 1)
+      assert(rep.testFailedEventsReceived(0).testName == "Scenario: test 2")
+      assert(rep.testPendingEventsReceived.length == 1)
+      assert(rep.testPendingEventsReceived(0).testName == "Scenario: test 3")
+      assert(rep.testCanceledEventsReceived.length == 1)
+      assert(rep.testCanceledEventsReceived(0).testName == "Scenario: test 4")
+      assert(rep.testIgnoredEventsReceived.length == 1)
+      assert(rep.testIgnoredEventsReceived(0).testName == "Scenario: test 5")
     }
 
   }

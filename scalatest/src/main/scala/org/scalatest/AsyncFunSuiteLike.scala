@@ -52,11 +52,23 @@ trait AsyncFunSuiteLike extends AsyncSuite with AsyncTestRegistration { thisSuit
     val stackDepthAdjustment = -1
     // SKIP-SCALATESTJS-END
     //SCALATESTJS-ONLY val stackDepthAdjustment = -4
-    engine.registerAsyncTest(testText, transformToOutcome(testFun), Resources.testCannotBeNestedInsideAnotherTest, "FunSuiteRegistering.scala", "registerTest", 4, stackDepthAdjustment, None, None, testTags: _*)
+    engine.registerAsyncTest(testText, transformToOutcome(testFun), Resources.testCannotBeNestedInsideAnotherTest, "AsyncFunSuiteLike.scala", "registerAsyncTest", 4, stackDepthAdjustment, None, None, testTags: _*)
   }
 
   final def registerIgnoredAsyncTest(testText: String, testTags: Tag*)(testFun: => Future[Assertion]) {
-    engine.registerIgnoredAsyncTest(testText, transformToOutcome(testFun), Resources.testCannotBeNestedInsideAnotherTest, "FunSuiteRegistering.scala", "registerIgnoredAsyncTest", 4, -3, None, testTags: _*)
+    engine.registerIgnoredAsyncTest(testText, transformToOutcome(testFun), Resources.testCannotBeNestedInsideAnotherTest, "AsyncFunSuiteLike.scala", "registerIgnoredAsyncTest", 4, -3, None, testTags: _*)
+  }
+
+  final def registerTest(testText: String, testTags: Tag*)(testFun: => Any): Unit = {
+    // SKIP-SCALATESTJS-START
+    val stackDepthAdjustment = -1
+    // SKIP-SCALATESTJS-END
+    //SCALATESTJS-ONLY val stackDepthAdjustment = -4
+    engine.registerAsyncTest(testText, () => PastOutcome(OutcomeOf.outcomeOf(testFun)), Resources.testCannotBeNestedInsideAnotherTest, "AsyncFunSuiteLike.scala", "registerTest", 4, stackDepthAdjustment, None, None, testTags: _*)
+  }
+
+  final def registerIgnoredTest(testText: String, testTags: Tag*)(testFun: => Any): Unit = {
+    engine.registerIgnoredAsyncTest(testText, () => PastOutcome(OutcomeOf.outcomeOf(testFun)), Resources.testCannotBeNestedInsideAnotherTest, "AsyncFunSuiteLike.scala", "registerIgnoredTest", 4, -3, None, testTags: _*)
   }
 
   /**

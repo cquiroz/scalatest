@@ -15,6 +15,7 @@
  */
 package org.scalatest.concurrent
 
+import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -26,7 +27,7 @@ This is private[scalatest] so that no one can actually use it except
 when we install it as the default. It can't be used generally because
 we special case it in the AsyncEngine. Whatever is referenced from
 executionContext is what is passed into AsyncEngine, and then we
-do a runtime type check to see if it is this one, and if so, we 
+do a runtime type check to see if it is this one, and if so, we
 call runNow.
 */
 private[scalatest] class SerialExecutionContext extends ExecutionContext {
@@ -42,7 +43,7 @@ private[scalatest] class SerialExecutionContext extends ExecutionContext {
     // If this is a thread different than the main test thread, we'll
     // notify the main test thread in case it is sitting in the wait
     // in runNow.
-    synchronized { notifyAll() }
+    // synchronized { notifyAll() }
   }
 
   def reportFailure(t: Throwable): Unit =
@@ -64,50 +65,50 @@ private[scalatest] class SerialExecutionContext extends ExecutionContext {
      thread other than the main test thread, this will do a notifyAll
      to wake up the main test thread if it is sitting in the wait
      loop in runNow:
-
      // After being notified, wait() will return
      synchronized { wait() }
-
      If so, it will loop back and find that as yet the Future[Outcome]
      is not completed, so it will execute the while body again:
-  
+
       while (!future.isCompleted) {
         // It will execute here again
       }
- 
-     It will find out that the queue does actually contain a job to do:
 
+     It will find out that the queue does actually contain a job to do:
      // queue.peek will return a job to do, not null
      while (queue.peek != null)
-
      It will execute this job, which is the transformation from
      Future[Assertion] to Future[Outcome]:
-
      // This will transform Future[Assertion] => Future[Outcome]
      queue.poll().run()
-
      That will complete the Future[Outcome], so when it tests to
      see if the Future[Outcome] is completed, it will find that it
      has:
-
      // This if test fails. !future.isCompleted is now false
      if (!future.isCompleted)
-
      Thus it will skip the wait() call and loop back to the top
      of the outer while. That will finally return false:
-    
+
       while (!future.isCompleted) {
         // Doesn't get here
       } // Just hops down here because the future is now complete
- 
+
       And runNow will return, as this test has finished running.
    */
-  def runNow(future: Future[Outcome]): Unit = {
-    while (!future.isCompleted) {
-      while (queue.peek != null)
-        queue.poll().run() // What to do about exceptions here?
-      if (!future.isCompleted)
-        synchronized { wait() }
+  /*def runNow(future: Future[Outcome]): Unit = {
+    while (!future.isCompleted || queue.size > 0)
+      queue.take().run() // What to do about exceptions here?
+  }*/
+
+
+  def runNow(future: Future[Outcome]): Unit = recRunNow(future)
+
+  @tailrec
+  private def recRunNow(future: Future[Outcome]): Unit = // Could take a scala.concurrent.duration.Deadline to be used for poll(timeout, timeUnit)
+    if (future.isCompleted && queue.size == 0) ()
+    else {
+      val task = queue.take() // Note that this will block if queue is empty, alternatively we can use poll(timeout, timeUnit) to deal with deadlines
+      task.run()  // TODO: this should abort the suite, let's write a test for that
+      recRunNow(future)
     }
-  }
 }

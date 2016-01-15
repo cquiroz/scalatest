@@ -15,15 +15,11 @@
  */
 package org.scalatest.concurrent
 
-import org.scalatest.SuiteMixin
-import org.scalatest.Suite
+import org.scalatest._
 import Timeouts._
 import org.scalatest.exceptions.ModifiableMessage
-import org.scalatest.Resources
 import org.scalatest.time.Span
 import org.scalatest.exceptions.TimeoutField
-import org.scalatest.Outcome
-import org.scalatest.Exceptional
 
 /**
  * Trait that when mixed into a suite class establishes a time limit for its tests.
@@ -122,7 +118,7 @@ import org.scalatest.Exceptional
  * to run.
  * </p>
  */
-trait TimeLimitedTests extends SuiteMixin { this: Suite =>
+trait TimeLimitedTests extends SuiteMixin with TimeLimits { this: Suite =>
 
   /**
    * A stackable implementation of <code>withFixture</code> that wraps a call to <code>super.withFixture</code> in a 
@@ -130,7 +126,7 @@ trait TimeLimitedTests extends SuiteMixin { this: Suite =>
    * 
    * @param test the test on which to enforce a time limit
    */
-  abstract override def withFixture(test: NoArgTest): Outcome = {
+  /*abstract override def withFixture(test: NoArgTest): Outcome = {
     try {
       failAfter(timeLimit) {
         super.withFixture(test)
@@ -142,13 +138,20 @@ trait TimeLimitedTests extends SuiteMixin { this: Suite =>
       case t: Throwable => 
         Exceptional(t)
     }
-  }
+  }*/
 
   /**
    * The time limit, in milliseconds, in which each test in a <code>Suite</code> that mixes in
    * <code>TimeLimitedTests</code> must complete.
    */
   def timeLimit: Span
+
+  /*abstract override protected def runTest(testName: String, args: Args): Status =
+    within(timeLimit) { super.runTest(testName, args)}*/
+
+  override def around[T](testFun: => T)(implicit timeLimiting: org.scalatest.enablers.TimeLimiting[T]): () => T = () => {
+    within(timeLimit) { testFun }
+  }
   
   /**
    * The default <a href="Interruptor.html"><code>Interruptor</code></a> strategy used to interrupt tests that exceed their time limit.

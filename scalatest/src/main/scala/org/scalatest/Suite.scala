@@ -1579,6 +1579,8 @@ trait Suite extends Assertions with Serializable { thisSuite =>
     }
   }
   // SKIP-SCALATESTJS-END
+
+  def around[T](testFun: => T)(implicit timeLimiting: org.scalatest.enablers.TimeLimiting[T]): () => T = () => testFun
 }
 
 private[scalatest] object Suite {

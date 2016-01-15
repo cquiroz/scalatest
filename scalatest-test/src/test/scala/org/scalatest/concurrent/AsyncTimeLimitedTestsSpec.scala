@@ -19,14 +19,15 @@ import org.scalatest.time.{Span, Millis}
 import org.scalatest._
 import SharedHelpers._
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
+import scala.concurrent.Future
 
 class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackTraces {
   describe("A time-limited test") {
-    describe("when it does not timeout") {
+    describe("when it does not timeout ") {
       describe("when it succeeds") {
-        it("should succeed") {
+        it("should succeed without Future") {
           val a =
-            new AsyncFunSuite with AsyncTimeLimitedTests {
+            new AsyncFunSuite with TimeLimitedTests {
               val timeLimit = Span(100L, Millis)
               test("plain old success") { assert(1 + 1 === 2) }
             }
@@ -35,13 +36,36 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
           val ts = rep.testSucceededEventsReceived
           ts.size should be (1)
         }
+        it("should succeed with Future") {
+          val a =
+            new AsyncFunSuite with TimeLimitedTests {
+              val timeLimit = Span(100L, Millis)
+              test("plain old success") { Future { assert(1 + 1 === 2) } }
+            }
+          val rep = new EventRecordingReporter
+          val status = a.run(None, Args(rep))
+          status.waitUntilCompleted()
+          val ts = rep.testSucceededEventsReceived
+          ts.size should be (1)
+        }
       }
       describe("when it fails") {
-        it("should fail") {
+        it("should fail without Future") {
           val a =
-            new AsyncFunSuite with AsyncTimeLimitedTests {
+            new AsyncFunSuite with TimeLimitedTests {
               val timeLimit = Span(100L, Millis)
               test("plain old failure") { assert(1 + 1 === 3) }
+            }
+          val rep = new EventRecordingReporter
+          a.run(None, Args(rep))
+          val tf = rep.testFailedEventsReceived
+          tf.size should be (1)
+        }
+        it("should fail with Future") {
+          val a =
+            new AsyncFunSuite with TimeLimitedTests {
+              val timeLimit = Span(100L, Millis)
+              test("plain old failure") { Future { assert(1 + 1 === 3) } }
             }
           val rep = new EventRecordingReporter
           a.run(None, Args(rep))
@@ -51,14 +75,11 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
       }
     }
     describe("when it times out") {
-      it("should fail with a timeout exception with the proper error message") {
+      it("should fail with a timeout exception with the proper error message test when timeout from main code") {
         val a =
-          new AsyncFunSuite with AsyncTimeLimitedTests {
+          new AsyncFunSuite with TimeLimitedTests {
             val timeLimit = Span(100L, Millis)
-            test("time out failure") {
-              Thread.sleep(500)
-              succeed
-            }
+            test("time out failure") { Thread.sleep(500); succeed }
           }
         val rep = new EventRecordingReporter
         a.run(None, Args(rep))
@@ -67,9 +88,22 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
         val tfe = tf(0)
         tfe.message should be (Resources.testTimeLimitExceeded("100 milliseconds"))
       }
-      /*it("should fail with a timeout exception with the proper cause, if the test timed out after it completed abruptly") {
+      it("should fail with a timeout exception with the proper error message test when timeout from future returned") {
         val a =
-          new FunSuite with TimeLimitedTests {
+          new AsyncFunSuite with TimeLimitedTests {
+            val timeLimit = Span(100L, Millis)
+            test("time out failure") { Future { Thread.sleep(500); succeed } }
+          }
+        val rep = new EventRecordingReporter
+        a.run(None, Args(rep))
+        val tf = rep.testFailedEventsReceived
+        tf.size should be (1)
+        val tfe = tf(0)
+        tfe.message should be (Resources.testTimeLimitExceeded("100 milliseconds"))
+      }
+      it("should fail with a timeout exception with the proper cause, if the test timed out after it completed abruptly from main code") {
+        val a =
+          new AsyncFunSuite with TimeLimitedTests {
             val timeLimit = Span(10L, Millis)
             override val defaultTestInterruptor = DoNotInterrupt
             test("time out failure") {
@@ -93,7 +127,34 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
             }
           case e => fail("Was not a TestFailedDueToTimeoutException", e)
         }
-      }*/
+      }
+      it("should fail with a timeout exception with the proper cause, if the test timed out after it completed abruptly from future returned") {
+        val a =
+          new AsyncFunSuite with TimeLimitedTests {
+            val timeLimit = Span(10L, Millis)
+            override val defaultTestInterruptor = DoNotInterrupt
+            test("time out failure") {
+              Future {
+                Thread.sleep(50)
+                throw new RuntimeException("oops!")
+              }
+            }
+          }
+        val rep = new EventRecordingReporter
+        a.run(None, Args(rep))
+        val tf = rep.testFailedEventsReceived
+        tf.size should be (1)
+        val tfe = tf(0)
+        tfe.message should be (Resources.testTimeLimitExceeded("10 milliseconds"))
+        import org.scalatest.OptionValues._
+        tfe.throwable.value match {
+          case tfe: TestFailedDueToTimeoutException =>
+            tfe.cause should not be defined
+
+          case e => fail("Was not a TestFailedDueToTimeoutException", e)
+        }
+      }
     }
   }
 }
+

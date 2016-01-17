@@ -122,7 +122,7 @@ trait AsyncFunSuiteLike extends AsyncSuite with AsyncTestRegistration { thisSuit
     // SKIP-SCALATESTJS-END
     //SCALATESTJS-ONLY val stackDepth = 6
     //SCALATESTJS-ONLY val stackDepthAdjustment = -4
-    engine.registerAsyncTest(testName, transformToOutcome(around[Future[Assertion]](testFun).apply()), Resources.testCannotAppearInsideAnotherTest, "FunSuiteRegistering.scala", "test", stackDepth, stackDepthAdjustment, None, None, testTags: _*)
+    engine.registerAsyncTest(testName, transformToOutcome(limitTestTime[Future[Assertion]](testFun).apply()), Resources.testCannotAppearInsideAnotherTest, "FunSuiteRegistering.scala", "test", stackDepth, stackDepthAdjustment, None, None, testTags: _*)
   }
 
   /**

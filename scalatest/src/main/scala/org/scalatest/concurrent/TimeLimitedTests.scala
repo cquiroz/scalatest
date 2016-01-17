@@ -149,7 +149,7 @@ trait TimeLimitedTests extends SuiteMixin with TimeLimits { this: Suite =>
   /*abstract override protected def runTest(testName: String, args: Args): Status =
     within(timeLimit) { super.runTest(testName, args)}*/
 
-  override def around[T](testFun: => T)(implicit timeLimiting: org.scalatest.enablers.TimeLimiting[T]): () => T = () => {
+  override private[scalatest] final def around[T](testFun: => T)(implicit timeLimiting: org.scalatest.enablers.TimeLimiting[T]): () => T = () => {
     within(timeLimit) { testFun }
   }
   

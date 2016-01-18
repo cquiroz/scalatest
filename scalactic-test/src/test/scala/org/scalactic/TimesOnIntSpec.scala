@@ -40,12 +40,12 @@ class TimesOnIntSpec extends FunSpec with TimesOnInt {
       assert(i === 100)
     }
 
-    it("should throw IllegalArgumentException if times is invoked on a negative integer") {
+    /*it("should throw IllegalArgumentException if times is invoked on a negative integer") {
       var i = 0
       intercept[IllegalArgumentException] {
         -1 times { i += 1 }
       }
       assert(i === 0)
-    }
+    }*/
   }
 }

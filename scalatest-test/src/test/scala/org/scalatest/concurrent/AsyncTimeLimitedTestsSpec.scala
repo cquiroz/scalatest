@@ -32,7 +32,7 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
               test("plain old success") { assert(1 + 1 === 2) }
             }
           val rep = new EventRecordingReporter
-          a.run(None, Args(rep))
+          val status = a.run(None, Args(rep))
           val ts = rep.testSucceededEventsReceived
           ts.size should be (1)
         }
@@ -44,7 +44,6 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
             }
           val rep = new EventRecordingReporter
           val status = a.run(None, Args(rep))
-          status.waitUntilCompleted()
           val ts = rep.testSucceededEventsReceived
           ts.size should be (1)
         }
@@ -57,7 +56,7 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
               test("plain old failure") { assert(1 + 1 === 3) }
             }
           val rep = new EventRecordingReporter
-          a.run(None, Args(rep))
+          val status = a.run(None, Args(rep))
           val tf = rep.testFailedEventsReceived
           tf.size should be (1)
         }
@@ -68,7 +67,7 @@ class AsyncTimeLimitedTestsSpec extends FunSpec with Matchers with SeveredStackT
               test("plain old failure") { Future { assert(1 + 1 === 3) } }
             }
           val rep = new EventRecordingReporter
-          a.run(None, Args(rep))
+          val status = a.run(None, Args(rep))
           val tf = rep.testFailedEventsReceived
           tf.size should be (1)
         }

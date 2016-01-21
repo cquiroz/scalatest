@@ -25,57 +25,14 @@ import org.scalatest.exceptions.TestFailedDueToTimeoutException
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
-trait AsyncTimeLimitedTests extends AsyncSuiteMixin { this: AsyncSuite =>
+trait AsyncTimeLimitedTests extends AsyncSuiteMixin with TimeLimits { this: AsyncSuite =>
 
   abstract override def withFixture(test: NoArgAsyncTest): Future[Outcome] = {
 
-    class TimeoutTask(promise: Promise[Outcome], span: Span) extends TimerTask {
-
-      def run(): Unit = {
-        if (!promise.isCompleted) {
-          promise.complete(Success(Exceptional(new TestFailedDueToTimeoutException(sde => Some(Resources.testTimeLimitExceeded(span.prettyString)), None, getStackDepthFun("TimeLimiting.scala", "run"), None, span))))
-        }
-      }
-
+    limitedTo(timeLimit, defaultTestInterruptor) {
+      super.withFixture(test)
     }
 
-    try {
-
-      val limit = timeLimit.totalNanos / 1000 / 1000
-      val startTime = scala.compat.Platform.currentTime
-
-      val future =
-        failAfter(timeLimit) {
-          super.withFixture(test)
-        } (defaultTestInterruptor)
-
-      val promise = Promise[Outcome]
-      val task = new TimeoutTask(promise, timeLimit)
-      val delay = limit - (scala.compat.Platform.currentTime - startTime)
-      val timer = new Timer
-
-      future.onComplete { t =>
-        t match {
-          case Success(r) =>
-            timer.cancel()
-            if (!promise.isCompleted)
-              promise.success(r)
-
-          case Failure(e) =>
-            timer.cancel()
-            if (!promise.isCompleted)
-              promise.failure(e)
-        }
-      }
-      timer.schedule(task, delay)
-      promise.future
-    }
-    catch {
-      case e: org.scalatest.exceptions.ModifiableMessage[_] with TimeoutField =>
-        Future.successful(Exceptional(e.modifyMessage(opts => Some(Resources.testTimeLimitExceeded(e.timeout.prettyString)))))
-      case t: Throwable =>
-        Future.successful(Exceptional(t))
-    }
   }
 
   /**

@@ -17,13 +17,8 @@ package org.scalatest.concurrent
 
 import org.scalatest.SyncSuiteMixin
 import org.scalatest.SyncSuite
-import Timeouts._
-import org.scalatest.exceptions.ModifiableMessage
-import org.scalatest.Resources
 import org.scalatest.time.Span
-import org.scalatest.exceptions.TimeoutField
 import org.scalatest.Outcome
-import org.scalatest.Exceptional
 
 /**
  * Trait that when mixed into a suite class establishes a time limit for its tests.
@@ -122,7 +117,7 @@ import org.scalatest.Exceptional
  * to run.
  * </p>
  */
-trait TimeLimitedTests extends SyncSuiteMixin { this: SyncSuite =>
+trait TimeLimitedTests extends SyncSuiteMixin with TimeLimits { this: SyncSuite =>
 
   /**
    * A stackable implementation of <code>withFixture</code> that wraps a call to <code>super.withFixture</code> in a 
@@ -131,16 +126,8 @@ trait TimeLimitedTests extends SyncSuiteMixin { this: SyncSuite =>
    * @param test the test on which to enforce a time limit
    */
   abstract override def withFixture(test: NoArgTest): Outcome = {
-    try {
-      failAfter(timeLimit) {
-        super.withFixture(test)
-      } (defaultTestInterruptor)
-    }
-    catch {
-      case e: org.scalatest.exceptions.ModifiableMessage[_] with TimeoutField => 
-        Exceptional(e.modifyMessage(opts => Some(Resources.testTimeLimitExceeded(e.timeout.prettyString))))
-      case t: Throwable => 
-        Exceptional(t)
+    limitedTo(timeLimit, defaultTestInterruptor) {
+      super.withFixture(test)
     }
   }
 

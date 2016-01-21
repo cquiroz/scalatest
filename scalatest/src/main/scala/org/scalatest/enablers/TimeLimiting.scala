@@ -33,7 +33,26 @@ trait TimeLimiting[T] {
 
 object TimeLimiting {
 
-  implicit def timeLimitingNatureOfFuture(implicit executionContext: ExecutionContext): TimeLimiting[Future[Outcome]] =
+  implicit def timeLimitingNatureOfOutcome: TimeLimiting[Outcome] =
+    new TimeLimiting[Outcome] {
+
+      def limitedTo(timeLimit: Span, interruptor: Interruptor)(block: => Outcome): Outcome = {
+        try {
+          failAfter(timeLimit) {
+            block
+          } (interruptor)
+        }
+        catch {
+          case e: org.scalatest.exceptions.ModifiableMessage[_] with TimeoutField =>
+            Exceptional(e.modifyMessage(opts => Some(Resources.testTimeLimitExceeded(e.timeout.prettyString))))
+          case t: Throwable =>
+            Exceptional(t)
+        }
+      }
+
+    }
+
+  implicit def timeLimitingNatureOfFutureOfOutcome(implicit executionContext: ExecutionContext): TimeLimiting[Future[Outcome]] =
     new TimeLimiting[Future[Outcome]] {
 
       class TimeoutTask(promise: Promise[Outcome], span: Span) extends TimerTask {

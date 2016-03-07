@@ -122,7 +122,7 @@ import exceptions.NullArgumentException
  * When this is not possible or practical, however, trait <code>Requirements</code> is helpful.
  * </p>
  */
-trait Requirements {
+trait Requirements extends DefaultPrettifier {
 
   import language.experimental.macros
 

@@ -1368,9 +1368,6 @@ trait Assertions extends TripleEquals with DefaultPrettifier {
    * </p>
    */
   final val succeed: Assertion = Succeeded
-
-  // TODO: Scaladoc
-  override def prettifier: Prettifier = super.prettifier
 }
 
 /**

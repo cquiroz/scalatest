@@ -20,9 +20,7 @@ package org.scalactic
  * object, to transform that object into a <code>String</code> representation.
  */
 trait PrettyMethods extends DefaultPrettifier {
-
-  override def prettifier: Prettifier = super.prettifier
-
+  
   /**
    * Wraps a <code>Prettifier</code>.
    *

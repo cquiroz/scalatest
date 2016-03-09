@@ -539,11 +539,8 @@ case class AbortedStatus(ex: Throwable) extends Status with Serializable { thisA
 // then user code could pattern match on it and then access the setCompleted
 // and setFailed methods. We wouldn't want that.
 private[scalatest] final class ScalaTestStatefulStatus extends Status with Serializable {
-
-  @transient private final val latch = new CountDownLatch(1)
-
+  @volatile private var completed = false
   private var succeeded = true
-
   private final val queue = new ConcurrentLinkedQueue[Try[Boolean] => Unit]
 
   private var asyncException: Option[Throwable] = None
@@ -555,17 +552,34 @@ private[scalatest] final class ScalaTestStatefulStatus extends Status with Seria
   }
 
   // SKIP-SCALATESTJS-START
+  /**
+    * Blocking call that waits until completion, as indicated by an invocation of <code>setCompleted</code> on this instance, then returns <code>false</code>
+    * if <code>setFailed</code> was called on this instance, else returns <code>true</code>.
+    *
+    * @return <code>true</code> if no tests failed and no suites aborted, <code>false</code> otherwise
+    */
   def succeeds() = {
     waitUntilCompleted()
     synchronized { succeeded }
   }
   // SKIP-SCALATESTJS-END
 
-  def isCompleted = synchronized { latch.getCount == 0L }
+  /**
+    * Non-blocking call that returns <code>true</code> if <code>setCompleted</code> has been invoked on this instance, <code>false</code> otherwise.
+    *
+    * @return <code>true</code> if the test or suite run is already completed, <code>false</code> otherwise.
+    */
+  def isCompleted = synchronized { completed }
 
   // SKIP-SCALATESTJS-START
+  /**
+    * Blocking call that returns only after <code>setCompleted</code> has been invoked on this <code>StatefulStatus</code> instance.
+    */
   def waitUntilCompleted() {
-    synchronized { latch }.await()
+    synchronized {
+      if (!completed)
+        wait()
+    }
     unreportedException match {
       case Some(ue) => throw ue
       case None => // Do nothing
@@ -573,6 +587,17 @@ private[scalatest] final class ScalaTestStatefulStatus extends Status with Seria
   }
   // SKIP-SCALATESTJS-END
 
+  /**
+    * Sets the status to failed without changing the completion status.
+    *
+    * <p>
+    * This method may be invoked repeatedly, even though invoking it once is sufficient to set the state of the <code>Status</code> to failed, but only
+    * up until <code>setCompleted</code> has been called. Once <code>setCompleted</code> has been called, invoking this method will result in a
+    * thrown <code>IllegalStateException</code>.
+    * <p>
+    *
+    * @throws IllegalStateException if this method is invoked on this instance after <code>setCompleted</code> has been invoked on this instance.
+    */
   def setFailed() {
     synchronized {
       if (isCompleted)
@@ -592,6 +617,18 @@ private[scalatest] final class ScalaTestStatefulStatus extends Status with Seria
     }
   }
 
+  /**
+    * Sets the status to completed.
+    *
+    * <p>
+    * This method may be invoked repeatedly, even though invoking it once is sufficient to set the state of the <code>Status</code> to completed.
+    * </p>
+    *
+    * <p>
+    * <strong>TODO: Specify that this method invokes the callbacks on the invoking thread after it releases the lock
+    * such that the Status has completed.</strong>
+    * </p>
+    */
   def setCompleted() {
     // Moved the for loop after the countdown, to avoid what I think is a race condition whereby we register a call back while
     // we are iterating through the list of callbacks prior to adding the last one.
@@ -600,7 +637,8 @@ private[scalatest] final class ScalaTestStatefulStatus extends Status with Seria
         // OLD, OUTDATED COMMENT, left in here to ponder the depths of its meaning a bit longer:
         // Only release the latch after the callbacks finish execution, to avoid race condition with other thread(s) that wait
         // for this Status to complete.
-        latch.countDown()
+        completed = true
+        notify()
         queue.iterator
       }
     val tri: Try[Boolean] =
@@ -612,6 +650,14 @@ private[scalatest] final class ScalaTestStatefulStatus extends Status with Seria
       f(tri)
   }
 
+  /**
+    * Registers the passed function to be executed when this status completes.
+    *
+    * <p>
+    * You may register multiple functions, which on completion will be executed in an undefined
+    * order.
+    * </p>
+    */
   def whenCompleted(f: Try[Boolean] => Unit) {
     var executeLocally = false
     synchronized {
@@ -646,7 +692,7 @@ private[scalatest] final class ScalaTestStatefulStatus extends Status with Seria
  * </p>
  */
 final class StatefulStatus extends Status with Serializable {
-  @transient private final val latch = new CountDownLatch(1)
+  @volatile private var completed = false
   private var succeeded = true
   private final val queue = new ConcurrentLinkedQueue[Try[Boolean] => Unit]
 
@@ -676,14 +722,17 @@ final class StatefulStatus extends Status with Serializable {
    * 
    * @return <code>true</code> if the test or suite run is already completed, <code>false</code> otherwise.
    */
-  def isCompleted = synchronized { latch.getCount == 0L }
+  def isCompleted = synchronized { completed }
 
   // SKIP-SCALATESTJS-START
   /**
    * Blocking call that returns only after <code>setCompleted</code> has been invoked on this <code>StatefulStatus</code> instance.
    */
   def waitUntilCompleted() {
-    synchronized { latch }.await()
+    synchronized {
+      if (!completed)
+        wait()
+    }
     unreportedException match {
       case Some(ue) => throw ue
       case None => // Do nothing
@@ -741,7 +790,8 @@ final class StatefulStatus extends Status with Serializable {
       // OLD, OUTDATED COMMENT, left in here to ponder the depths of its meaning a bit longer:
       // Only release the latch after the callbacks finish execution, to avoid race condition with other thread(s) that wait
       // for this Status to complete.
-        latch.countDown()
+        completed = true
+        notify()
         queue.iterator
       }
     val tri: Try[Boolean] =

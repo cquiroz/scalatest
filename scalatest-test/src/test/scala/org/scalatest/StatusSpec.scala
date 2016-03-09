@@ -95,7 +95,9 @@ class StatusSpec extends fixture.FunSpec {
 
     // SKIP-SCALATESTJS-START
     it("should be serializable") { status =>
-      SharedHelpers.serializeRoundtrip(status)
+      import scala.language.reflectiveCalls
+      val serializedStatus = SharedHelpers.serializeRoundtrip(status)
+      serializedStatus.setCompleted()
     }
 
     it("waitUntilCompleted should throw unreportedException if set") { () =>

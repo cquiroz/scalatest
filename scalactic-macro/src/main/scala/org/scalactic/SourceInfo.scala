@@ -16,3 +16,11 @@
 package org.scalactic
 
 case class SourceInfo(fileName: String, path: String, lineNumber: Int)
+
+object SourceInfo {
+
+  import scala.language.experimental.macros
+
+  implicit def sourceInfo: SourceInfo = macro SourceMacro.genSourceInfo
+
+}

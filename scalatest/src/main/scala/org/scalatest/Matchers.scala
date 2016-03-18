@@ -15,6 +15,7 @@
  */
 package org.scalatest
 
+import org.scalactic.SourceInfo
 import org.scalatest.enablers.InspectorAsserting
 import org.scalatest.matchers._
 import org.scalatest.enablers._
@@ -6768,7 +6769,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *        ^
      * </pre>
      */
-    def should(rightMatcherX1: Matcher[T]): Assertion = {
+    def should(rightMatcherX1: Matcher[T])(implicit sourceInfo: SourceInfo): Assertion = {
       ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherX1)
     }
 
@@ -6919,7 +6920,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *         ^
      * </pre>
      */
-    def shouldBe(right: Any): Assertion = {
+    def shouldBe(right: Any)(implicit sourceInfo: SourceInfo): Assertion = {
       if (!areEqualComparingArraysStructurally(leftSideValue, right)) {
         val (leftee, rightee) = Suite.getObjectsForFailureMessage(leftSideValue, right)
         indicateFailure(FailureMessages.wasNotEqualTo(leftee, rightee))
@@ -6935,7 +6936,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *   ^
      * </pre>
      */
-    def shouldBe(comparison: ResultOfLessThanComparison[T]): Assertion = {
+    def shouldBe(comparison: ResultOfLessThanComparison[T])(implicit sourceInfo: SourceInfo): Assertion = {
       if (!comparison(leftSideValue)) {
         indicateFailure(
           FailureMessages.wasNotLessThan(
@@ -6955,7 +6956,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *   ^
      * </pre> 
      */
-    def shouldBe(comparison: ResultOfGreaterThanComparison[T]): Assertion = {
+    def shouldBe(comparison: ResultOfGreaterThanComparison[T])(implicit sourceInfo: SourceInfo): Assertion = {
       if (!comparison(leftSideValue)) {
         indicateFailure(
           FailureMessages.wasNotGreaterThan(
@@ -6975,7 +6976,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *   ^
      * </pre> 
      */
-    def shouldBe(comparison: ResultOfLessThanOrEqualToComparison[T]): Assertion = {
+    def shouldBe(comparison: ResultOfLessThanOrEqualToComparison[T])(implicit sourceInfo: SourceInfo): Assertion = {
       if (!comparison(leftSideValue)) {
         indicateFailure(
           FailureMessages.wasNotLessThanOrEqualTo(
@@ -6995,7 +6996,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *   ^
      * </pre> 
      */
-    def shouldBe(comparison: ResultOfGreaterThanOrEqualToComparison[T]): Assertion = {
+    def shouldBe(comparison: ResultOfGreaterThanOrEqualToComparison[T])(implicit sourceInfo: SourceInfo): Assertion = {
       if (!comparison(leftSideValue)) {
         indicateFailure(
           FailureMessages.wasNotGreaterThanOrEqualTo(
@@ -7015,7 +7016,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *   ^
      * </pre>
      */
-    def shouldBe(beMatcher: BeMatcher[T]): Assertion = {
+    def shouldBe(beMatcher: BeMatcher[T])(implicit sourceInfo: SourceInfo): Assertion = {
       val result = beMatcher.apply(leftSideValue)
       if (!result.matches)
         indicateFailure(result.failureMessage)
@@ -7030,7 +7031,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *        ^
      * </pre>
      */
-    def shouldBe(spread: Spread[T]): Assertion = {
+    def shouldBe(spread: Spread[T])(implicit sourceInfo: SourceInfo): Assertion = {
       if (!spread.isWithin(leftSideValue)) {
         indicateFailure(FailureMessages.wasNotPlusOrMinus(leftSideValue, spread.pivot, spread.tolerance))
       }

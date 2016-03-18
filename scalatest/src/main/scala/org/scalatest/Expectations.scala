@@ -15,6 +15,8 @@
  */
 package org.scalatest
 
+import org.scalactic.SourceInfo
+
 import scala.reflect.ClassTag
 import Fact._
 import org.scalactic.Bool
@@ -110,7 +112,7 @@ private[scalatest] trait Expectations {
 
   class ExpectationsHelper {
 
-    def macroExpect(bool: Bool, clue: Any): Fact = {
+    def macroExpect(bool: Bool, clue: Any, sourceInfo: SourceInfo): Fact = {
       //requireNonNull(clue)
       if (!bool.value)
         No(

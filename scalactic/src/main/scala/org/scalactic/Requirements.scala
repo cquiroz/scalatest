@@ -150,7 +150,7 @@ trait Requirements {
      * @param bool the <code>Bool</code> to check as requirement
      * @param clue optional clue to be included in <code>IllegalArgumentException</code>'s error message when the requirement failed
      */
-    def macroRequire(bool: Bool, clue: Any) {
+    def macroRequire(bool: Bool, clue: Any, sourceInfo: SourceInfo) {
       if (clue == null)
         throw new NullPointerException("clue was null")
       if (!bool.value) {
@@ -165,7 +165,7 @@ trait Requirements {
      * @param bool the <code>Bool</code> to check as requirement
      * @param clue optional clue to be included in <code>IllegalStateException</code>'s error message when the requirement failed
      */
-    def macroRequireState(bool: Bool, clue: Any) {
+    def macroRequireState(bool: Bool, clue: Any, sourceInfo: SourceInfo) {
       if (clue == null)
         throw new NullPointerException("clue was null")
       if (!bool.value) {

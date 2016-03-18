@@ -785,13 +785,35 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
    *
    * {helperName}.{methodName}($org_scalatest_assert_macro_expr, clue)
    */
-  def callHelper(methodName: String, clueTree: Tree): Apply =
+  def callHelper(methodName: String, clueTree: Tree, sourceInfoTree: Tree): Apply =
     Apply(
       Select(
         Ident(newTermName(helperName)),
         newTermName(methodName)
       ),
-      List(Ident(newTermName("$org_scalatest_assert_macro_expr")), clueTree)
+      List(Ident(newTermName("$org_scalatest_assert_macro_expr")), clueTree, sourceInfoTree)
+    )
+
+  def sourceInfoTree: Apply =
+    Apply(
+      Select(
+        Select(
+          Select(
+            Select(
+              Ident(newTermName("_root_")),
+              newTermName("org")
+            ),
+            newTermName("scalactic")
+          ),
+          newTermName("SourceInfo")
+        ),
+        newTermName("apply")
+      ),
+      List(
+        context.literal(context.enclosingPosition.source.file.name).tree,
+        context.literal(context.enclosingPosition.source.path).tree,
+        context.literal(context.enclosingPosition.line).tree
+      )
     )
 
   /**
@@ -803,12 +825,19 @@ private[org] class BooleanMacro[C <: Context](val context: C, helperName: String
    * }
    */
   def genMacro[T](booleanExpr: Expr[Boolean], methodName: String, clueExpr: Expr[Any]): Expr[T] = {
+
+    val sourceInfoExprTree = sourceInfoTree
+
+      /*reify {
+        SourceInfo(context.enclosingPosition.source.file.name, context.enclosingPosition.source.path, context.enclosingPosition.line).splice
+      }*/
+
     val ownerRepair = new MacroOwnerRepair[context.type](context)
     val expandedCode =
       context.Expr(
         Block(
           valDef("$org_scalatest_assert_macro_expr", transformAst(booleanExpr.tree)),
-          callHelper(methodName, clueExpr.tree)
+          callHelper(methodName, clueExpr.tree, sourceInfoExprTree)
         )
       )
     ownerRepair.repairOwners(expandedCode)

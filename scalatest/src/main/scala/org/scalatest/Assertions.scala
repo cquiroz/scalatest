@@ -17,6 +17,7 @@ package org.scalatest
 
 import exceptions.TestCanceledException
 import exceptions.TestPendingException
+import org.scalactic.SourceInfo
 import scala.reflect.ClassTag
 import Assertions.areEqualComparingArraysStructurally
 import org.scalactic.TripleEquals
@@ -499,7 +500,7 @@ trait Assertions extends TripleEquals {
      * @param bool the <code>Bool</code> to assert for
      * @param clue optional clue to be included in <code>TestFailedException</code>'s error message when assertion failed
      */
-    def macroAssert(bool: Bool, clue: Any): Assertion = {
+    def macroAssert(bool: Bool, clue: Any, sourceInfo: SourceInfo): Assertion = {
       requireNonNull(clue)
       if (!bool.value) {
         val failureMessage = if (Bool.isSimpleWithoutExpressionText(bool)) None else Some(bool.failureMessage)
@@ -514,7 +515,7 @@ trait Assertions extends TripleEquals {
      * @param bool the <code>Bool</code> to assume for
      * @param clue optional clue to be included in <code>TestCanceledException</code>'s error message when assertion failed
      */
-    def macroAssume(bool: Bool, clue: Any): Assertion = {
+    def macroAssume(bool: Bool, clue: Any, sourceInfo: SourceInfo): Assertion = {
       requireNonNull(clue)
       if (!bool.value) {
         val failureMessage = if (Bool.isSimpleWithoutExpressionText(bool)) None else Some(bool.failureMessage)

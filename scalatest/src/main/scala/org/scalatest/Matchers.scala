@@ -7727,7 +7727,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * Implicitly converts an object of type <code>T</code> to a <code>AnyShouldWrapper[T]</code>,
    * to enable <code>should</code> methods to be invokable on that object.
    */
-  implicit def convertToAnyShouldWrapper[T](o: T): AnyShouldWrapper[T] = new AnyShouldWrapper(o)
+  implicit def convertToAnyShouldWrapper[T](o: T)(implicit sourceInfo: SourceInfo): AnyShouldWrapper[T] = new AnyShouldWrapper(o)
 
   /**
    * Implicitly converts an object of type <code>java.lang.String</code> to a <code>StringShouldWrapper</code>,

@@ -19,7 +19,7 @@ import scala.reflect.macros.Context
 import org.scalatest.words.{ResultOfAnTypeInvocation, MatcherWords, ResultOfATypeInvocation}
 //import org.scalatest.words.{FactResultOfAnTypeInvocation, FactResultOfATypeInvocation}
 import org.scalatest.{UnquotedString, Resources, Suite, FailureMessages, Assertions}
-import org.scalactic.Prettifier
+import org.scalactic.{Prettifier, SourceInfo}
 
 private[scalatest] object TypeMatcherMacro {
 
@@ -55,7 +55,7 @@ private[scalatest] object TypeMatcherMacro {
   }
 
   // Do checking on type parameter and generate AST that create a 'a type' matcher
-  def aTypeMatcherImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def aTypeMatcherImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
 
     import context.universe._
 
@@ -84,14 +84,14 @@ private[scalatest] object TypeMatcherMacro {
           ),
           newTermName("aTypeMatcher")
         ),
-        List(tree)
+        List(tree, prettifier.tree, sourceInfo.tree)
       )
     )
 
   }
 
   // Do checking on type parameter and generate AST that create a 'an type' matcher
-  def anTypeMatcherImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def anTypeMatcherImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
 
     import context.universe._
 
@@ -120,14 +120,14 @@ private[scalatest] object TypeMatcherMacro {
           ),
           newTermName("anTypeMatcher")
         ),
-        List(tree)
+        List(tree, prettifier.tree, sourceInfo.tree)
       )
     )
 
   }
 
   // Do checking on type parameter and generate AST that create a negated 'a type' matcher
-  def notATypeMatcher(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def notATypeMatcher(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
     import context.universe._
 
     val tree = aType.tree
@@ -155,13 +155,13 @@ private[scalatest] object TypeMatcherMacro {
           ),
           newTermName("notATypeMatcher")
         ),
-        List(tree)
+        List(tree, prettifier.tree, sourceInfo.tree)
       )
     )
   }
 
   // Do checking on type parameter and generate AST that create a negated 'an type' matcher
-  def notAnTypeMatcher(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def notAnTypeMatcher(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
     import context.universe._
 
     val tree = anType.tree
@@ -189,18 +189,18 @@ private[scalatest] object TypeMatcherMacro {
           ),
           newTermName("notAnTypeMatcher")
         ),
-        List(tree)
+        List(tree, prettifier.tree, sourceInfo.tree)
       )
     )
   }
 
   // Do checking on type parameter and generate AST that does a 'and not' logical expression matcher for 'a type' matcher.
-  def andNotATypeMatcher(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def andNotATypeMatcher(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
 
     import context.universe._
 
     // create a negated matcher from notATypeMatcher
-    val rhs = notATypeMatcher(context)(aType)
+    val rhs = notATypeMatcher(context)(aType)(prettifier, sourceInfo)
 
     /**
      * Generate AST for code that call the 'and' method on the Matcher instance (reference through 'owner'):
@@ -208,7 +208,7 @@ private[scalatest] object TypeMatcherMacro {
      * owner.and(rhs)
      */
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -218,7 +218,7 @@ private[scalatest] object TypeMatcherMacro {
               ),
               newTermName("and")
             ),
-            List(rhs.tree)
+            List(rhs.tree, prettifier.tree, sourceInfo.tree)
           )
         )
       case _ => context.abort(context.macroApplication.pos, "This macro should be used with 'and not' syntax only.")
@@ -227,12 +227,12 @@ private[scalatest] object TypeMatcherMacro {
   }
 
   // Do checking on type parameter and generate AST that does a 'and not' logical expression matcher for 'an type' matcher.
-  def andNotAnTypeMatcher(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def andNotAnTypeMatcher(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
 
     import context.universe._
 
     // create a negated matcher from notAnTypeMatcher
-    val rhs = notAnTypeMatcher(context)(anType)
+    val rhs = notAnTypeMatcher(context)(anType)(prettifier, sourceInfo)
 
     /**
      * Generate AST for code that call the 'and' method on the Matcher instance (reference through 'owner'):
@@ -240,7 +240,7 @@ private[scalatest] object TypeMatcherMacro {
      * owner.and(rhs)
      */
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -250,7 +250,7 @@ private[scalatest] object TypeMatcherMacro {
               ),
               newTermName("and")
             ),
-            List(rhs.tree)
+            List(rhs.tree, prettifier.tree, sourceInfo.tree)
           )
         )
       case _ => context.abort(context.macroApplication.pos, "This macro should be used with 'and not' syntax only.")
@@ -259,12 +259,12 @@ private[scalatest] object TypeMatcherMacro {
   }
 
   // Do checking on type parameter and generate AST that does a 'or not' logical expression matcher for 'a type' matcher.
-  def orNotATypeMatcher(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def orNotATypeMatcher(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
 
     import context.universe._
 
     // create a negated matcher from notATypeMatcher
-    val rhs = notATypeMatcher(context)(aType)
+    val rhs = notATypeMatcher(context)(aType)(prettifier, sourceInfo)
 
     /**
      * Generate AST for code that call the 'or' method on the Matcher instance (reference through 'owner'):
@@ -272,7 +272,7 @@ private[scalatest] object TypeMatcherMacro {
      * owner.or(rhs)
      */
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -282,21 +282,22 @@ private[scalatest] object TypeMatcherMacro {
               ),
               newTermName("or")
             ),
-            List(rhs.tree)
+            List(rhs.tree, prettifier.tree, sourceInfo.tree)
           )
         )
-      case _ => context.abort(context.macroApplication.pos, "This macro should be used with 'or not' syntax only.")
+      case other =>
+        context.abort(context.macroApplication.pos, "This macro should be used with 'or not' syntax only.")
     }
 
   }
 
   // Do checking on type parameter and generate AST that does a 'or not' logical expression matcher for 'an type' matcher.
-  def orNotAnTypeMatcher(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[Matcher[Any]] = {
+  def orNotAnTypeMatcher(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
 
     import context.universe._
 
     // create a negated matcher from notAnTypeMatcher
-    val rhs = notAnTypeMatcher(context)(anType)
+    val rhs = notAnTypeMatcher(context)(anType)(prettifier, sourceInfo)
 
     /**
      * Generate AST for code that call the 'or' method on the Matcher instance (reference through 'owner'):
@@ -304,7 +305,7 @@ private[scalatest] object TypeMatcherMacro {
      * owner.or(rhs)
      */
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -314,7 +315,7 @@ private[scalatest] object TypeMatcherMacro {
               ),
               newTermName("or")
             ),
-            List(rhs.tree)
+            List(rhs.tree, prettifier.tree, sourceInfo.tree)
           )
         )
       case _ => context.abort(context.macroApplication.pos, "This macro should be used with 'or not' syntax only.")
@@ -323,7 +324,7 @@ private[scalatest] object TypeMatcherMacro {
   }
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.<methodName>, used by 'shouldBe a [type]' and 'shouldBe an [type]' syntax
-  def assertTypeImpl(context: Context)(tree: context.Tree, beMethodName: String, assertMethodName: String): context.Expr[org.scalatest.Assertion] = {
+  def assertTypeImpl(context: Context)(tree: context.Tree, beMethodName: String, assertMethodName: String)(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] = {
     import context.universe._
 
     // check type parameter
@@ -336,7 +337,7 @@ private[scalatest] object TypeMatcherMacro {
      */
     val callHelper =
       context.macroApplication match {
-        case Apply(Select(qualifier, _), _) =>
+        case Apply(Apply(Select(qualifier, _), _), _) =>
           Apply(
             Select(
               Select(
@@ -351,7 +352,7 @@ private[scalatest] object TypeMatcherMacro {
               ),
               newTermName(assertMethodName)
             ),
-            List(Select(qualifier, newTermName("leftSideValue")), tree)
+            List(Select(qualifier, newTermName("leftSideValue")), tree, prettifier.tree, sourceInfo.tree)
           )
 
         case _ => context.abort(context.macroApplication.pos, s"This macro should be used with $beMethodName [Type] syntax only.")
@@ -361,20 +362,20 @@ private[scalatest] object TypeMatcherMacro {
   }
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.checkAType, used by 'shouldBe a [type]' syntax
-  def shouldBeATypeImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[org.scalatest.Assertion] =
-    assertTypeImpl(context)(aType.tree, "shouldBe a", "assertAType")
+  def shouldBeATypeImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] =
+    assertTypeImpl(context)(aType.tree, "shouldBe a", "assertAType")(prettifier, sourceInfo)
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.checkAType, used by 'mustBe a [type]' syntax
-  def mustBeATypeImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[org.scalatest.Assertion] =
-    assertTypeImpl(context)(aType.tree, "mustBe a", "assertAType")
+  def mustBeATypeImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] =
+    assertTypeImpl(context)(aType.tree, "mustBe a", "assertAType")(prettifier, sourceInfo)
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.checkAType, used by 'shouldBe an [type]' syntax
-  def shouldBeAnTypeImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[org.scalatest.Assertion] =
-    assertTypeImpl(context)(anType.tree, "shouldBe an", "assertAnType")
+  def shouldBeAnTypeImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] =
+    assertTypeImpl(context)(anType.tree, "shouldBe an", "assertAnType")(prettifier, sourceInfo)
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.checkAnType, used by 'mustBe an [type]' syntax
-  def mustBeAnTypeImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[org.scalatest.Assertion] =
-    assertTypeImpl(context)(anType.tree, "mustBe an", "assertAnType")
+  def mustBeAnTypeImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] =
+    assertTypeImpl(context)(anType.tree, "mustBe an", "assertAnType")(prettifier, sourceInfo)
 
   /*def expectTypeImpl(context: Context)(tree: context.Tree, beMethodName: String, assertMethodName: String): context.Expr[org.scalatest.Fact] = {
     import context.universe._
@@ -419,7 +420,7 @@ private[scalatest] object TypeMatcherMacro {
   def willBeAnTypeImpl(context: Context)(anType: context.Expr[FactResultOfAnTypeInvocation[_]]): context.Expr[org.scalatest.Fact] =
     expectTypeImpl(context)(anType.tree, "willBe an", "expectAnType")*/
 
-  def assertTypeShouldBeTrueImpl(context: Context)(tree: context.Tree, beMethodName: String, assertMethodName: String): context.Expr[org.scalatest.Assertion] = {
+  def assertTypeShouldBeTrueImpl(context: Context)(tree: context.Tree, beMethodName: String, assertMethodName: String)(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] = {
     import context.universe._
 
     // check type parameter
@@ -432,7 +433,7 @@ private[scalatest] object TypeMatcherMacro {
      */
     val callHelper =
       context.macroApplication match {
-        case Apply(Select(qualifier, _), _) =>
+        case Apply(Apply(Select(qualifier, _), _), _) =>
           Apply(
             Select(
               Select(
@@ -447,7 +448,7 @@ private[scalatest] object TypeMatcherMacro {
               ),
               newTermName(assertMethodName)
             ),
-            List(Select(qualifier, newTermName("left")), tree, Select(qualifier, newTermName("shouldBeTrue")))
+            List(Select(qualifier, newTermName("left")), tree, Select(qualifier, newTermName("shouldBeTrue")), prettifier.tree, sourceInfo.tree)
           )
 
         case _ => context.abort(context.macroApplication.pos, s"This macro should be used with $beMethodName [Type] syntax only.")
@@ -457,12 +458,12 @@ private[scalatest] object TypeMatcherMacro {
   }
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.assertATypeShouldBeTrue
-  def assertATypeShouldBeTrueImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[org.scalatest.Assertion] =
-    assertTypeShouldBeTrueImpl(context)(aType.tree, "should not be a", "assertATypeShouldBeTrue")
+  def assertATypeShouldBeTrueImpl(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] =
+    assertTypeShouldBeTrueImpl(context)(aType.tree, "should not be a", "assertATypeShouldBeTrue")(prettifier, sourceInfo)
 
   // Do checking on type parameter and generate AST to call TypeMatcherHelper.assertAnTypeShouldBeTrue
-  def assertAnTypeShouldBeTrueImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[org.scalatest.Assertion] =
-    assertTypeShouldBeTrueImpl(context)(anType.tree, "should not be an", "assertAnTypeShouldBeTrue")
+  def assertAnTypeShouldBeTrueImpl(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[org.scalatest.Assertion] =
+    assertTypeShouldBeTrueImpl(context)(anType.tree, "should not be an", "assertAnTypeShouldBeTrue")(prettifier, sourceInfo)
 
   /*def expectTypeWillBeTrueImpl(context: Context)(tree: context.Tree, beMethodName: String, expectMethodName: String): context.Expr[org.scalatest.Fact] = {
     import context.universe._

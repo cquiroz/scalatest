@@ -26,6 +26,7 @@ import org.scalactic.Equality
 import org.scalactic.TripleEqualsSupport.Spread
 import org.scalactic.TripleEqualsSupport.TripleEqualsInvocation
 import org.scalactic.Prettifier
+import org.scalactic.SourceInfo
 import org.scalatest.FailureMessages
 import org.scalatest.Resources
 
@@ -517,13 +518,17 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    * @param the matcher to logical-and with this matcher
    * @return a matcher that performs the logical-and of this and the passed matcher
    */
-  def and[U <: T](rightMatcher: Matcher[U]): Matcher[U] =
+  def and[U <: T](rightMatcher: Matcher[U]): Matcher[U] = {
+    val prettifier = implicitly[Prettifier]
     new Matcher[U] {
       def apply(left: U): MatchResult = {
-        andMatchersAndApply(left, outerInstance, rightMatcher)
+        andMatchersAndApply(left, outerInstance, rightMatcher, prettifier)
       }
-      override def toString: String = "(" + Prettifier.default(outerInstance) + ") and (" + Prettifier.default(rightMatcher) + ")"
+
+      override def toString: String = "(" + prettifier(outerInstance) + ") and (" + prettifier(rightMatcher) + ")"
+
     }
+  }
 
   import scala.language.higherKinds
 
@@ -535,18 +540,21 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    * @param rightMatcherFactory1 the <code>MatcherFactory</code> to logical-and with this <code>MatcherFactory</code>
    * @return a <code>MatcherFactory</code> that performs the logical-and of this and the passed <code>MatcherFactory</code>
    */
-  def and[U, TC1[_]](rightMatcherFactory1: MatcherFactory1[U, TC1]): MatcherFactory1[T with U, TC1] =
+  def and[U, TC1[_]](rightMatcherFactory1: MatcherFactory1[U, TC1]): MatcherFactory1[T with U, TC1] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory1[T with U, TC1] {
       def matcher[V <: T with U : TC1]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val rightMatcher = rightMatcherFactory1.matcher
-            andMatchersAndApply(left, outerInstance, rightMatcher)
+            andMatchersAndApply(left, outerInstance, rightMatcher, prettifier)
           }
         }
       }
-      override def toString: String = "(" + Prettifier.default(outerInstance) + ") and (" + Prettifier.default(rightMatcherFactory1) + ")"
+
+      override def toString: String = "(" + prettifier(outerInstance) + ") and (" + prettifier(rightMatcherFactory1) + ")"
     }
+  }
 
   /**
    * Returns a matcher whose <code>apply</code> method returns a <code>MatchResult</code>
@@ -571,13 +579,16 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    * @param rightMatcher the matcher to logical-or with this matcher
    * @return a matcher that performs the logical-or of this and the passed matcher
    */
-  def or[U <: T](rightMatcher: Matcher[U]): Matcher[U] =
+  def or[U <: T](rightMatcher: Matcher[U]): Matcher[U] = {
+    val prettifier = implicitly[Prettifier]
     new Matcher[U] {
       def apply(left: U): MatchResult = {
-        orMatchersAndApply(left, outerInstance, rightMatcher)
+        orMatchersAndApply(left, outerInstance, rightMatcher, prettifier)
       }
-      override def toString: String = "(" + Prettifier.default(outerInstance) + ") or (" + Prettifier.default(rightMatcher) + ")"
+
+      override def toString: String = "(" + prettifier(outerInstance) + ") or (" + prettifier(rightMatcher) + ")"
     }
+  }
 
   /**
    * Returns a <code>MatcherFactory</code> whose <code>matcher</code> method returns a <code>Matcher</code>,
@@ -587,19 +598,23 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    * @param rightMatcherFactory1 the <code>MatcherFactory</code> to logical-or with this <code>MatcherFactory</code>
    * @return a <code>MatcherFactory</code> that performs the logical-or of this and the passed <code>MatcherFactory</code>
    */
-  def or[U, TC1[_]](rightMatcherFactory1: MatcherFactory1[U, TC1]): MatcherFactory1[T with U, TC1] =
+  def or[U, TC1[_]](rightMatcherFactory1: MatcherFactory1[U, TC1]): MatcherFactory1[T with U, TC1] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory1[T with U, TC1] {
       def matcher[V <: T with U : TC1]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val rightMatcher = rightMatcherFactory1.matcher
-            orMatchersAndApply(left, outerInstance, rightMatcher)
+            orMatchersAndApply(left, outerInstance, rightMatcher, prettifier)
           }
-          override def toString: String = "(" + Prettifier.default(outerInstance) + ") or (" + Prettifier.default(rightMatcherFactory1) + ")"
+
+          override def toString: String = "(" + prettifier(outerInstance) + ") or (" + prettifier(rightMatcherFactory1) + ")"
         }
       }
-      override def toString: String = "(" + Prettifier.default(outerInstance) + ") or (" + Prettifier.default(rightMatcherFactory1) + ")"
+
+      override def toString: String = "(" + prettifier(outerInstance) + ") or (" + prettifier(rightMatcherFactory1) + ")"
     }
+  }
 
   /**
    * This class is part of the ScalaTest matchers DSL. Please see the documentation for <a href="../Matchers.html"><code>Matchers</code></a> for an overview of
@@ -617,7 +632,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                   ^
      * </pre>
      */
-    def length(expectedLength: Long): MatcherFactory1[T, Length] = and(MatcherWords.have.length(expectedLength))
+    def length(expectedLength: Long)(implicit prettifier: Prettifier): MatcherFactory1[T, Length] = and(MatcherWords.have.length(expectedLength)(prettifier))
 
     /**
      * This method enables the following syntax:
@@ -1180,7 +1195,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    *
    * @author Bill Venners
    */
-  final class AndNotWord {
+  final class AndNotWord(prettifier: Prettifier) {
 
     /**
      * Get the <code>Matcher</code> instance, currently used by macro only.
@@ -1227,7 +1242,8 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
               Resources.rawMidSentenceEqualedNull,
               Resources.rawDidNotEqualNull,
               Vector.empty, 
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "not equal null"
@@ -1254,8 +1270,8 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                  ^
      * </pre>
      */
-    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication): MatcherFactory1[T, Length] =
-      outerInstance.and(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)))
+    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication)(implicit prettifier: Prettifier): MatcherFactory1[T, Length] =
+      outerInstance.and(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)(prettifier)))
 
     /**
      * This method enables the following syntax:
@@ -1455,7 +1471,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                  ^
      * </pre>
      */
-    def be(aType: ResultOfATypeInvocation[_]): Matcher[T] = macro TypeMatcherMacro.andNotATypeMatcher
+    def be(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[T] = macro TypeMatcherMacro.andNotATypeMatcher
       
     /**
      * This method enables the following syntax:
@@ -1465,7 +1481,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                  ^
      * </pre>
      */
-    def be(anType: ResultOfAnTypeInvocation[_]): Matcher[T] = macro TypeMatcherMacro.andNotAnTypeMatcher
+    def be(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[T] = macro TypeMatcherMacro.andNotAnTypeMatcher
     
     /**
      * This method enables the following syntax:
@@ -1848,7 +1864,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                  ^
      * </pre>
      */
-    def matchPattern(right: PartialFunction[Any, _]) = macro MatchPatternMacro.andNotMatchPatternMatcher
+    def matchPattern(right: PartialFunction[Any, _])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro MatchPatternMacro.andNotMatchPatternMatcher
   }
 
   /**
@@ -1859,7 +1875,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    *          ^
    * </pre>
    */
-  def and(notWord: NotWord): AndNotWord = new AndNotWord
+  def and(notWord: NotWord)(implicit prettifier: Prettifier): AndNotWord = new AndNotWord(prettifier)
   
   /**
    * This method enables the following syntax:
@@ -1899,7 +1915,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                  ^
      * </pre>
      */
-    def length(expectedLength: Long): MatcherFactory1[T, Length] = or(MatcherWords.have.length(expectedLength))
+    def length(expectedLength: Long)(implicit prettifier: Prettifier): MatcherFactory1[T, Length] = or(MatcherWords.have.length(expectedLength)(prettifier))
 
     /**
      * This method enables the following syntax:
@@ -2462,7 +2478,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    *
    * @author Bill Venners
    */
-  final class OrNotWord {
+  final class OrNotWord(prettifier: Prettifier) {
 
     /**
      * Get the <code>Matcher</code> instance, currently used by macro only.
@@ -2509,7 +2525,8 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
               Resources.rawMidSentenceEqualedNull,
               Resources.rawDidNotEqualNull,
               Vector.empty, 
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "not equal null"
@@ -2536,8 +2553,8 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                 ^
      * </pre>
      */
-    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication): MatcherFactory1[T, Length] =
-      outerInstance.or(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)))
+    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication)(implicit prettifier: Prettifier): MatcherFactory1[T, Length] =
+      outerInstance.or(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)(prettifier)))
 
     /**
      * This method enables the following syntax:
@@ -2737,7 +2754,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                 ^
      * </pre>
      */
-    def be(aType: ResultOfATypeInvocation[_]): Matcher[T] = macro TypeMatcherMacro.orNotATypeMatcher
+    def be(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[T] = macro TypeMatcherMacro.orNotATypeMatcher
     
     /**
      * This method enables the following syntax:
@@ -2747,7 +2764,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                 ^
      * </pre>
      */
-    def be(anType: ResultOfAnTypeInvocation[_]): Matcher[T] = macro TypeMatcherMacro.orNotAnTypeMatcher
+    def be(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[T] = macro TypeMatcherMacro.orNotAnTypeMatcher
     
     /**
      * This method enables the following syntax:
@@ -3129,7 +3146,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
      *                 ^
      * </pre>
      */
-    def matchPattern(right: PartialFunction[Any, _]) = macro MatchPatternMacro.orNotMatchPatternMatcher
+    def matchPattern(right: PartialFunction[Any, _])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro MatchPatternMacro.orNotMatchPatternMatcher
   }
 
   /**
@@ -3140,7 +3157,7 @@ trait Matcher[-T] extends Function1[T, MatchResult] { outerInstance =>
    *          ^
    * </pre>
    */
-  def or(notWord: NotWord): OrNotWord = new OrNotWord
+  def or(notWord: NotWord)(implicit prettifier: Prettifier): OrNotWord = new OrNotWord(prettifier)
   
   /**
    * This method enables the following syntax:

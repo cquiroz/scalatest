@@ -38,16 +38,17 @@ final class IncludeWord {
    *                       ^
    * </pre>
    */
-  def apply(expectedSubstring: String): Matcher[String] =
+  def apply(expectedSubstring: String)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           left.indexOf(expectedSubstring) >= 0, 
           Resources.rawDidNotIncludeSubstring,
           Resources.rawIncludedSubstring,
-          Vector(left, expectedSubstring)
+          Vector(left, expectedSubstring),
+          prettifier
         )
-      override def toString: String = "include (" + Prettifier.default(expectedSubstring) + ")"
+      override def toString: String = "include (" + prettifier(expectedSubstring) + ")"
     }
 
   /**
@@ -59,7 +60,7 @@ final class IncludeWord {
    *                         ^
    * </pre>
    */
-  def regex[T <: String](right: T): Matcher[T] = regex(right.r)
+  def regex[T <: String](right: T)(implicit prettifier: Prettifier): Matcher[T] = regex(right.r)(prettifier)
   
   /**
    * This method enables the following syntax:
@@ -69,11 +70,11 @@ final class IncludeWord {
    *                             ^
    * </pre>
    */	
-  def regex(regexWithGroups: RegexWithGroups) = 
+  def regex(regexWithGroups: RegexWithGroups)(implicit prettifier: Prettifier) =
     new Matcher[String] {
       def apply(left: String): MatchResult = 
-        includeRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
-      override def toString: String = "include regex " + Prettifier.default(regexWithGroups)
+        includeRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
+      override def toString: String = "include regex " + prettifier(regexWithGroups)
     }
 
   /**
@@ -85,16 +86,17 @@ final class IncludeWord {
    *                        ^
    * </pre>
    */
-  def regex(expectedRegex: Regex): Matcher[String] =
+  def regex(expectedRegex: Regex)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           expectedRegex.findFirstIn(left).isDefined,
           Resources.rawDidNotIncludeRegex,
           Resources.rawIncludedRegex,
-          Vector(left, UnquotedString(expectedRegex.toString))
+          Vector(left, UnquotedString(expectedRegex.toString)),
+          prettifier
         )
-      override def toString: String = "include regex \"" + Prettifier.default(expectedRegex) + "\""
+      override def toString: String = "include regex \"" + prettifier(expectedRegex) + "\""
     }
   
   /**

@@ -149,7 +149,7 @@ final class NotWord {
    * outerInstance.and(MatcherWords.not.exist)
    *                                    ^
    */ 
-  private[scalatest] val exist: MatcherFactory1[Any, Existence] = 
+  private[scalatest] def exist(implicit prettifier: Prettifier): MatcherFactory1[Any, Existence] =
     new MatcherFactory1[Any, Existence] {
       def matcher[T : Existence]: Matcher[T] = 
         new Matcher[T] {
@@ -159,7 +159,8 @@ final class NotWord {
               !existence.exists(left), 
               Resources.rawExists,
               Resources.rawDoesNotExist,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           } 
           override def toString: String = "not exist"
@@ -184,14 +185,15 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def equal[U](spread: Spread[U]): Matcher[U] = {
+  def equal[U](spread: Spread[U])(implicit prettifier: Prettifier): Matcher[U] = {
     new Matcher[U] {
       def apply(left: U): MatchResult = {
         MatchResult(
           !(spread.isWithin(left)),
           Resources.rawEqualedPlusOrMinus,
           Resources.rawDidNotEqualPlusOrMinus,
-          Vector(left, spread.pivot, spread.tolerance)
+          Vector(left, spread.pivot, spread.tolerance),
+          prettifier
         )
       }
       override def toString: String = "not equal " + Prettifier.default(spread)
@@ -206,7 +208,7 @@ final class NotWord {
    *                 ^
    * </pre>
    */
-  def equal(o: Null): Matcher[AnyRef] =
+  def equal(o: Null)(implicit prettifier: Prettifier): Matcher[AnyRef] =
     new Matcher[AnyRef] {
       def apply(left: AnyRef): MatchResult = {
         MatchResult(
@@ -218,7 +220,8 @@ final class NotWord {
           Vector.empty, 
           Vector(left), 
           Vector.empty, 
-          Vector(left)
+          Vector(left),
+          prettifier
         )
       }
       override def toString: String = "not equal null"
@@ -232,8 +235,8 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def have(resultOfLengthWordApplication: ResultOfLengthWordApplication): MatcherFactory1[Any, Length] =
-    apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength))
+  def have(resultOfLengthWordApplication: ResultOfLengthWordApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Length] =
+    apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)(prettifier))
 
   // This looks similar to the AndNotWord one, but not quite the same because no and
   /**
@@ -297,7 +300,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def matchPattern(right: PartialFunction[Any, _]): Matcher[Any] = macro MatchPatternMacro.notMatchPatternMatcher
+  def matchPattern(right: PartialFunction[Any, _])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] = macro MatchPatternMacro.notMatchPatternMatcher
 
   /**
    * This method enables the following syntax: 
@@ -307,7 +310,7 @@ final class NotWord {
    *                 ^
    * </pre>
    */
-  def be(o: Null): Matcher[AnyRef] =
+  def be(o: Null)(implicit prettifier: Prettifier): Matcher[AnyRef] =
     new Matcher[AnyRef] {
       def apply(left: AnyRef): MatchResult = {
         MatchResult(
@@ -319,7 +322,8 @@ final class NotWord {
           Vector.empty, 
           Vector(left), 
           Vector.empty, 
-          Vector(left)
+          Vector(left),
+          prettifier
         )
       }
       override def toString: String = "not be null"
@@ -334,14 +338,15 @@ final class NotWord {
    *                 ^
    * </pre>
    */
-  def be[T](resultOfLessThanComparison: ResultOfLessThanComparison[T]): Matcher[T] = {
+  def be[T](resultOfLessThanComparison: ResultOfLessThanComparison[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult =
         MatchResult(
           !resultOfLessThanComparison(left),
           Resources.rawWasLessThan,
           Resources.rawWasNotLessThan,
-          Vector(left, resultOfLessThanComparison.right)
+          Vector(left, resultOfLessThanComparison.right),
+          prettifier
         )
       override def toString: String = "not be " + Prettifier.default(resultOfLessThanComparison)
     }
@@ -355,14 +360,15 @@ final class NotWord {
    *                 ^
    * </pre>
    */
-  def be[T](resultOfGreaterThanComparison: ResultOfGreaterThanComparison[T]): Matcher[T] = {
+  def be[T](resultOfGreaterThanComparison: ResultOfGreaterThanComparison[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult =
         MatchResult(
           !resultOfGreaterThanComparison(left),
           Resources.rawWasGreaterThan,
           Resources.rawWasNotGreaterThan,
-          Vector(left, resultOfGreaterThanComparison.right)
+          Vector(left, resultOfGreaterThanComparison.right),
+          prettifier
         )
       override def toString: String = "not be " + Prettifier.default(resultOfGreaterThanComparison)
     }
@@ -376,14 +382,15 @@ final class NotWord {
    *                 ^
    * </pre>
    */
-  def be[T](resultOfLessThanOrEqualToComparison: ResultOfLessThanOrEqualToComparison[T]): Matcher[T] = {
+  def be[T](resultOfLessThanOrEqualToComparison: ResultOfLessThanOrEqualToComparison[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult =
         MatchResult(
           !resultOfLessThanOrEqualToComparison(left),
           Resources.rawWasLessThanOrEqualTo,
           Resources.rawWasNotLessThanOrEqualTo,
-          Vector(left, resultOfLessThanOrEqualToComparison.right)
+          Vector(left, resultOfLessThanOrEqualToComparison.right),
+          prettifier
         )
       override def toString: String = "not be " + Prettifier.default(resultOfLessThanOrEqualToComparison)
     }
@@ -397,14 +404,15 @@ final class NotWord {
    *                 ^
    * </pre>
    */
-  def be[T](resultOfGreaterThanOrEqualToComparison: ResultOfGreaterThanOrEqualToComparison[T]): Matcher[T] = {
+  def be[T](resultOfGreaterThanOrEqualToComparison: ResultOfGreaterThanOrEqualToComparison[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult =
         MatchResult(
           !resultOfGreaterThanOrEqualToComparison(left),
           Resources.rawWasGreaterThanOrEqualTo,
           Resources.rawWasNotGreaterThanOrEqualTo,
-          Vector(left, resultOfGreaterThanOrEqualToComparison.right)
+          Vector(left, resultOfGreaterThanOrEqualToComparison.right),
+          prettifier
         )
       override def toString: String = "not be " + Prettifier.default(resultOfGreaterThanOrEqualToComparison)
     }
@@ -446,10 +454,11 @@ final class NotWord {
           positiveMatchResult.rawNegatedFailureMessage,
           positiveMatchResult.rawFailureMessage, 
           positiveMatchResult.negatedFailureMessageArgs, 
-          positiveMatchResult.failureMessageArgs
+          positiveMatchResult.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(symbol)
+      override def toString: String = "not be " + prettifier(symbol)
     }
   }
   // SKIP-SCALATESTJS-END
@@ -463,7 +472,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be[T <: AnyRef](bePropertyMatcher: BePropertyMatcher[T]): Matcher[T] = {
+  def be[T <: AnyRef](bePropertyMatcher: BePropertyMatcher[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val result = bePropertyMatcher(left)
@@ -471,10 +480,11 @@ final class NotWord {
           !result.matches,
           Resources.rawWas,
           Resources.rawWasNot,
-          Vector(left, UnquotedString(result.propertyName))
+          Vector(left, UnquotedString(result.propertyName)),
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(bePropertyMatcher)
+      override def toString: String = "not be " + prettifier(bePropertyMatcher)
     }
   }
 
@@ -496,10 +506,11 @@ final class NotWord {
           positiveMatchResult.rawNegatedFailureMessage,
           positiveMatchResult.rawFailureMessage, 
           positiveMatchResult.negatedFailureMessageArgs, 
-          positiveMatchResult.failureMessageArgs
+          positiveMatchResult.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(resultOfAWordApplication)
+      override def toString: String = "not be " + prettifier(resultOfAWordApplication)
     }
   }
   // SKIP-SCALATESTJS-END
@@ -513,7 +524,7 @@ final class NotWord {
    *                             ^
    * </pre>
    */
-  def be[T <: AnyRef](resultOfAWordApplication: ResultOfAWordToBePropertyMatcherApplication[T]): Matcher[T] = {
+  def be[T <: AnyRef](resultOfAWordApplication: ResultOfAWordToBePropertyMatcherApplication[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val result = resultOfAWordApplication.bePropertyMatcher(left)
@@ -521,10 +532,11 @@ final class NotWord {
           !result.matches,
           Resources.rawWasA,
           Resources.rawWasNotA,
-          Vector(left, UnquotedString(result.propertyName))
+          Vector(left, UnquotedString(result.propertyName)),
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(resultOfAWordApplication)
+      override def toString: String = "not be " + prettifier(resultOfAWordApplication)
     }
   }
   
@@ -536,7 +548,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be[T](resultOfAWordApplication: ResultOfAWordToAMatcherApplication[T]): Matcher[T] = {
+  def be[T](resultOfAWordApplication: ResultOfAWordToAMatcherApplication[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val result = resultOfAWordApplication.aMatcher(left)
@@ -545,10 +557,11 @@ final class NotWord {
           result.rawNegatedFailureMessage,
           result.rawFailureMessage, 
           result.negatedFailureMessageArgs, 
-          result.failureMessageArgs
+          result.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(resultOfAWordApplication)
+      override def toString: String = "not be " + prettifier(resultOfAWordApplication)
     }
   }
 
@@ -570,10 +583,11 @@ final class NotWord {
           positiveMatchResult.rawNegatedFailureMessage,
           positiveMatchResult.rawFailureMessage, 
           positiveMatchResult.negatedFailureMessageArgs, 
-          positiveMatchResult.failureMessageArgs
+          positiveMatchResult.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(resultOfAnWordApplication)
+      override def toString: String = "not be " + prettifier(resultOfAnWordApplication)
     }
   }
   // SKIP-SCALATESTJS-END
@@ -586,7 +600,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be[T <: AnyRef](resultOfAnWordApplication: ResultOfAnWordToBePropertyMatcherApplication[T]): Matcher[T] = {
+  def be[T <: AnyRef](resultOfAnWordApplication: ResultOfAnWordToBePropertyMatcherApplication[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val result = resultOfAnWordApplication.bePropertyMatcher(left)
@@ -594,10 +608,11 @@ final class NotWord {
           !result.matches,
           Resources.rawWasAn,
           Resources.rawWasNotAn,
-          Vector(left, UnquotedString(result.propertyName))
+          Vector(left, UnquotedString(result.propertyName)),
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(resultOfAnWordApplication)
+      override def toString: String = "not be " + prettifier(resultOfAnWordApplication)
     }
   }
   
@@ -609,7 +624,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be[T](resultOfAnWordApplication: ResultOfAnWordToAnMatcherApplication[T]): Matcher[T] = {
+  def be[T](resultOfAnWordApplication: ResultOfAnWordToAnMatcherApplication[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val result = resultOfAnWordApplication.anMatcher(left)
@@ -618,7 +633,8 @@ final class NotWord {
           result.rawNegatedFailureMessage,
           result.rawFailureMessage, 
           result.negatedFailureMessageArgs, 
-          result.failureMessageArgs
+          result.failureMessageArgs,
+          prettifier
         )
       }
       override def toString: String = "not be " + Prettifier.default(resultOfAnWordApplication)
@@ -633,14 +649,15 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be[T <: AnyRef](resultOfTheSameInstanceAsApplication: ResultOfTheSameInstanceAsApplication): Matcher[T] = {
+  def be[T <: AnyRef](resultOfTheSameInstanceAsApplication: ResultOfTheSameInstanceAsApplication)(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         MatchResult(
           resultOfTheSameInstanceAsApplication.right ne left,
           Resources.rawWasSameInstanceAs,
           Resources.rawWasNotSameInstanceAs,
-          Vector(left, resultOfTheSameInstanceAsApplication.right)
+          Vector(left, resultOfTheSameInstanceAsApplication.right),
+          prettifier
         )
       }
       override def toString: String = "not be " + Prettifier.default(resultOfTheSameInstanceAsApplication)
@@ -655,14 +672,15 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def be[U](spread: Spread[U]): Matcher[U] = {
+  def be[U](spread: Spread[U])(implicit prettifier: Prettifier): Matcher[U] = {
     new Matcher[U] {
       def apply(left: U): MatchResult = {
         MatchResult(
           !(spread.isWithin(left)),
           Resources.rawWasPlusOrMinus,
           Resources.rawWasNotPlusOrMinus,
-          Vector(left, spread.pivot, spread.tolerance)
+          Vector(left, spread.pivot, spread.tolerance),
+          prettifier
         )
       }
       override def toString: String = "not be " + Prettifier.default(spread)
@@ -677,16 +695,17 @@ final class NotWord {
    *                      ^
    * </pre>
    */
-  def be[A, U <: PartialFunction[A, _]](resultOfDefinedAt: ResultOfDefinedAt[A]): Matcher[U] = {
+  def be[A, U <: PartialFunction[A, _]](resultOfDefinedAt: ResultOfDefinedAt[A])(implicit prettifier: Prettifier): Matcher[U] = {
     new Matcher[U] {
       def apply(left: U): MatchResult =
         MatchResult(
           !(left.isDefinedAt(resultOfDefinedAt.right)),
           Resources.rawWasDefinedAt,
           Resources.rawWasNotDefinedAt,
-          Vector(left, resultOfDefinedAt.right)
+          Vector(left, resultOfDefinedAt.right),
+          prettifier
         )
-      override def toString: String = "not be " + Prettifier.default(resultOfDefinedAt)
+      override def toString: String = "not be " + prettifier(resultOfDefinedAt)
     }
   }
 
@@ -706,7 +725,7 @@ final class NotWord {
    *                   ^
    * </pre>
    */
-  def be(right: Any): Matcher[Any] = {
+  def be(right: Any)(implicit prettifier: Prettifier): Matcher[Any] = {
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         left match {
@@ -718,7 +737,8 @@ final class NotWord {
               Resources.rawMidSentenceWasNull,
               Resources.rawWasNotNull,
               Vector.empty, 
-              Vector(right)
+              Vector(right),
+              prettifier
             )
           case _ => 
             val (leftee, rightee) = getObjectsForFailureMessage(left, right) // TODO: To move this to reporter
@@ -727,11 +747,12 @@ final class NotWord {
               Resources.rawWasEqualTo,
               Resources.rawWasNotEqualTo,
               Vector(left, right), 
-              Vector(leftee, rightee)
+              Vector(leftee, rightee),
+              prettifier
             )
         }
       }
-      override def toString: String = "not be " + Prettifier.default(right)
+      override def toString: String = "not be " + prettifier(right)
     }
   }
   
@@ -798,7 +819,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be(aType: ResultOfATypeInvocation[_]) = macro TypeMatcherMacro.notATypeMatcher
+  def be(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro TypeMatcherMacro.notATypeMatcher
   
   /**
    * This method enables the following syntax:
@@ -808,7 +829,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def be(anType: ResultOfAnTypeInvocation[_]) = macro TypeMatcherMacro.notAnTypeMatcher
+  def be(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro TypeMatcherMacro.notAnTypeMatcher
 
   /**
    * This method enables the following syntax: 
@@ -818,19 +839,20 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def fullyMatch(resultOfRegexWordApplication: ResultOfRegexWordApplication): Matcher[String] = {
+  def fullyMatch(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit prettifier: Prettifier): Matcher[String] = {
     new Matcher[String] {
       def apply(left: String): MatchResult = {
-        val result = fullyMatchRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+        val result = fullyMatchRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         MatchResult(
           !result.matches, 
           result.rawNegatedFailureMessage, 
           result.rawFailureMessage, 
           result.negatedFailureMessageArgs, 
-          result.failureMessageArgs
+          result.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not fullyMatch " + Prettifier.default(resultOfRegexWordApplication)
+      override def toString: String = "not fullyMatch " + prettifier(resultOfRegexWordApplication)
     }
   }
 
@@ -842,20 +864,21 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def include(resultOfRegexWordApplication: ResultOfRegexWordApplication): Matcher[String] = {
+  def include(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit prettifier: Prettifier): Matcher[String] = {
     val rightRegex = resultOfRegexWordApplication.regex
     new Matcher[String] {
       def apply(left: String): MatchResult = {
-        val result = includeRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+        val result = includeRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         MatchResult(
           !result.matches, 
           result.rawNegatedFailureMessage, 
           result.rawFailureMessage, 
           result.negatedFailureMessageArgs, 
-          result.failureMessageArgs
+          result.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not include " + Prettifier.default(resultOfRegexWordApplication)
+      override def toString: String = "not include " + prettifier(resultOfRegexWordApplication)
     }
   }
 
@@ -867,16 +890,17 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def include(expectedSubstring: String): Matcher[String] = {
+  def include(expectedSubstring: String)(implicit prettifier: Prettifier): Matcher[String] = {
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           !(left.indexOf(expectedSubstring) >= 0), 
           Resources.rawIncludedSubstring,
           Resources.rawDidNotIncludeSubstring,
-          Vector(left, expectedSubstring)
+          Vector(left, expectedSubstring),
+          prettifier
         )
-      override def toString: String = "not include " + Prettifier.default(expectedSubstring)
+      override def toString: String = "not include " + prettifier(expectedSubstring)
     }
   }
 
@@ -888,20 +912,21 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def startWith(resultOfRegexWordApplication: ResultOfRegexWordApplication): Matcher[String] = {
+  def startWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit prettifier: Prettifier): Matcher[String] = {
     val rightRegex = resultOfRegexWordApplication.regex
     new Matcher[String] {
       def apply(left: String): MatchResult = {
-        val result = startWithRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+        val result = startWithRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         MatchResult(
           !result.matches, 
           result.rawNegatedFailureMessage, 
           result.rawFailureMessage, 
           result.negatedFailureMessageArgs, 
-          result.failureMessageArgs
+          result.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not startWith " + Prettifier.default(resultOfRegexWordApplication)
+      override def toString: String = "not startWith " + prettifier(resultOfRegexWordApplication)
     }
   }
 
@@ -913,16 +938,17 @@ final class NotWord {
    *                     ^
    * </pre>
    */
-  def startWith(expectedSubstring: String): Matcher[String] = {
+  def startWith(expectedSubstring: String)(implicit prettifier: Prettifier): Matcher[String] = {
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           left.indexOf(expectedSubstring) != 0,
           Resources.rawStartedWith,
           Resources.rawDidNotStartWith,
-          Vector(left, expectedSubstring)
+          Vector(left, expectedSubstring),
+          prettifier
         )
-      override def toString: String = "not startWith " + Prettifier.default(expectedSubstring)
+      override def toString: String = "not startWith " + prettifier(expectedSubstring)
     }
   }
 
@@ -934,20 +960,21 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def endWith(resultOfRegexWordApplication: ResultOfRegexWordApplication): Matcher[String] = {
+  def endWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit prettifier: Prettifier): Matcher[String] = {
     val rightRegex = resultOfRegexWordApplication.regex
     new Matcher[String] {
       def apply(left: String): MatchResult = {
-        val result = endWithRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+        val result = endWithRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         MatchResult(
           !result.matches, 
           result.rawNegatedFailureMessage, 
           result.rawFailureMessage, 
           result.negatedFailureMessageArgs, 
-          result.failureMessageArgs
+          result.failureMessageArgs,
+          prettifier
         )
       }
-      override def toString: String = "not endWith " + Prettifier.default(resultOfRegexWordApplication)
+      override def toString: String = "not endWith " + prettifier(resultOfRegexWordApplication)
     }
   }
 
@@ -959,17 +986,18 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  def endWith(expectedSubstring: String): Matcher[String] = {
+  def endWith(expectedSubstring: String)(implicit prettifier: Prettifier): Matcher[String] = {
     new Matcher[String] {
       def apply(left: String): MatchResult = {
         MatchResult(
           !(left endsWith expectedSubstring),
           Resources.rawEndedWith,
           Resources.rawDidNotEndWith,
-          Vector(left, expectedSubstring)
+          Vector(left, expectedSubstring),
+          prettifier
         )
       }
-      override def toString: String = "not endWith " + Prettifier.default(expectedSubstring)
+      override def toString: String = "not endWith " + prettifier(expectedSubstring)
     }
   }
 
@@ -981,7 +1009,7 @@ final class NotWord {
    *                  ^
    * </pre>
    */
-  def contain(nullValue: Null): MatcherFactory1[Any, Containing] = {
+  def contain(nullValue: Null)(implicit prettifier: Prettifier): MatcherFactory1[Any, Containing] = {
     new MatcherFactory1[Any, Containing] {
       def matcher[U : Containing]: Matcher[U] =
         new Matcher[U] {
@@ -991,7 +1019,8 @@ final class NotWord {
               !containing.contains(left, null),
               Resources.rawContainedNull,
               Resources.rawDidNotContainNull,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "not contain null"
@@ -1008,7 +1037,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](expectedElement: T): MatcherFactory1[Any, Containing] = {
+  def contain[T](expectedElement: T)(implicit prettifier: Prettifier): MatcherFactory1[Any, Containing] = {
     new MatcherFactory1[Any, Containing] {
       def matcher[U : Containing]: Matcher[U] = 
         new Matcher[U] {
@@ -1018,12 +1047,13 @@ final class NotWord {
               !containing.contains(left, expectedElement),
               Resources.rawContainedExpectedElement,
               Resources.rawDidNotContainExpectedElement,
-              Vector(left, expectedElement)
+              Vector(left, expectedElement),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(expectedElement)
+          override def toString: String = "not contain " + prettifier(expectedElement)
         }
-      override def toString: String = "not contain " + Prettifier.default(expectedElement)
+      override def toString: String = "not contain " + prettifier(expectedElement)
     }
   }
 
@@ -1035,7 +1065,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](oneOf: ResultOfOneOfApplication): MatcherFactory1[Any, Containing] = {
+  def contain[T](oneOf: ResultOfOneOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Containing] = {
     new MatcherFactory1[Any, Containing] {
       def matcher[T](implicit containing: Containing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1047,13 +1077,14 @@ final class NotWord {
               !containing.containsOneOf(left, right),
               Resources.rawContainedOneOfElements,
               Resources.rawDidNotContainOneOfElements,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(oneOf)
+          override def toString: String = "not contain " + prettifier(oneOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(oneOf)
+      override def toString: String = "not contain " + prettifier(oneOf)
     }
   }
 
@@ -1065,7 +1096,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](oneElementOf: ResultOfOneElementOfApplication): MatcherFactory1[Any, Containing] = {
+  def contain[T](oneElementOf: ResultOfOneElementOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Containing] = {
     new MatcherFactory1[Any, Containing] {
       def matcher[T](implicit containing: Containing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1077,13 +1108,14 @@ final class NotWord {
               !containing.containsOneOf(left, right.distinct),
               Resources.rawContainedOneElementOf,
               Resources.rawDidNotContainOneElementOf,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(oneElementOf)
+          override def toString: String = "not contain " + prettifier(oneElementOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(oneElementOf)
+      override def toString: String = "not contain " + prettifier(oneElementOf)
     }
   }
 
@@ -1095,7 +1127,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](atLeastOneOf: ResultOfAtLeastOneOfApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain[T](atLeastOneOf: ResultOfAtLeastOneOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1107,13 +1139,14 @@ final class NotWord {
               !aggregating.containsAtLeastOneOf(left, right),
               Resources.rawContainedAtLeastOneOf,
               Resources.rawDidNotContainAtLeastOneOf,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(atLeastOneOf)
+          override def toString: String = "not contain " + prettifier(atLeastOneOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(atLeastOneOf)
+      override def toString: String = "not contain " + prettifier(atLeastOneOf)
     }
   }
 
@@ -1125,7 +1158,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](atLeastOneElementOf: ResultOfAtLeastOneElementOfApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain[T](atLeastOneElementOf: ResultOfAtLeastOneElementOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1137,13 +1170,14 @@ final class NotWord {
               !aggregating.containsAtLeastOneOf(left, right),
               Resources.rawContainedAtLeastOneElementOf,
               Resources.rawDidNotContainAtLeastOneElementOf,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(atLeastOneElementOf)
+          override def toString: String = "not contain " + prettifier(atLeastOneElementOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(atLeastOneElementOf)
+      override def toString: String = "not contain " + prettifier(atLeastOneElementOf)
     }
   }
   
@@ -1155,7 +1189,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](noneOf: ResultOfNoneOfApplication): MatcherFactory1[Any, Containing] = {
+  def contain[T](noneOf: ResultOfNoneOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Containing] = {
     new MatcherFactory1[Any, Containing] {
       def matcher[T](implicit containing: Containing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1167,13 +1201,14 @@ final class NotWord {
               !containing.containsNoneOf(left, right),
               Resources.rawDidNotContainAtLeastOneOf,
               Resources.rawContainedAtLeastOneOf,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(noneOf)
+          override def toString: String = "not contain " + prettifier(noneOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(noneOf)
+      override def toString: String = "not contain " + prettifier(noneOf)
     }
   }
 
@@ -1185,7 +1220,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](noElementsOf: ResultOfNoElementsOfApplication): MatcherFactory1[Any, Containing] = {
+  def contain[T](noElementsOf: ResultOfNoElementsOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Containing] = {
     new MatcherFactory1[Any, Containing] {
       def matcher[T](implicit containing: Containing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1197,13 +1232,14 @@ final class NotWord {
               !containing.containsNoneOf(left, right.distinct),
               Resources.rawDidNotContainAtLeastOneElementOf,
               Resources.rawContainedAtLeastOneElementOf,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(noElementsOf)
+          override def toString: String = "not contain " + prettifier(noElementsOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(noElementsOf)
+      override def toString: String = "not contain " + prettifier(noElementsOf)
     }
   }
   
@@ -1215,7 +1251,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain[T](theSameElementAs: ResultOfTheSameElementsAsApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain[T](theSameElementAs: ResultOfTheSameElementsAsApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1227,13 +1263,14 @@ final class NotWord {
               !aggregating.containsTheSameElementsAs(left, right),
               Resources.rawContainedSameElements,
               Resources.rawDidNotContainSameElements,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(theSameElementAs)
+          override def toString: String = "not contain " + prettifier(theSameElementAs)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(theSameElementAs)
+      override def toString: String = "not contain " + prettifier(theSameElementAs)
     }
   }
   
@@ -1245,7 +1282,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain[T](theSameElementInOrderAs: ResultOfTheSameElementsInOrderAsApplication): MatcherFactory1[Any, Sequencing] = {
+  def contain[T](theSameElementInOrderAs: ResultOfTheSameElementsInOrderAsApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Sequencing] = {
     new MatcherFactory1[Any, Sequencing] {
       def matcher[T](implicit sequencing: Sequencing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1257,13 +1294,14 @@ final class NotWord {
               !sequencing.containsTheSameElementsInOrderAs(left, right),
               Resources.rawContainedSameElementsInOrder,
               Resources.rawDidNotContainSameElementsInOrder,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(theSameElementInOrderAs)
+          override def toString: String = "not contain " + prettifier(theSameElementInOrderAs)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(theSameElementInOrderAs)
+      override def toString: String = "not contain " + prettifier(theSameElementInOrderAs)
     }
   }
   
@@ -1275,7 +1313,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain[T](only: ResultOfOnlyApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain[T](only: ResultOfOnlyApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1289,13 +1327,14 @@ final class NotWord {
               !aggregating.containsOnly(left, right),
               if (withFriendlyReminder) Resources.rawContainedOnlyElementsWithFriendlyReminder else Resources.rawContainedOnlyElements,
               if (withFriendlyReminder) Resources.rawDidNotContainOnlyElementsWithFriendlyReminder else Resources.rawDidNotContainOnlyElements,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(only)
+          override def toString: String = "not contain " + prettifier(only)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(only)
+      override def toString: String = "not contain " + prettifier(only)
     }
   }
   
@@ -1307,7 +1346,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain[T](inOrderOnly: ResultOfInOrderOnlyApplication): MatcherFactory1[Any, Sequencing] = {
+  def contain[T](inOrderOnly: ResultOfInOrderOnlyApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Sequencing] = {
     new MatcherFactory1[Any, Sequencing] {
       def matcher[T](implicit sequencing: Sequencing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1319,13 +1358,14 @@ final class NotWord {
               !sequencing.containsInOrderOnly(left, right),
               Resources.rawContainedInOrderOnlyElements,
               Resources.rawDidNotContainInOrderOnlyElements,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(inOrderOnly)
+          override def toString: String = "not contain " + prettifier(inOrderOnly)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(inOrderOnly)
+      override def toString: String = "not contain " + prettifier(inOrderOnly)
     }
   }
   
@@ -1337,7 +1377,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain[T](allOf: ResultOfAllOfApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain[T](allOf: ResultOfAllOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1349,13 +1389,14 @@ final class NotWord {
               !aggregating.containsAllOf(left, right),
               Resources.rawContainedAllOfElements,
               Resources.rawDidNotContainAllOfElements,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(allOf)
+          override def toString: String = "not contain " + prettifier(allOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(allOf)
+      override def toString: String = "not contain " + prettifier(allOf)
     }
   }
 
@@ -1367,7 +1408,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain(allElementsOf: ResultOfAllElementsOfApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain(allElementsOf: ResultOfAllElementsOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1379,13 +1420,14 @@ final class NotWord {
               !aggregating.containsAllOf(left, right.distinct),
               Resources.rawContainedAllElementsOf,
               Resources.rawDidNotContainAllElementsOf,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(allElementsOf)
+          override def toString: String = "not contain " + prettifier(allElementsOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(allElementsOf)
+      override def toString: String = "not contain " + prettifier(allElementsOf)
     }
   }
   
@@ -1397,7 +1439,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain[T](inOrder: ResultOfInOrderApplication): MatcherFactory1[Any, Sequencing] = {
+  def contain[T](inOrder: ResultOfInOrderApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Sequencing] = {
     new MatcherFactory1[Any, Sequencing] {
       def matcher[T](implicit sequencing: Sequencing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1409,13 +1451,14 @@ final class NotWord {
               !sequencing.containsInOrder(left, right),
               Resources.rawContainedAllOfElementsInOrder,
               Resources.rawDidNotContainAllOfElementsInOrder,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(inOrder)
+          override def toString: String = "not contain " + prettifier(inOrder)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(inOrder)
+      override def toString: String = "not contain " + prettifier(inOrder)
     }
   }
 
@@ -1427,7 +1470,7 @@ final class NotWord {
    *                                 ^
    * </pre>
    */
-  def contain(inOrderElementsOf: ResultOfInOrderElementsOfApplication): MatcherFactory1[Any, Sequencing] = {
+  def contain(inOrderElementsOf: ResultOfInOrderElementsOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Sequencing] = {
     new MatcherFactory1[Any, Sequencing] {
       def matcher[T](implicit sequencing: Sequencing[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1439,13 +1482,14 @@ final class NotWord {
               !sequencing.containsInOrder(left, right.distinct),
               Resources.rawContainedAllElementsOfInOrder,
               Resources.rawDidNotContainAllElementsOfInOrder,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(inOrderElementsOf)
+          override def toString: String = "not contain " + prettifier(inOrderElementsOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(inOrderElementsOf)
+      override def toString: String = "not contain " + prettifier(inOrderElementsOf)
     }
   }
   
@@ -1457,7 +1501,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain[T](atMostOneOf: ResultOfAtMostOneOfApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain[T](atMostOneOf: ResultOfAtMostOneOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1469,13 +1513,14 @@ final class NotWord {
               !aggregating.containsAtMostOneOf(left, right),
               Resources.rawContainedAtMostOneOf,
               Resources.rawDidNotContainAtMostOneOf,
-              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", ")))
+              Vector(left, UnquotedString(right.map(FailureMessages.decorateToStringValue).mkString(", "))),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(atMostOneOf)
+          override def toString: String = "not contain " + prettifier(atMostOneOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(atMostOneOf)
+      override def toString: String = "not contain " + prettifier(atMostOneOf)
     }
   }
 
@@ -1487,7 +1532,7 @@ final class NotWord {
    *                         ^
    * </pre>
    */
-  def contain(atMostOneElementOf: ResultOfAtMostOneElementOfApplication): MatcherFactory1[Any, Aggregating] = {
+  def contain(atMostOneElementOf: ResultOfAtMostOneElementOfApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Aggregating] = {
     new MatcherFactory1[Any, Aggregating] {
       def matcher[T](implicit aggregating: Aggregating[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1499,13 +1544,14 @@ final class NotWord {
               !aggregating.containsAtMostOneOf(left, right.distinct),
               Resources.rawContainedAtMostOneElementOf,
               Resources.rawDidNotContainAtMostOneElementOf,
-              Vector(left, right)
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(atMostOneElementOf)
+          override def toString: String = "not contain " + prettifier(atMostOneElementOf)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(atMostOneElementOf)
+      override def toString: String = "not contain " + prettifier(atMostOneElementOf)
     }
   }
   
@@ -1517,7 +1563,7 @@ final class NotWord {
    *                                         ^
    * </pre>
    */
-  def contain(resultOfKeyWordApplication: ResultOfKeyWordApplication): MatcherFactory1[Any, KeyMapping] = {
+  def contain(resultOfKeyWordApplication: ResultOfKeyWordApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, KeyMapping] = {
     new MatcherFactory1[Any, KeyMapping] {
       def matcher[T](implicit keyMapping: KeyMapping[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1527,13 +1573,14 @@ final class NotWord {
               !keyMapping.containsKey(left, expectedKey),
               Resources.rawContainedKey,
               Resources.rawDidNotContainKey,
-              Vector(left, expectedKey)
+              Vector(left, expectedKey),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(resultOfKeyWordApplication)
+          override def toString: String = "not contain " + prettifier(resultOfKeyWordApplication)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(resultOfKeyWordApplication)
+      override def toString: String = "not contain " + prettifier(resultOfKeyWordApplication)
     }
   }
 
@@ -1545,7 +1592,7 @@ final class NotWord {
    *                                         ^
    * </pre>
    */
-  def contain(resultOfValueWordApplication: ResultOfValueWordApplication): MatcherFactory1[Any, ValueMapping] = {
+  def contain(resultOfValueWordApplication: ResultOfValueWordApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, ValueMapping] = {
     new MatcherFactory1[Any, ValueMapping] {
       def matcher[T](implicit valueMapping: ValueMapping[T]): Matcher[T] = {
         new Matcher[T] {
@@ -1555,13 +1602,14 @@ final class NotWord {
               !valueMapping.containsValue(left, expectedValue),
               Resources.rawContainedValue,
               Resources.rawDidNotContainValue,
-              Vector(left, expectedValue)
+              Vector(left, expectedValue),
+              prettifier
             )
           }
-          override def toString: String = "not contain " + Prettifier.default(resultOfValueWordApplication)
+          override def toString: String = "not contain " + prettifier(resultOfValueWordApplication)
         }
       }
-      override def toString: String = "not contain " + Prettifier.default(resultOfValueWordApplication)
+      override def toString: String = "not contain " + prettifier(resultOfValueWordApplication)
     }
   }
   
@@ -1573,7 +1621,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  private[scalatest] def contain[T](resultOfAWordApplication: ResultOfAWordToAMatcherApplication[T]): Matcher[GenTraversable[T]] = {
+  private[scalatest] def contain[T](resultOfAWordApplication: ResultOfAWordToAMatcherApplication[T])(implicit prettifier: Prettifier): Matcher[GenTraversable[T]] = {
     new Matcher[GenTraversable[T]] {
       def apply(left: GenTraversable[T]): MatchResult = {
         val aMatcher = resultOfAWordApplication.aMatcher
@@ -1583,10 +1631,11 @@ final class NotWord {
           Resources.rawContainedA,
           Resources.rawDidNotContainA,
           Vector(left, UnquotedString(aMatcher.nounName), UnquotedString(if (matched.isDefined) aMatcher(matched.get).negatedFailureMessage else "-")), 
-          Vector(left, UnquotedString(aMatcher.nounName))
+          Vector(left, UnquotedString(aMatcher.nounName)),
+          prettifier
         )
       }
-      override def toString: String = "not contain " + Prettifier.default(resultOfAWordApplication)
+      override def toString: String = "not contain " + prettifier(resultOfAWordApplication)
     }
   }
   
@@ -1598,7 +1647,7 @@ final class NotWord {
    *                    ^
    * </pre>
    */
-  private[scalatest] def contain[T](resultOfAnWordApplication: ResultOfAnWordToAnMatcherApplication[T]): Matcher[GenTraversable[T]] = {
+  private[scalatest] def contain[T](resultOfAnWordApplication: ResultOfAnWordToAnMatcherApplication[T])(implicit prettifier: Prettifier): Matcher[GenTraversable[T]] = {
     new Matcher[GenTraversable[T]] {
       def apply(left: GenTraversable[T]): MatchResult = {
         val anMatcher = resultOfAnWordApplication.anMatcher
@@ -1608,10 +1657,11 @@ final class NotWord {
           Resources.rawContainedAn,
           Resources.rawDidNotContainAn,
           Vector(left, UnquotedString(anMatcher.nounName), UnquotedString(if (matched.isDefined) anMatcher(matched.get).negatedFailureMessage else "-")), 
-          Vector(left, UnquotedString(anMatcher.nounName))
+          Vector(left, UnquotedString(anMatcher.nounName)),
+          prettifier
         )
       }
-      override def toString: String = "not contain " + Prettifier.default(resultOfAnWordApplication)
+      override def toString: String = "not contain " + prettifier(resultOfAnWordApplication)
     }
   }
   

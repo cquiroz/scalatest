@@ -288,7 +288,8 @@ trait MatcherWords {
    * </p>
    *
    */
-  def equal(right: Any): MatcherFactory1[Any, Equality] =
+  def equal(right: Any): MatcherFactory1[Any, Equality] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory1[Any, Equality] {
       def matcher[T <: Any : Equality]: Matcher[T] = {
         val equality = implicitly[Equality[T]]
@@ -299,15 +300,19 @@ trait MatcherWords {
               equality.areEqual(left, right),
               Resources.rawDidNotEqual,
               Resources.rawEqualed,
-              Vector(leftee, rightee), 
-              Vector(left, right)
+              Vector(leftee, rightee),
+              Vector(left, right),
+              prettifier
             )
           }
-          override def toString: String = "equal (" + Prettifier.default(right) + ")"
+
+          override def toString: String = "equal (" + prettifier(right) + ")"
         }
       }
-      override def toString: String = "equal (" + Prettifier.default(right) + ")"
+
+      override def toString: String = "equal (" + prettifier(right) + ")"
     }
+  }
 }
 
 object MatcherWords extends MatcherWords

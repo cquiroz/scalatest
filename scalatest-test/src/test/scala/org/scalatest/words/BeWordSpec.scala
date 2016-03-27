@@ -24,6 +24,7 @@ import matchers.{BePropertyMatcher,
                  AnMatcher, 
                  BeMatcher, 
                  MatchResult}
+import org.scalactic.Prettifier
 
 class BeWordSpec extends FunSpec with FileMocks {
   
@@ -806,7 +807,8 @@ class BeWordSpec extends FunSpec with FileMocks {
             left % 2 == 1,
             left.toString + " was even",
             left.toString + " was odd", 
-            Vector(left)
+            Vector(left),
+            Prettifier.default
           )
         }
       }

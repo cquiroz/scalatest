@@ -40,7 +40,7 @@ final class HaveWord {
    *                  ^
    * </pre>
    */
-  def length(expectedLength: Long): MatcherFactory1[Any, Length] =
+  def length(expectedLength: Long)(implicit prettifier: Prettifier): MatcherFactory1[Any, Length] =
     new MatcherFactory1[Any, Length] {
       def matcher[T <: Any : Length]: Matcher[T] = {
         val length = implicitly[Length[T]]
@@ -52,7 +52,8 @@ final class HaveWord {
               Resources.rawHadLengthInsteadOfExpectedLength,
               Resources.rawHadLength,
               Vector(left, lengthOfLeft, expectedLength), 
-              Vector(left, expectedLength)
+              Vector(left, expectedLength),
+              prettifier
             )
           }
           override def toString: String = "have length " + expectedLength
@@ -76,7 +77,7 @@ final class HaveWord {
    * In a future ScalaTest release, this may be tightened so that all is statically checked at compile time.
    * </p>
    */
-  def size(expectedSize: Long): MatcherFactory1[Any, Size] =
+  def size(expectedSize: Long)(implicit prettifier: Prettifier): MatcherFactory1[Any, Size] =
     new MatcherFactory1[Any, Size] {
       def matcher[T <: Any : Size]: Matcher[T] = {
         val size = implicitly[Size[T]]
@@ -88,7 +89,8 @@ final class HaveWord {
               Resources.rawHadSizeInsteadOfExpectedSize,
               Resources.rawHadSize,
               Vector(left, sizeOfLeft, expectedSize), 
-              Vector(left, expectedSize)
+              Vector(left, expectedSize),
+              prettifier
             )
           }
           override def toString: String = "have size " + expectedSize
@@ -105,7 +107,7 @@ final class HaveWord {
    *                    ^
    * </pre>
    */
-  def message(expectedMessage: String): MatcherFactory1[Any, Messaging] =
+  def message(expectedMessage: String)(implicit prettifier: Prettifier): MatcherFactory1[Any, Messaging] =
     new MatcherFactory1[Any, Messaging] {
       def matcher[T <: Any : Messaging]: Matcher[T] = {
         val messaging = implicitly[Messaging[T]]
@@ -117,7 +119,8 @@ final class HaveWord {
               Resources.rawHadMessageInsteadOfExpectedMessage,
               Resources.rawHadExpectedMessage,
               Vector(left, messageOfLeft, expectedMessage), 
-              Vector(left, expectedMessage)
+              Vector(left, expectedMessage),
+              prettifier
             )
           }
           override def toString: String = "have message " + Prettifier.default(expectedMessage)
@@ -129,7 +132,7 @@ final class HaveWord {
   /**
    * Enables parentheses to be placed around <code>length (N)</code> in expressions of the form: <code>should have (length (N))</code>.
    */
-  def apply[T](resultOfLengthWordApplication: ResultOfLengthWordApplication): MatcherFactory1[Any, Length] = length(resultOfLengthWordApplication.expectedLength)
+  def apply[T](resultOfLengthWordApplication: ResultOfLengthWordApplication)(implicit prettifier: Prettifier): MatcherFactory1[Any, Length] = length(resultOfLengthWordApplication.expectedLength)(prettifier)
 
 
   /**
@@ -145,7 +148,7 @@ final class HaveWord {
    *                  ^
    * </pre>
    */
-  def apply[T](firstPropertyMatcher: HavePropertyMatcher[T, _], propertyMatchers: HavePropertyMatcher[T, _]*): Matcher[T] =
+  def apply[T](firstPropertyMatcher: HavePropertyMatcher[T, _], propertyMatchers: HavePropertyMatcher[T, _]*)(implicit prettifier: Prettifier): Matcher[T] =
 
     new Matcher[T] {
 
@@ -185,7 +188,7 @@ final class HaveWord {
                 )
               )
 
-            MatchResult(false, rawFailureMessage, rawFailureMessage, rawMidSentenceFailureMessage, rawMidSentenceFailureMessage, failureMessageArgs, midSentenceFailureMessageArgs)
+            MatchResult(false, rawFailureMessage, rawFailureMessage, rawMidSentenceFailureMessage, rawMidSentenceFailureMessage, failureMessageArgs, midSentenceFailureMessageArgs, prettifier)
 
           case None =>
 
@@ -217,7 +220,7 @@ final class HaveWord {
               }
               else (Resources.rawMidSentenceAllPropertiesHadExpectedValues, Vector(left))
 
-            MatchResult(true, rawFailureMessage, rawFailureMessage, rawMidSentenceFailureMessage, rawMidSentenceFailureMessage, failureMessageArgs, rawMidSentenceFailureMessageArgs)
+            MatchResult(true, rawFailureMessage, rawFailureMessage, rawMidSentenceFailureMessage, rawMidSentenceFailureMessage, failureMessageArgs, rawMidSentenceFailureMessageArgs, prettifier)
         }
       }
       

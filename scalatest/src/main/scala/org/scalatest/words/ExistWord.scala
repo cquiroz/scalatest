@@ -15,6 +15,7 @@
  */
 package org.scalatest.words
 
+import org.scalactic.Prettifier
 import org.scalatest.Resources
 import org.scalatest.matchers.Matcher
 import org.scalatest.matchers.MatcherFactory1
@@ -31,7 +32,7 @@ import org.scalatest.enablers.Existence
  */
 final class ExistWord {
   
-  private[scalatest] val matcherFactory: MatcherFactory1[Any, Existence] = 
+  private[scalatest] def matcherFactory(implicit prettifier: Prettifier): MatcherFactory1[Any, Existence] =
     new MatcherFactory1[Any, Existence] {
       def matcher[T <: Any : Existence]: Matcher[T] = 
         new Matcher[T] {
@@ -41,7 +42,8 @@ final class ExistWord {
               existence.exists(left), 
               Resources.rawDoesNotExist,
               Resources.rawExists,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "exist"

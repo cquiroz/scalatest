@@ -91,7 +91,7 @@ final class BeWord {
    *                       ^
    * </pre>
    */
-  def <[T : Ordering](right: T): Matcher[T] =
+  def <[T : Ordering](right: T)(implicit prettifier: Prettifier): Matcher[T] =
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val ordering = implicitly[Ordering[T]]
@@ -99,7 +99,8 @@ final class BeWord {
           ordering.lt(left, right), // left < right
           Resources.rawWasNotLessThan,
           Resources.rawWasLessThan,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
       }
       override def toString: String = "be < " + Prettifier.default(right)
@@ -130,7 +131,7 @@ final class BeWord {
    *                       ^
    * </pre>
    */
-  def >[T : Ordering](right: T): Matcher[T] =
+  def >[T : Ordering](right: T)(implicit prettifier: Prettifier): Matcher[T] =
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val ordering = implicitly[Ordering[T]]
@@ -138,7 +139,8 @@ final class BeWord {
           ordering.gt(left, right), // left > right
           Resources.rawWasNotGreaterThan,
           Resources.rawWasGreaterThan,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
       }
       override def toString: String = "be > " + Prettifier.default(right)
@@ -169,7 +171,7 @@ final class BeWord {
    *                       ^
    * </pre>
    */
-  def <=[T : Ordering](right: T): Matcher[T] =
+  def <=[T : Ordering](right: T)(implicit prettifier: Prettifier): Matcher[T] =
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val ordering = implicitly[Ordering[T]]
@@ -177,7 +179,8 @@ final class BeWord {
           ordering.lteq(left, right), // left <= right
           Resources.rawWasNotLessThanOrEqualTo,
           Resources.rawWasLessThanOrEqualTo,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
       }
       override def toString: String = "be <= " + Prettifier.default(right)
@@ -208,7 +211,7 @@ final class BeWord {
    *                       ^
    * </pre>
    */
-  def >=[T : Ordering](right: T): Matcher[T] =
+  def >=[T : Ordering](right: T)(implicit prettifier: Prettifier): Matcher[T] =
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val ordering = implicitly[Ordering[T]]
@@ -216,7 +219,8 @@ final class BeWord {
           ordering.gteq(left, right), // left >= right
           Resources.rawWasNotGreaterThanOrEqualTo,
           Resources.rawWasGreaterThanOrEqualTo,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
       }
       override def toString: String = "be >= " + Prettifier.default(right)
@@ -235,7 +239,7 @@ final class BeWord {
    * </p>
    */
   @deprecated("The deprecation period for the be === syntax has expired. Please use should equal, should ===, shouldEqual, should be, or shouldBe instead.")
-  def ===(right: Any): Matcher[Any] = {
+  def ===(right: Any)(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] = {
     throw new NotAllowedException(FailureMessages.beTripleEqualsNotAllowed,
                                   getStackDepthFun("BeWord.scala", "$eq$eq$eq"))
   }
@@ -265,7 +269,7 @@ final class BeWord {
    *                          ^
    * </pre>
    */
-  def a[S <: AnyRef](bePropertyMatcher: BePropertyMatcher[S]): Matcher[S] =
+  def a[S <: AnyRef](bePropertyMatcher: BePropertyMatcher[S])(implicit prettifier: Prettifier): Matcher[S] =
     new Matcher[S] {
       def apply(left: S): MatchResult = {
         val result = bePropertyMatcher(left)
@@ -273,10 +277,11 @@ final class BeWord {
           result.matches,
           Resources.rawWasNotA,
           Resources.rawWasA,
-          Vector(left, UnquotedString(result.propertyName))
+          Vector(left, UnquotedString(result.propertyName)),
+          prettifier
         )
       }
-      override def toString: String = "be a " + Prettifier.default(bePropertyMatcher)
+      override def toString: String = "be a " + prettifier(bePropertyMatcher)
     }
   
   /**
@@ -287,10 +292,10 @@ final class BeWord {
    *                   ^
    * </pre>
    */
-  def a[S](aMatcher: AMatcher[S]): Matcher[S] = 
+  def a[S](aMatcher: AMatcher[S])(implicit prettifier: Prettifier): Matcher[S] =
     new Matcher[S] {
       def apply(left: S): MatchResult = aMatcher(left)
-      override def toString: String = "be a " + Prettifier.default(aMatcher)
+      override def toString: String = "be a " + prettifier(aMatcher)
     }
 
   // SKIP-SCALATESTJS-START
@@ -305,7 +310,7 @@ final class BeWord {
   def an(right: Symbol)(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[AnyRef] =
     new Matcher[AnyRef] {
       def apply(left: AnyRef): MatchResult = matchSymbolToPredicateMethod(left, right, true, false)(prettifier, sourceInfo)
-      override def toString: String = "be an " + Prettifier.default(right)
+      override def toString: String = "be an " + prettifier(right)
     }
   // SKIP-SCALATESTJS-END
 
@@ -318,7 +323,7 @@ final class BeWord {
    *                          ^
    * </pre>
    */
-  def an[S <: AnyRef](bePropertyMatcher: BePropertyMatcher[S]): Matcher[S] =
+  def an[S <: AnyRef](bePropertyMatcher: BePropertyMatcher[S])(implicit prettifier: Prettifier): Matcher[S] =
     new Matcher[S] {
       def apply(left: S): MatchResult = {
         val result = bePropertyMatcher(left)
@@ -326,10 +331,11 @@ final class BeWord {
           result.matches,
           Resources.rawWasNotAn,
           Resources.rawWasAn,
-          Vector(left, UnquotedString(result.propertyName))
+          Vector(left, UnquotedString(result.propertyName)),
+          prettifier
         )
       }
-      override def toString: String = "be an " + Prettifier.default(bePropertyMatcher)
+      override def toString: String = "be an " + prettifier(bePropertyMatcher)
     }
   
   /**
@@ -340,10 +346,10 @@ final class BeWord {
    *                   ^
    * </pre>
    */
-  def an[S](anMatcher: AnMatcher[S]): Matcher[S] = 
+  def an[S](anMatcher: AnMatcher[S])(implicit prettifier: Prettifier): Matcher[S] =
     new Matcher[S] {
       def apply(left: S): MatchResult = anMatcher(left)
-      override def toString: String = "be an " + Prettifier.default(anMatcher)
+      override def toString: String = "be an " + prettifier(anMatcher)
     }
 
   /**
@@ -354,17 +360,18 @@ final class BeWord {
    *                      ^
    * </pre>
    */
-  def apply[U](spread: Spread[U]): Matcher[U] =
+  def apply[U](spread: Spread[U])(implicit prettifier: Prettifier): Matcher[U] =
     new Matcher[U] {
       def apply(left: U): MatchResult = {
         MatchResult(
           spread.isWithin(left),
           Resources.rawWasNotPlusOrMinus,
           Resources.rawWasPlusOrMinus,
-          Vector(left, spread.pivot, spread.tolerance)
+          Vector(left, spread.pivot, spread.tolerance),
+          prettifier
         )
       }
-      override def toString: String = "be (" + Prettifier.default(spread) + ")"
+      override def toString: String = "be (" + prettifier(spread) + ")"
     }
 
   /**
@@ -375,16 +382,17 @@ final class BeWord {
    *                  ^
    * </pre>
    */
-  def theSameInstanceAs(right: AnyRef): Matcher[AnyRef] =
+  def theSameInstanceAs(right: AnyRef)(implicit prettifier: Prettifier): Matcher[AnyRef] =
     new Matcher[AnyRef] {
       def apply(left: AnyRef): MatchResult =
         MatchResult(
           left eq right,
           Resources.rawWasNotSameInstanceAs,
           Resources.rawWasSameInstanceAs,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
-      override def toString: String = "be theSameInstanceAs " + Prettifier.default(right)
+      override def toString: String = "be theSameInstanceAs " + prettifier(right)
     }
 
   /**
@@ -395,16 +403,17 @@ final class BeWord {
    *                  ^
    * </pre>
    */
-  def apply(right: Boolean): Matcher[Boolean] = 
+  def apply(right: Boolean)(implicit prettifier: Prettifier): Matcher[Boolean] =
     new Matcher[Boolean] {
       def apply(left: Boolean): MatchResult =
         MatchResult(
           left == right,
           Resources.rawWasNot,
           Resources.rawWas,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
-      override def toString: String = "be (" + Prettifier.default(right) + ")"
+      override def toString: String = "be (" + prettifier(right) + ")"
     }
 
   /**
@@ -415,7 +424,7 @@ final class BeWord {
    *                  ^
    * </pre>
    */
-  def apply(o: Null): Matcher[AnyRef] = 
+  def apply(o: Null)(implicit prettifier: Prettifier): Matcher[AnyRef] =
     new Matcher[AnyRef] {
       def apply(left: AnyRef): MatchResult = {
         MatchResult(
@@ -425,7 +434,8 @@ final class BeWord {
           Resources.rawWasNotNull,
           Resources.rawMidSentenceWasNull,
           Vector(left), 
-          Vector.empty
+          Vector.empty,
+          prettifier
         )
       }
       override def toString: String = "be (null)"
@@ -476,10 +486,10 @@ final class BeWord {
    *               ^
    * </pre>
    */
-  def apply[T](right: BeMatcher[T]): Matcher[T] =
+  def apply[T](right: BeMatcher[T])(implicit prettifier: Prettifier): Matcher[T] =
     new Matcher[T] {
       def apply(left: T): MatchResult = right(left)
-      override def toString: String = "be (" + Prettifier.default(right) + ")"
+      override def toString: String = "be (" + prettifier(right) + ")"
     }
 
   /**
@@ -490,7 +500,7 @@ final class BeWord {
    *                ^
    * </pre>
    */
-  def apply[T](bePropertyMatcher: BePropertyMatcher[T]): Matcher[T] =
+  def apply[T](bePropertyMatcher: BePropertyMatcher[T])(implicit prettifier: Prettifier): Matcher[T] =
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         val result = bePropertyMatcher(left)
@@ -498,10 +508,11 @@ final class BeWord {
           result.matches,
           Resources.rawWasNot,
           Resources.rawWas,
-          Vector(left, UnquotedString(result.propertyName))
+          Vector(left, UnquotedString(result.propertyName)),
+          prettifier
         )
       }
-      override def toString: String = "be (" + Prettifier.default(bePropertyMatcher) + ")"
+      override def toString: String = "be (" + prettifier(bePropertyMatcher) + ")"
     }
 
   /**
@@ -520,7 +531,7 @@ final class BeWord {
    *               ^
    * </pre>
    */
-  def apply(right: Any): Matcher[Any] =
+  def apply(right: Any)(implicit prettifier: Prettifier): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, right) // TODO: To move this to reporter
@@ -529,10 +540,11 @@ final class BeWord {
           Resources.rawWasNotEqualTo,
           Resources.rawWasEqualTo,
           Vector(leftee, rightee), 
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
       }
-      override def toString: String = "be (" + Prettifier.default(right) + ")"
+      override def toString: String = "be (" + prettifier(right) + ")"
     }
   
   /**
@@ -543,23 +555,28 @@ final class BeWord {
    *                          ^
    * </pre>
    */
-  def apply(right: SortedWord): MatcherFactory1[Any, Sortable] = 
+  def apply(right: SortedWord): MatcherFactory1[Any, Sortable] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory1[Any, Sortable] {
-      def matcher[T <: Any : Sortable]: Matcher[T] = 
+      def matcher[T <: Any : Sortable]: Matcher[T] =
         new Matcher[T] {
           def apply(left: T): MatchResult = {
             val sortable = implicitly[Sortable[T]]
             MatchResult(
-              sortable.isSorted(left), 
+              sortable.isSorted(left),
               Resources.rawWasNotSorted,
               Resources.rawWasSorted,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
+
           override def toString: String = "be (sorted)"
         }
+
       override def toString: String = "be (sorted)"
     }
+  }
   
   /**
    * This method enables the following syntax, where <code>fraction</code> refers to a <code>PartialFunction</code>:
@@ -569,16 +586,17 @@ final class BeWord {
    *                     ^
    * </pre>
    */
-  def definedAt[A, U <: PartialFunction[A, _]](right: A): Matcher[U] = 
+  def definedAt[A, U <: PartialFunction[A, _]](right: A)(implicit prettifier: Prettifier): Matcher[U] =
     new Matcher[U] {
       def apply(left: U): MatchResult =
         MatchResult(
           left.isDefinedAt(right),
           Resources.rawWasNotDefinedAt,
           Resources.rawWasDefinedAt,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
-      override def toString: String = "be definedAt " + Prettifier.default(right)
+      override def toString: String = "be definedAt " + prettifier(right)
     }
 
   /**
@@ -599,16 +617,17 @@ final class BeWord {
    *                  ^
    * </pre>
    */
-  def apply[A, U <: PartialFunction[A, _]](resultOfDefinedAt: ResultOfDefinedAt[A]): Matcher[U] =
+  def apply[A, U <: PartialFunction[A, _]](resultOfDefinedAt: ResultOfDefinedAt[A])(implicit prettifier: Prettifier): Matcher[U] =
     new Matcher[U] {
       def apply(left: U): MatchResult =
         MatchResult(
           left.isDefinedAt(resultOfDefinedAt.right),
           Resources.rawWasNotDefinedAt,
           Resources.rawWasDefinedAt,
-          Vector(left, resultOfDefinedAt.right)
+          Vector(left, resultOfDefinedAt.right),
+          prettifier
         )
-      override def toString: String = "be definedAt " + Prettifier.default(resultOfDefinedAt.right)
+      override def toString: String = "be definedAt " + prettifier(resultOfDefinedAt.right)
     }
 
   import language.experimental.macros
@@ -621,7 +640,7 @@ final class BeWord {
    *               ^
    * </pre>
    */
-  def apply(aType: ResultOfATypeInvocation[_]): Matcher[Any] = macro TypeMatcherMacro.aTypeMatcherImpl
+  def apply(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] = macro TypeMatcherMacro.aTypeMatcherImpl
   
   /**
    * This method enables the following syntax, where <code>open</code> refers to a <code>BePropertyMatcher</code>:
@@ -631,7 +650,7 @@ final class BeWord {
    *               ^
    * </pre>
    */
-  def apply(anType: ResultOfAnTypeInvocation[_]): Matcher[Any] = macro TypeMatcherMacro.anTypeMatcherImpl
+  def apply(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] = macro TypeMatcherMacro.anTypeMatcherImpl
   
   /**
    * This method enables the following syntax, where <code>open</code> refers to a <code>BePropertyMatcher</code>:
@@ -641,7 +660,7 @@ final class BeWord {
    *                ^
    * </pre>
    */
-  def apply(readable: ReadableWord): MatcherFactory1[Any, Readability] = 
+  def apply(readable: ReadableWord)(implicit prettifier: Prettifier): MatcherFactory1[Any, Readability] =
     new MatcherFactory1[Any, Readability] {
       def matcher[T <: Any : Readability]: Matcher[T] = 
         new Matcher[T] {
@@ -651,12 +670,13 @@ final class BeWord {
               readability.isReadable(left), 
               Resources.rawWasNotReadable,
               Resources.rawWasReadable,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
-          override def toString: String = "be (" + Prettifier.default(readable) + ")"
+          override def toString: String = "be (" + prettifier(readable) + ")"
         }
-      override def toString: String = "be (" + Prettifier.default(readable) + ")"
+      override def toString: String = "be (" + prettifier(readable) + ")"
     }
   
   /**
@@ -667,7 +687,7 @@ final class BeWord {
    *                 ^
    * </pre>
    */
-  def apply(writable: WritableWord): MatcherFactory1[Any, Writability] = 
+  def apply(writable: WritableWord)(implicit prettifier: Prettifier): MatcherFactory1[Any, Writability] =
     new MatcherFactory1[Any, Writability] {
       def matcher[T <: Any : Writability]: Matcher[T] = 
         new Matcher[T] {
@@ -677,7 +697,8 @@ final class BeWord {
               writability.isWritable(left), 
               Resources.rawWasNotWritable,
               Resources.rawWasWritable,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "be (writable)"
@@ -693,7 +714,7 @@ final class BeWord {
    *                 ^
    * </pre>
    */
-  def apply(empty: EmptyWord): MatcherFactory1[Any, Emptiness] = 
+  def apply(empty: EmptyWord)(implicit prettifier: Prettifier): MatcherFactory1[Any, Emptiness] =
     new MatcherFactory1[Any, Emptiness] {
       def matcher[T <: Any : Emptiness]: Matcher[T] = 
         new Matcher[T] {
@@ -703,7 +724,8 @@ final class BeWord {
               emptiness.isEmpty(left), 
               Resources.rawWasNotEmpty,
               Resources.rawWasEmpty,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "be (empty)"
@@ -719,7 +741,7 @@ final class BeWord {
    *                 ^
    * </pre>
    */
-  def apply(defined: DefinedWord): MatcherFactory1[Any, Definition] = 
+  def apply(defined: DefinedWord)(implicit prettifier: Prettifier): MatcherFactory1[Any, Definition] =
     new MatcherFactory1[Any, Definition] {
       def matcher[T <: Any : Definition]: Matcher[T] = 
         new Matcher[T] {
@@ -729,7 +751,8 @@ final class BeWord {
               definition.isDefined(left), 
               Resources.rawWasNotDefined,
               Resources.rawWasDefined,
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "be (defined)"

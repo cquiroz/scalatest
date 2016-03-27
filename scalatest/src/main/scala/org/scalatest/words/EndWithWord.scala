@@ -39,16 +39,17 @@ final class EndWithWord {
    *                        ^
    * </pre>
    */
-  def apply(right: String): Matcher[String] =
+  def apply(right: String)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           left endsWith right,
           Resources.rawDidNotEndWith,
           Resources.rawEndedWith,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
-      override def toString: String = "endWith (" + Prettifier.default(right) + ")"
+      override def toString: String = "endWith (" + prettifier(right) + ")"
     }
 
   /**
@@ -60,7 +61,7 @@ final class EndWithWord {
    *                        ^
    * </pre>
    */
-  def regex[T <: String](right: T): Matcher[T] = regex(right.r)
+  def regex[T <: String](right: T)(implicit prettifier: Prettifier): Matcher[T] = regex(right.r)(prettifier)
   
   /**
    * This method enables the following syntax:
@@ -70,11 +71,11 @@ final class EndWithWord {
    *                             ^
    * </pre>
    */	
-  def regex(regexWithGroups: RegexWithGroups) = 
+  def regex(regexWithGroups: RegexWithGroups)(implicit prettifier: Prettifier) =
     new Matcher[String] {
       def apply(left: String): MatchResult = 
-        endWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
-      override def toString: String = "endWith regex " + Prettifier.default(regexWithGroups)
+        endWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
+      override def toString: String = "endWith regex " + prettifier(regexWithGroups)
     }
 
   /**
@@ -86,7 +87,7 @@ final class EndWithWord {
    *                        ^
    * </pre>
    */
-  def regex(rightRegex: Regex): Matcher[String] =
+  def regex(rightRegex: Regex)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult = {
         val allMatches = rightRegex.findAllIn(left)
@@ -94,10 +95,11 @@ final class EndWithWord {
           allMatches.hasNext && (allMatches.end == left.length),
           Resources.rawDidNotEndWithRegex,
           Resources.rawEndedWithRegex,
-          Vector(left, UnquotedString(rightRegex.toString))
+          Vector(left, UnquotedString(rightRegex.toString)),
+          prettifier
         )
       }
-      override def toString: String = "endWith regex \"" + Prettifier.default(rightRegex) + "\""
+      override def toString: String = "endWith regex \"" + prettifier(rightRegex) + "\""
     }
   
   /**

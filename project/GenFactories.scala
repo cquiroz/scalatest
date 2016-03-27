@@ -34,6 +34,7 @@ import org.scalactic.Equality
 import org.scalactic.TripleEqualsSupport.Spread
 import org.scalactic.TripleEqualsSupport.TripleEqualsInvocation
 import org.scalactic.Prettifier
+import org.scalactic.SourceInfo
 import org.scalatest.FailureMessages
 import org.scalatest.Resources
 import org.scalatest.words.FullyMatchWord
@@ -134,72 +135,80 @@ $endif$
   /**
    * Ands this matcher factory with the passed matcher.
    */
-  def and[U <: SC](rightMatcher: Matcher[U]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] =
+  def and[U <: SC](rightMatcher: Matcher[U]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory$arity$[U, $commaSeparatedTCNs$] {
       def matcher[V <: U : $colonSeparatedTCNs$]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val leftMatcher = thisMatcherFactory.matcher
-            andMatchersAndApply(left, leftMatcher, rightMatcher)
+            andMatchersAndApply(left, leftMatcher, rightMatcher, prettifier)
           }
-          override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") and (" + Prettifier.default(rightMatcher) + ")"
+          override def toString: String = "(" + prettifier(thisMatcherFactory) + ") and (" + prettifier(rightMatcher) + ")"
         }
       }
-      override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") and (" + Prettifier.default(rightMatcher) + ")"
+      override def toString: String = "(" + prettifier(thisMatcherFactory) + ") and (" + prettifier(rightMatcher) + ")"
     }
+  }
 
   /**
    * Ors this matcher factory with the passed matcher.
    */
-  def or[U <: SC](rightMatcher: Matcher[U]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] =
+  def or[U <: SC](rightMatcher: Matcher[U]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory$arity$[U, $commaSeparatedTCNs$] {
       def matcher[V <: U : $colonSeparatedTCNs$]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val leftMatcher = thisMatcherFactory.matcher
-            orMatchersAndApply(left, leftMatcher, rightMatcher)
+            orMatchersAndApply(left, leftMatcher, rightMatcher, prettifier)
           }
-          override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") or (" + Prettifier.default(rightMatcher) + ")"
+          override def toString: String = "(" + prettifier(thisMatcherFactory) + ") or (" + prettifier(rightMatcher) + ")"
         }
       }
-      override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") or (" + Prettifier.default(rightMatcher) + ")"
+      override def toString: String = "(" + prettifier(thisMatcherFactory) + ") or (" + prettifier(rightMatcher) + ")"
     }
+  }
 
   /**
    * Ands this matcher factory with the passed <code>MatcherFactory1</code> that has the same final typeclass as this one.
    */
-  def and[U <: SC](rightMatcherFactory: MatcherFactory1[U, TC$arity$]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] =
+  def and[U <: SC](rightMatcherFactory: MatcherFactory1[U, TC$arity$]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory$arity$[U, $commaSeparatedTCNs$] {
       def matcher[V <: U : $colonSeparatedTCNs$]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val leftMatcher = thisMatcherFactory.matcher
             val rightMatcher = rightMatcherFactory.matcher
-            andMatchersAndApply(left, leftMatcher, rightMatcher)
+            andMatchersAndApply(left, leftMatcher, rightMatcher, prettifier)
           }
-          override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") and (" + Prettifier.default(rightMatcherFactory) + ")"
+          override def toString: String = "(" + prettifier(thisMatcherFactory) + ") and (" + prettifier(rightMatcherFactory) + ")"
         }
       }
-      override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") and (" + Prettifier.default(rightMatcherFactory) + ")"
+      override def toString: String = "(" + prettifier(thisMatcherFactory) + ") and (" + prettifier(rightMatcherFactory) + ")"
     }
+  }
 
   /**
    * Ors this matcher factory with the passed <code>MatcherFactory1</code> that has the same final typeclass as this one.
    */
-  def or[U <: SC](rightMatcherFactory: MatcherFactory1[U, TC$arity$]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] =
+  def or[U <: SC](rightMatcherFactory: MatcherFactory1[U, TC$arity$]): MatcherFactory$arity$[U, $commaSeparatedTCNs$] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory$arity$[U, $commaSeparatedTCNs$] {
       def matcher[V <: U : $colonSeparatedTCNs$]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val leftMatcher = thisMatcherFactory.matcher
             val rightMatcher = rightMatcherFactory.matcher
-            orMatchersAndApply(left, leftMatcher, rightMatcher)
+            orMatchersAndApply(left, leftMatcher, rightMatcher, prettifier)
           }
-          override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") or (" + Prettifier.default(rightMatcherFactory) + ")"
+          override def toString: String = "(" + prettifier(thisMatcherFactory) + ") or (" + prettifier(rightMatcherFactory) + ")"
         }
       }
-      override def toString: String = "(" + Prettifier.default(thisMatcherFactory) + ") or (" + Prettifier.default(rightMatcherFactory) + ")"
+      override def toString: String = "(" + prettifier(thisMatcherFactory) + ") or (" + prettifier(rightMatcherFactory) + ")"
     }
+  }
                 """
 
   // And and or taking a MF1 that has the rightmost type class
@@ -224,34 +233,38 @@ $endif$
   /**
    * Ands this matcher factory with the passed matcher factory.
    */
-  def and[U <: SC, $passedTypeConstructors$](rightMatcherFactory: MatcherFactory$passedArity$[U, $passedCommaSeparatedTCNs$]): MatcherFactory$resultArity$[U, $resultCommaSeparatedTCNs$] =
+  def and[U <: SC, $passedTypeConstructors$](rightMatcherFactory: MatcherFactory$passedArity$[U, $passedCommaSeparatedTCNs$]): MatcherFactory$resultArity$[U, $resultCommaSeparatedTCNs$] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory$resultArity$[U, $resultCommaSeparatedTCNs$] {
       def matcher[V <: U : $resultColonSeparatedTCNs$]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val leftMatcher = thisMatcherFactory.matcher
             val rightMatcher = rightMatcherFactory.matcher
-            andMatchersAndApply(left, leftMatcher, rightMatcher)
+            andMatchersAndApply(left, leftMatcher, rightMatcher, prettifier)
           }
         }
       }
     }
+  }
 
   /**
    * Ors this matcher factory with the passed matcher factory.
    */
-  def or[U <: SC, $passedTypeConstructors$](rightMatcherFactory: MatcherFactory$passedArity$[U, $passedCommaSeparatedTCNs$]): MatcherFactory$resultArity$[U, $resultCommaSeparatedTCNs$] =
+  def or[U <: SC, $passedTypeConstructors$](rightMatcherFactory: MatcherFactory$passedArity$[U, $passedCommaSeparatedTCNs$]): MatcherFactory$resultArity$[U, $resultCommaSeparatedTCNs$] = {
+    val prettifier = implicitly[Prettifier]
     new MatcherFactory$resultArity$[U, $resultCommaSeparatedTCNs$] {
       def matcher[V <: U : $resultColonSeparatedTCNs$]: Matcher[V] = {
         new Matcher[V] {
           def apply(left: V): MatchResult = {
             val leftMatcher = thisMatcherFactory.matcher
             val rightMatcher = rightMatcherFactory.matcher
-            orMatchersAndApply(left, leftMatcher, rightMatcher)
+            orMatchersAndApply(left, leftMatcher, rightMatcher, prettifier)
           }
         }
       }
     }
+  }
 """
 
   val bottomPart1 = """
@@ -271,7 +284,7 @@ $endif$
      *                          ^
      * </pre>
      */
-    def length(expectedLength: Long): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] = and(MatcherWords.have.length(expectedLength))
+    def length(expectedLength: Long)(implicit prettifier: Prettifier): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] = and(MatcherWords.have.length(expectedLength)(prettifier))
 
     // These guys need to generate a MatcherFactory of N+1. And it needs N-1 TC's, with the last one being Length.
 
@@ -752,7 +765,7 @@ $endif$
      *                               ^
      * </pre>
      */
-    def regex(regexString: String): MatcherFactory$arity$[SC with String, $commaSeparatedTCNs$] = and(MatcherWords.startWith.regex(regexString))
+    def regex(regexString: String)(implicit prettifier: Prettifier): MatcherFactory$arity$[SC with String, $commaSeparatedTCNs$] = and(MatcherWords.startWith.regex(regexString)(prettifier))
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -762,7 +775,7 @@ $endif$
      *                               ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): MatcherFactory$arity$[SC with String, $commaSeparatedTCNs$] = and(MatcherWords.startWith.regex(regexWithGroups))
+    def regex(regexWithGroups: RegexWithGroups)(implicit prettifier: Prettifier): MatcherFactory$arity$[SC with String, $commaSeparatedTCNs$] = and(MatcherWords.startWith.regex(regexWithGroups)(prettifier))
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -772,7 +785,7 @@ $endif$
      *                               ^
      * </pre>
      */
-    def regex(regex: Regex): MatcherFactory$arity$[SC with String, $commaSeparatedTCNs$] = and(MatcherWords.startWith.regex(regex))
+    def regex(regex: Regex)(implicit prettifier: Prettifier): MatcherFactory$arity$[SC with String, $commaSeparatedTCNs$] = and(MatcherWords.startWith.regex(regex)(prettifier))
   }
 
   /**
@@ -876,7 +889,7 @@ $endif$
      *                         ^
      * </pre>
      */
-    def equal(o: Null): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] = {
+    def equal(o: Null)(implicit prettifier: Prettifier): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] = {
       thisMatcherFactory and {
         new Matcher[SC] {
           def apply(left: SC): MatchResult = {
@@ -887,7 +900,8 @@ $endif$
               Resources.rawMidSentenceEqualedNull,
               Resources.rawDidNotEqualNull,
               Vector.empty, 
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "not equal null"
@@ -914,8 +928,8 @@ $endif$
      *                         ^
      * </pre>
      */
-    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] =
-      thisMatcherFactory.and(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)))
+    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication)(implicit prettifier: Prettifier): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] =
+      thisMatcherFactory.and(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)(prettifier)))
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -1125,7 +1139,7 @@ $endif$
      *                         ^
      * </pre>
      */
-    def be(aType: ResultOfATypeInvocation[_]): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.andNotATypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
+    def be(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.andNotATypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -1135,7 +1149,7 @@ $endif$
      *                         ^
      * </pre>
      */
-    def be(anType: ResultOfAnTypeInvocation[_]): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.andNotAnTypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
+    def be(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.andNotAnTypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -1517,7 +1531,7 @@ $endif$
      *                         ^
      * </pre>
      */
-     def matchPattern(right: PartialFunction[Any, _]) = macro MatchPatternMacro.andNotMatchPatternMatcher
+     def matchPattern(right: PartialFunction[Any, _])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro MatchPatternMacro.andNotMatchPatternMatcher
   }
                     """
 
@@ -1571,7 +1585,7 @@ $endif$
      *                         ^
      * </pre>
      */
-    def length(expectedLength: Long): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] = or(MatcherWords.have.length(expectedLength))
+    def length(expectedLength: Long)(implicit prettifier: Prettifier): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] = or(MatcherWords.have.length(expectedLength)(prettifier))
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -2170,7 +2184,7 @@ $endif$
      *                        ^
      * </pre>
      */
-    def equal(o: Null): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] = {
+    def equal(o: Null)(implicit prettifier: Prettifier): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] = {
       thisMatcherFactory or {
         new Matcher[SC] {
           def apply(left: SC): MatchResult = {
@@ -2181,7 +2195,8 @@ $endif$
               Resources.rawMidSentenceEqualedNull,
               Resources.rawDidNotEqualNull,
               Vector.empty, 
-              Vector(left)
+              Vector(left),
+              prettifier
             )
           }
           override def toString: String = "not equal null"
@@ -2208,8 +2223,8 @@ $endif$
      *                        ^
      * </pre>
      */
-    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] =
-      thisMatcherFactory.or(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)))
+    def have(resultOfLengthWordApplication: ResultOfLengthWordApplication)(implicit prettifier: Prettifier): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Length] =
+      thisMatcherFactory.or(MatcherWords.not.apply(MatcherWords.have.length(resultOfLengthWordApplication.expectedLength)(prettifier)))
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -2419,7 +2434,7 @@ $endif$
      *                        ^
      * </pre>
      */
-    def be(aType: ResultOfATypeInvocation[_]): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.orNotATypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
+    def be(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.orNotATypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -2429,7 +2444,7 @@ $endif$
      *                        ^
      * </pre>
      */
-    def be(anType: ResultOfAnTypeInvocation[_]): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.orNotAnTypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
+    def be(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$] = macro MatcherFactory$arity$.orNotAnTypeMatcherFactory$arity$[SC, $commaSeparatedTCNs$]
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -2811,7 +2826,7 @@ $endif$
      *                        ^
      * </pre>
      */
-    def matchPattern(right: PartialFunction[Any, _]) = macro MatchPatternMacro.orNotMatchPatternMatcher
+    def matchPattern(right: PartialFunction[Any, _])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro MatchPatternMacro.orNotMatchPatternMatcher
   }
 
   /**
@@ -2870,39 +2885,39 @@ object MatcherFactory$arity$ {
   /**
    * This method is called by macro that supports 'and not a [Type]' syntax.
    */
-  def andNotATypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
-    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].andNotATypeMatcherFactory$arity$(context)(aType)
+  def andNotATypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
+    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].andNotATypeMatcherFactory$arity$(context)(aType)(prettifier, sourceInfo)
 
   /**
    * This method is called by macro that supports 'or not a [Type]' syntax.
    */
-  def orNotATypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
-    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].orNotATypeMatcherFactory$arity$(context)(aType)
+  def orNotATypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
+    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].orNotATypeMatcherFactory$arity$(context)(aType)(prettifier, sourceInfo)
 
   /**
    * This method is called by macro that supports 'and not a [Type]' syntax.
    */
-  def andNotAnTypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
-    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].andNotAnTypeMatcherFactory$arity$(context)(anType)
+  def andNotAnTypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
+    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].andNotAnTypeMatcherFactory$arity$(context)(anType)(prettifier, sourceInfo)
 
   /**
    * This method is called by macro that supports 'or not a [Type]' syntax.
    */
-  def orNotAnTypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
-    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].orNotAnTypeMatcherFactory$arity$(context)(anType)
+  def orNotAnTypeMatcherFactory$arity$[SC, $typeConstructors$](context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] =
+    new MatcherFactory$arity$Macro[SC, $commaSeparatedTCNs$].orNotAnTypeMatcherFactory$arity$(context)(anType)(prettifier, sourceInfo)
 }
 
 private[scalatest] class MatcherFactory$arity$Macro[-SC, $typeConstructors$] {
 
   import scala.reflect.macros.Context
 
-  def andNotATypeMatcherFactory$arity$(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
+  def andNotATypeMatcherFactory$arity$(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(implicit prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
     import context.universe._
 
-    val rhs = TypeMatcherMacro.notATypeMatcher(context)(aType)
+    val rhs = TypeMatcherMacro.notATypeMatcher(context)(aType)(prettifier, sourceInfo)
 
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -2919,13 +2934,13 @@ private[scalatest] class MatcherFactory$arity$Macro[-SC, $typeConstructors$] {
     }
   }
 
-  def orNotATypeMatcherFactory$arity$(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
+  def orNotATypeMatcherFactory$arity$(context: Context)(aType: context.Expr[ResultOfATypeInvocation[_]])(implicit prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
     import context.universe._
 
-    val rhs = TypeMatcherMacro.notATypeMatcher(context)(aType)
+    val rhs = TypeMatcherMacro.notATypeMatcher(context)(aType)(prettifier, sourceInfo)
 
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -2942,13 +2957,13 @@ private[scalatest] class MatcherFactory$arity$Macro[-SC, $typeConstructors$] {
     }
   }
 
-  def andNotAnTypeMatcherFactory$arity$(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
+  def andNotAnTypeMatcherFactory$arity$(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(implicit prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
     import context.universe._
 
-    val rhs = TypeMatcherMacro.notAnTypeMatcher(context)(anType)
+    val rhs = TypeMatcherMacro.notAnTypeMatcher(context)(anType)(prettifier, sourceInfo)
 
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(
@@ -2965,13 +2980,13 @@ private[scalatest] class MatcherFactory$arity$Macro[-SC, $typeConstructors$] {
     }
   }
 
-  def orNotAnTypeMatcherFactory$arity$(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
+  def orNotAnTypeMatcherFactory$arity$(context: Context)(anType: context.Expr[ResultOfAnTypeInvocation[_]])(implicit prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[MatcherFactory$arity$[SC with AnyRef, $commaSeparatedTCNs$]] = {
     import context.universe._
 
-    val rhs = TypeMatcherMacro.notAnTypeMatcher(context)(anType)
+    val rhs = TypeMatcherMacro.notAnTypeMatcher(context)(anType)(prettifier, sourceInfo)
 
     context.macroApplication match {
-      case Apply(Select(qualifier, _), _) =>
+      case Apply(Apply(Select(qualifier, _), _), _) =>
         context.Expr(
           Apply(
             Select(

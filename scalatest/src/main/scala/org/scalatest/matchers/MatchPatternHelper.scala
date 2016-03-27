@@ -16,7 +16,7 @@
 package org.scalatest.matchers
 
 import org.scalatest.{FailureMessages, Resources}
-import org.scalactic.Prettifier
+import org.scalactic.{Prettifier, SourceInfo}
 import org.scalatest.MatchersHelper._
 import org.scalatest.words.ResultOfNotWordForAny
 
@@ -33,14 +33,15 @@ object MatchPatternHelper {
    *               ^
    * </pre>
    */
-  def matchPatternMatcher(right: PartialFunction[Any, _]): Matcher[Any] =
+  def matchPatternMatcher(right: PartialFunction[Any, _], prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         MatchResult(
           right.isDefinedAt(left),
           Resources.rawDidNotMatchTheGivenPattern,
           Resources.rawMatchedTheGivenPattern,
-          Vector(left)
+          Vector(left),
+          prettifier
         )
       }
       override def toString: String = "patternMatch " + Prettifier.default(right)
@@ -54,14 +55,15 @@ object MatchPatternHelper {
    *                    ^
    * </pre>
    */
-  def notMatchPatternMatcher(right: PartialFunction[Any, _]): Matcher[Any] =
+  def notMatchPatternMatcher(right: PartialFunction[Any, _], prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         MatchResult(
           !right.isDefinedAt(left),
           Resources.rawMatchedTheGivenPattern,
           Resources.rawDidNotMatchTheGivenPattern,
-          Vector(left)
+          Vector(left),
+          prettifier
         )
       }
       override def toString: String = "not patternMatch " + Prettifier.default(right)
@@ -75,7 +77,7 @@ object MatchPatternHelper {
    *                   ^
    * </pre>
    */
-  def checkMatchPattern(resultOfNoWordForAny: ResultOfNotWordForAny[_], right: PartialFunction[Any, _]) {
+  def checkMatchPattern(resultOfNoWordForAny: ResultOfNotWordForAny[_], right: PartialFunction[Any, _], prettifier: Prettifier, sourceInfo: SourceInfo) {
     if (right.isDefinedAt(resultOfNoWordForAny.left) != resultOfNoWordForAny.shouldBeTrue)
       throw newTestFailedException(
         if (resultOfNoWordForAny.shouldBeTrue)

@@ -38,16 +38,17 @@ final class StartWithWord {
    *                          ^
    * </pre>
    */
-  def apply(right: String): Matcher[String] =
+  def apply(right: String)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           left startsWith right,
           Resources.rawDidNotStartWith,
           Resources.rawStartedWith,
-          Vector(left, right)
+          Vector(left, right),
+          prettifier
         )
-      override def toString: String = "startWith (" + Prettifier.default(right) + ")"
+      override def toString: String = "startWith (" + prettifier(right) + ")"
     }
 
   /**
@@ -59,7 +60,7 @@ final class StartWithWord {
    *                          ^
    * </pre>
    */
-  def regex[T <: String](right: T): Matcher[T] = regex(right.r)
+  def regex[T <: String](right: T)(implicit prettifier: Prettifier): Matcher[T] = regex(right.r)(prettifier)
   
   /**
    * This method enables the following syntax:
@@ -69,11 +70,11 @@ final class StartWithWord {
    *                               ^
    * </pre>
    */	
-  def regex(regexWithGroups: RegexWithGroups) = 
+  def regex(regexWithGroups: RegexWithGroups)(implicit prettifier: Prettifier) =
     new Matcher[String] {
       def apply(left: String): MatchResult = 
-        startWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
-      override def toString: String = "startWith regex " + Prettifier.default(regexWithGroups)
+        startWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
+      override def toString: String = "startWith regex " + prettifier(regexWithGroups)
     }
 
   /**
@@ -85,16 +86,17 @@ final class StartWithWord {
    *                         ^
    * </pre>
    */
-  def regex(rightRegex: Regex): Matcher[String] =
+  def regex(rightRegex: Regex)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           rightRegex.pattern.matcher(left).lookingAt,
           Resources.rawDidNotStartWithRegex,
           Resources.rawStartedWithRegex,
-          Vector(left, UnquotedString(rightRegex.toString))
+          Vector(left, UnquotedString(rightRegex.toString)),
+          prettifier
         )
-      override def toString: String = "startWith regex " + Prettifier.default(rightRegex)
+      override def toString: String = "startWith regex " + prettifier(rightRegex)
     }
   
   /**

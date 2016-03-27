@@ -150,7 +150,7 @@ private[scalatest] object MatchersHelper {
     }
   }
 
-  def andMatchersAndApply[T](left: T, leftMatcher: Matcher[T], rightMatcher: Matcher[T]): MatchResult = {
+  def andMatchersAndApply[T](left: T, leftMatcher: Matcher[T], rightMatcher: Matcher[T], prettifier: Prettifier): MatchResult = {
     val leftMatchResult = leftMatcher(left)
     val rightMatchResult = rightMatcher(left) // Not short circuiting anymore
     if (!leftMatchResult.matches) leftMatchResult
@@ -164,12 +164,13 @@ private[scalatest] object MatchersHelper {
         Vector(NegatedFailureMessage(leftMatchResult), MidSentenceFailureMessage(rightMatchResult)),
         Vector(NegatedFailureMessage(leftMatchResult), MidSentenceNegatedFailureMessage(rightMatchResult)),
         Vector(MidSentenceNegatedFailureMessage(leftMatchResult), MidSentenceFailureMessage(rightMatchResult)),
-        Vector(MidSentenceNegatedFailureMessage(leftMatchResult), MidSentenceNegatedFailureMessage(rightMatchResult))
+        Vector(MidSentenceNegatedFailureMessage(leftMatchResult), MidSentenceNegatedFailureMessage(rightMatchResult)),
+        prettifier
       )
     }
   }
 
-  def orMatchersAndApply[T](left: T, leftMatcher: Matcher[T], rightMatcher: Matcher[T]): MatchResult = {
+  def orMatchersAndApply[T](left: T, leftMatcher: Matcher[T], rightMatcher: Matcher[T], prettifier: Prettifier): MatchResult = {
     val leftMatchResult = leftMatcher(left)
     val rightMatchResult = rightMatcher(left) // Not short circuiting anymore
     if (leftMatchResult.matches) leftMatchResult.copy(matches = true)
@@ -183,7 +184,8 @@ private[scalatest] object MatchersHelper {
         Vector(FailureMessage(leftMatchResult), MidSentenceFailureMessage(rightMatchResult)),
         Vector(FailureMessage(leftMatchResult), MidSentenceNegatedFailureMessage(rightMatchResult)),
         Vector(MidSentenceFailureMessage(leftMatchResult), MidSentenceFailureMessage(rightMatchResult)),
-        Vector(MidSentenceFailureMessage(leftMatchResult), MidSentenceNegatedFailureMessage(rightMatchResult))
+        Vector(MidSentenceFailureMessage(leftMatchResult), MidSentenceNegatedFailureMessage(rightMatchResult)),
+        prettifier
       )
     }
   }
@@ -232,7 +234,8 @@ private[scalatest] object MatchersHelper {
           result == true, // Right now I just leave the return value of accessProperty as Any
           wasNot,
           was,
-          Vector(left, UnquotedString(propertyName))
+          Vector(left, UnquotedString(propertyName)),
+          prettier
         )
     }
   }
@@ -240,13 +243,14 @@ private[scalatest] object MatchersHelper {
 
   def checkPatternMatchAndGroups(matches: Boolean, left: String, pMatcher: java.util.regex.Matcher, regex: Regex, groups: IndexedSeq[String], 
                                  didNotMatchMessage: => String, matchMessage: => String, notGroupAtIndexMessage:  => String, notGroupMessage: => String,
-                                 andGroupMessage: => String): MatchResult = {
+                                 andGroupMessage: => String, prettifier: Prettifier): MatchResult = {
     if (groups.size == 0 || !matches)
       MatchResult(
         matches, 
         didNotMatchMessage,
         matchMessage,
-        Vector(left, UnquotedString(regex.toString))
+        Vector(left, UnquotedString(regex.toString)),
+        prettifier
       )
     else {
       val count = pMatcher.groupCount
@@ -262,7 +266,8 @@ private[scalatest] object MatchersHelper {
             if (groups.size > 1) notGroupAtIndexMessage else notGroupMessage,
             andGroupMessage,
             if (groups.size > 1) Vector(left, UnquotedString(regex.toString), pMatcher.group(idx + 1), UnquotedString(group), idx) else Vector(left, UnquotedString(regex.toString), pMatcher.group(1), UnquotedString(group)), 
-            Vector(left, UnquotedString(regex.toString), UnquotedString(groups.mkString(", ")))
+            Vector(left, UnquotedString(regex.toString), UnquotedString(groups.mkString(", "))),
+            prettifier
           )
         case None => 
           // None of group failed
@@ -271,39 +276,40 @@ private[scalatest] object MatchersHelper {
             notGroupMessage,
             andGroupMessage,
             Vector(left, UnquotedString(regex.toString), pMatcher.group(1),  UnquotedString(groups.mkString(", "))), 
-            Vector(left, UnquotedString(regex.toString), UnquotedString(groups.mkString(", ")))
+            Vector(left, UnquotedString(regex.toString), UnquotedString(groups.mkString(", "))),
+            prettifier
           )
       }
     }
   }
   
-  def fullyMatchRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String]): MatchResult = {
+  def fullyMatchRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String], prettifier: Prettifier): MatchResult = {
     val pMatcher = regex.pattern.matcher(left)
     val matches = pMatcher.matches
     checkPatternMatchAndGroups(matches, left, pMatcher, regex, groups, Resources.rawDidNotFullyMatchRegex, Resources.rawFullyMatchedRegex, Resources.rawFullyMatchedRegexButNotGroupAtIndex,
-                               Resources.rawFullyMatchedRegexButNotGroup, Resources.rawFullyMatchedRegexAndGroup)
+                               Resources.rawFullyMatchedRegexButNotGroup, Resources.rawFullyMatchedRegexAndGroup, prettifier)
   }
   
-  def startWithRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String]): MatchResult = {
+  def startWithRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String], prettifier: Prettifier): MatchResult = {
     val pMatcher = regex.pattern.matcher(left)
     val matches = pMatcher.lookingAt
     checkPatternMatchAndGroups(matches, left, pMatcher, regex, groups, Resources.rawDidNotStartWithRegex, Resources.rawStartedWithRegex, Resources.rawStartedWithRegexButNotGroupAtIndex,
-      Resources.rawStartedWithRegexButNotGroup, Resources.rawStartedWithRegexAndGroup)
+      Resources.rawStartedWithRegexButNotGroup, Resources.rawStartedWithRegexAndGroup, prettifier)
   }
   
-  def endWithRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String]): MatchResult = {
+  def endWithRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String], prettifier: Prettifier): MatchResult = {
     val pMatcher = regex.pattern.matcher(left)
     val found = pMatcher.find
     val matches = found && pMatcher.end == left.length
     checkPatternMatchAndGroups(matches, left, pMatcher, regex, groups, Resources.rawDidNotEndWithRegex, Resources.rawEndedWithRegex, Resources.rawEndedWithRegexButNotGroupAtIndex,
-                               Resources.rawEndedWithRegexButNotGroup, Resources.rawEndedWithRegexAndGroup)
+                               Resources.rawEndedWithRegexButNotGroup, Resources.rawEndedWithRegexAndGroup, prettifier)
   }
   
-  def includeRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String]): MatchResult = {
+  def includeRegexWithGroups(left: String, regex: Regex, groups: IndexedSeq[String], prettifier: Prettifier): MatchResult = {
     val pMatcher = regex.pattern.matcher(left)
     val matches = pMatcher.find
     checkPatternMatchAndGroups(matches, left, pMatcher, regex, groups, Resources.rawDidNotIncludeRegex, Resources.rawIncludedRegex, Resources.rawIncludedRegexButNotGroupAtIndex,
-                               Resources.rawIncludedRegexButNotGroup, Resources.rawIncludedRegexAndGroup)
+                               Resources.rawIncludedRegexButNotGroup, Resources.rawIncludedRegexAndGroup, prettifier)
   }
 
   private[scalatest] def checkExpectedException[T](f: => Any, clazz: Class[T], wrongExceptionMessageFun: (Any, Any) => String, exceptionExpectedMessageFun: String => String, stackDepth: Int): T = {

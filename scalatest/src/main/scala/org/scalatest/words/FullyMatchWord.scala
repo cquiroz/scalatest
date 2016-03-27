@@ -39,16 +39,17 @@ final class FullyMatchWord {
    *                          ^
    * </pre>
    */
-  def regex(rightRegexString: String): Matcher[String] =
+  def regex(rightRegexString: String)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           java.util.regex.Pattern.matches(rightRegexString, left),
           Resources.rawDidNotFullyMatchRegex,
           Resources.rawFullyMatchedRegex,
-          Vector(left, UnquotedString(rightRegexString))
+          Vector(left, UnquotedString(rightRegexString)),
+          prettifier
         )
-      override def toString: String = "fullyMatch regex " + Prettifier.default(rightRegexString)
+      override def toString: String = "fullyMatch regex " + prettifier(rightRegexString)
     }
 
   /**
@@ -59,11 +60,11 @@ final class FullyMatchWord {
    *                          ^
    * </pre>
    */	
-  def regex(regexWithGroups: RegexWithGroups) = 
+  def regex(regexWithGroups: RegexWithGroups)(implicit prettifier: Prettifier) =
     new Matcher[String] {
       def apply(left: String): MatchResult = 
-        fullyMatchRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
-      override def toString: String = "fullyMatch regex " + Prettifier.default(regexWithGroups)
+        fullyMatchRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
+      override def toString: String = "fullyMatch regex " + prettifier(regexWithGroups)
     }
 
   /**
@@ -75,16 +76,17 @@ final class FullyMatchWord {
    *                          ^
    * </pre>
    */
-  def regex(rightRegex: Regex): Matcher[String] =
+  def regex(rightRegex: Regex)(implicit prettifier: Prettifier): Matcher[String] =
     new Matcher[String] {
       def apply(left: String): MatchResult =
         MatchResult(
           rightRegex.pattern.matcher(left).matches,
           Resources.rawDidNotFullyMatchRegex,
           Resources.rawFullyMatchedRegex,
-          Vector(left, UnquotedString(rightRegex.toString))
+          Vector(left, UnquotedString(rightRegex.toString)),
+          prettifier
         )
-      override def toString: String = "fullyMatch regex \"" + Prettifier.default(rightRegex) + "\""
+      override def toString: String = "fullyMatch regex \"" + prettifier(rightRegex) + "\""
     }
   
   /**

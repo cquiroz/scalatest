@@ -32,6 +32,7 @@ import java.io.File
 // SKIP-SCALATESTJS-END
 import FailureMessages.decorateToStringValue
 import org.scalatest.exceptions.NotAllowedException
+import org.scalactic.Prettifier
 
 class NotWordSpec extends FunSpec with FileMocks {
   
@@ -196,7 +197,8 @@ class NotWordSpec extends FunSpec with FileMocks {
             left % 2 == 1,
             left.toString + " was even",
             left.toString + " was odd", 
-            Vector(left)
+            Vector(left),
+            Prettifier.default
           )
         }
       }
@@ -449,7 +451,8 @@ class NotWordSpec extends FunSpec with FileMocks {
             left % 2 == 1,
             left.toString + " was even",
             left.toString + " was odd", 
-            Vector(left)
+            Vector(left),
+            Prettifier.default
           )
         }
       }

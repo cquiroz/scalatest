@@ -17,6 +17,7 @@ package org.scalatest.matchers
 
 import reflect.macros.Context
 import org.scalatest.Resources
+import org.scalactic.{Prettifier, SourceInfo}
 
 private[scalatest] object MatchPatternMacro {
 
@@ -51,7 +52,7 @@ private[scalatest] object MatchPatternMacro {
   }
 
   // Do checking on case definition and generate AST that returns a match pattern matcher
-  def matchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]]): context.Expr[Matcher[Any]] = {
+  def matchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
     import context.universe._
 
     val tree = right.tree
@@ -79,14 +80,14 @@ private[scalatest] object MatchPatternMacro {
           ),
           newTermName("matchPatternMatcher")
         ),
-        List(tree)
+        List(tree, prettifier.tree, sourceInfo.tree)
       )
 
     context.Expr(callHelper)
   }
 
   // Do checking on case definition and generate AST that returns a negated match pattern matcher
-  def notMatchPatternMatcherTree(context: Context)(right: context.Expr[PartialFunction[Any, _]]): context.Tree = {
+  def notMatchPatternMatcherTree(context: Context)(right: context.Expr[PartialFunction[Any, _]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Tree = {
     import context.universe._
 
     val tree = right.tree
@@ -113,22 +114,22 @@ private[scalatest] object MatchPatternMacro {
         ),
         newTermName("notMatchPatternMatcher")
       ),
-      List(tree)
+      List(tree, prettifier.tree, sourceInfo.tree)
     )
   }
 
   // Generate AST that returns a negated match pattern matcher expression
-  def notMatchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]]): context.Expr[Matcher[Any]] =
-    context.Expr(notMatchPatternMatcherTree(context)(right))
+  def notMatchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] =
+    context.Expr(notMatchPatternMatcherTree(context)(right)(prettifier, sourceInfo))
 
   // Do checking on case definition and generate AST that does a 'and not' logical expression matcher.
-  def andNotMatchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]]): context.Expr[Matcher[Any]] = {
+  def andNotMatchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
     import context.universe._
 
     val tree = right.tree
 
     // Generate a negated matcher by calling notMatchPatternMatcher
-    val notMatcher = notMatchPatternMatcherTree(context)(right)
+    val notMatcher = notMatchPatternMatcherTree(context)(right)(prettifier, sourceInfo)
 
     /**
      * Generate AST for code that call the 'and' method on the Matcher instance (reference through 'owner'):
@@ -137,7 +138,7 @@ private[scalatest] object MatchPatternMacro {
      */
     val callHelper =
       context.macroApplication match {
-        case Apply(Select(qualifier, _), _) =>
+        case Apply(Apply(Select(qualifier, _), _), _) =>
           Apply(
             Select(
               Select(
@@ -154,13 +155,13 @@ private[scalatest] object MatchPatternMacro {
     context.Expr(callHelper)
   }
 
-  def orNotMatchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]]): context.Expr[Matcher[Any]] = {
+  def orNotMatchPatternMatcher(context: Context)(right: context.Expr[PartialFunction[Any, _]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[Matcher[Any]] = {
     import context.universe._
 
     val tree = right.tree
 
     // Generate a negated matcher by calling notMatchPatternMatcher
-    val notMatcher = notMatchPatternMatcherTree(context)(right)
+    val notMatcher = notMatchPatternMatcherTree(context)(right)(prettifier, sourceInfo)
 
     /**
      * Generate AST for code that call the 'and' method on the Matcher instance (reference through 'owner'):
@@ -169,7 +170,7 @@ private[scalatest] object MatchPatternMacro {
      */
     val callHelper =
       context.macroApplication match {
-        case Apply(Select(qualifier, _), _) =>
+        case Apply(Apply(Select(qualifier, _), _), _) =>
           Apply(
             Select(
               Select(
@@ -191,7 +192,7 @@ private[scalatest] object MatchPatternMacro {
    *
    * org.scalatest.matchers.MatchPatternHelper.checkPatternMatcher(left, right)
    */
-  def matchPattern(context: Context)(right: context.Expr[PartialFunction[Any, _]]): context.Expr[_] = {
+  def matchPattern(context: Context)(right: context.Expr[PartialFunction[Any, _]])(prettifier: context.Expr[Prettifier], sourceInfo: context.Expr[SourceInfo]): context.Expr[_] = {
     import context.universe._
 
     val tree = right.tree
@@ -206,7 +207,7 @@ private[scalatest] object MatchPatternMacro {
      */
     val callHelper =
       context.macroApplication match {
-        case Apply(Select(qualifier, _), _) =>
+        case Apply(Apply(Select(qualifier, _), _), _) =>
           Apply(
             Select(
               Select(
@@ -221,7 +222,7 @@ private[scalatest] object MatchPatternMacro {
               ),
               newTermName("checkMatchPattern")
             ),
-            List(qualifier, tree)
+            List(qualifier, tree, prettifier.tree, sourceInfo.tree)
           )
 
         case _ => context.abort(context.macroApplication.pos, "This macro should be used with should not syntax only.")

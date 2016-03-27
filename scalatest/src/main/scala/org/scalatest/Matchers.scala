@@ -2156,7 +2156,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfIncludeWordForString(left: String, shouldBeTrue: Boolean) {
+  final class ResultOfIncludeWordForString(left: String, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private[scalatest] val stackDepth = 0
@@ -2173,7 +2173,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                       ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = regex(rightRegexString.r)
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = regex(rightRegexString.r)(sourceInfo)
 
     /**
      * This method enables the following syntax: 
@@ -2183,8 +2183,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                       ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = {
-      val result = includeRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = {
+      val result = includeRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
       if (result.matches != shouldBeTrue)
         indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage, None, withGroupStackDepth)
       else indicateSuccess(shouldBeTrue, result.negatedFailureMessage, result.failureMessage)
@@ -2198,7 +2198,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                       ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = {
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = {
       if (rightRegex.findFirstIn(left).isDefined != shouldBeTrue)
         indicateFailure(shouldBeTrue, FailureMessages.didNotIncludeRegex(left, rightRegex), FailureMessages.includedRegex(left, rightRegex), None, stackDepth)
       else indicateSuccess(shouldBeTrue, FailureMessages.includedRegex(left, rightRegex), FailureMessages.didNotIncludeRegex(left, rightRegex))
@@ -2209,7 +2209,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *
      * @return "ResultOfIncludeWordForString([left], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfIncludeWordForString(" + Prettifier.default(left) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfIncludeWordForString(" + prettifier(left) + ", " + prettifier(shouldBeTrue) + ")"
   }
 
   /**
@@ -2218,7 +2218,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfStartWithWordForString(left: String, shouldBeTrue: Boolean) {
+  final class ResultOfStartWithWordForString(left: String, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private[scalatest] val stackDepth = 0
@@ -2235,7 +2235,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                         ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = regex(rightRegexString.r)
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = regex(rightRegexString.r)(sourceInfo)
 
     /**
      * This method enables the following syntax: 
@@ -2245,8 +2245,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                         ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = {
-      val result = startWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = {
+      val result = startWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
       if (result.matches != shouldBeTrue)
         indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage, None, withGroupStackDepth)
       else indicateSuccess(shouldBeTrue, result.negatedFailureMessage, result.failureMessage)
@@ -2260,7 +2260,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                         ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = {
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = {
       if (rightRegex.pattern.matcher(left).lookingAt != shouldBeTrue)
         indicateFailure(shouldBeTrue, FailureMessages.didNotStartWithRegex(left, rightRegex), FailureMessages.startedWithRegex(left, rightRegex), None, stackDepth)
       else indicateSuccess(shouldBeTrue, FailureMessages.startedWithRegex(left, rightRegex), FailureMessages.didNotStartWithRegex(left, rightRegex))
@@ -2271,7 +2271,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *
      * @return "ResultOfStartWithWordForString([left], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfStartWithWordForString(" + Prettifier.default(left) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfStartWithWordForString(" + prettifier(left) + ", " + prettifier(shouldBeTrue) + ")"
   }
 
   /**
@@ -2280,7 +2280,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfEndWithWordForString(left: String, shouldBeTrue: Boolean) {
+  final class ResultOfEndWithWordForString(left: String, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private[scalatest] val stackDepth = 0
@@ -2297,7 +2297,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                       ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = regex(rightRegexString.r)
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = regex(rightRegexString.r)(sourceInfo)
     
     /**
      * This method enables the following syntax: 
@@ -2307,8 +2307,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                       ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = {
-      val result = endWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = {
+      val result = endWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
       if (result.matches != shouldBeTrue)
         indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage, None, withGroupStackDepth)
       else indicateSuccess(shouldBeTrue, result.negatedFailureMessage, result.failureMessage)
@@ -2322,7 +2322,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                       ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = {
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = {
       val allMatches = rightRegex.findAllIn(left)
       if ((allMatches.hasNext && (allMatches.end == left.length)) != shouldBeTrue)
         indicateFailure(shouldBeTrue, FailureMessages.didNotEndWithRegex(left, rightRegex), FailureMessages.endedWithRegex(left, rightRegex), None, stackDepth)
@@ -2334,7 +2334,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *
      * @return "ResultOfEndWithWordForString([left], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfEndWithWordForString(" + Prettifier.default(left) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfEndWithWordForString(" + prettifier(left) + ", " + prettifier(shouldBeTrue) + ")"
   }
 
   /**
@@ -2343,7 +2343,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfFullyMatchWordForString(left: String, shouldBeTrue: Boolean) {
+  final class ResultOfFullyMatchWordForString(left: String, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private[scalatest] val stackDepth = 0
@@ -2360,7 +2360,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                         ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = regex(rightRegexString.r)
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = regex(rightRegexString.r)(sourceInfo)
 
     /**
      * This method enables the following syntax: 
@@ -2370,8 +2370,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                         ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = {
-      val result = fullyMatchRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = {
+      val result = fullyMatchRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups, prettifier)
       if (result.matches != shouldBeTrue)
         indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage, None, withGroupStackDepth)
       else indicateSuccess(shouldBeTrue, result.negatedFailureMessage, result.failureMessage)
@@ -2385,7 +2385,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                          ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = {
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = {
       if (rightRegex.pattern.matcher(left).matches != shouldBeTrue)
         indicateFailure(shouldBeTrue, FailureMessages.didNotFullyMatchRegex(left, rightRegex), FailureMessages.fullyMatchedRegex(left, rightRegex), None, stackDepth)
       else indicateSuccess(shouldBeTrue, FailureMessages.fullyMatchedRegex(left, rightRegex), FailureMessages.didNotFullyMatchRegex(left, rightRegex))
@@ -2396,7 +2396,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *
      * @return "ResultOfFullyMatchWordForString([left], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfFullyMatchWordForString(" + Prettifier.default(left) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfFullyMatchWordForString(" + prettifier(left) + ", " + prettifier(shouldBeTrue) + ")"
   }
   
   // Going back to original, legacy one to get to a good place to check in.
@@ -2422,17 +2422,18 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *               ^
    * </pre>
    */
-  def equal[T](spread: Spread[T]): Matcher[T] = {
+  def equal[T](spread: Spread[T])(implicit prettifier: Prettifier): Matcher[T] = {
     new Matcher[T] {
       def apply(left: T): MatchResult = {
         MatchResult(
           spread.isWithin(left),
           Resources.rawDidNotEqualPlusOrMinus,
           Resources.rawEqualedPlusOrMinus,
-          Vector(left, spread.pivot, spread.tolerance)
+          Vector(left, spread.pivot, spread.tolerance),
+          prettifier
         )
       }
-      override def toString: String = "equal (" + Prettifier.default(spread) + ")"
+      override def toString: String = "equal (" + prettifier(spread) + ")"
     }
   }
 
@@ -2444,7 +2445,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *               ^
    * </pre>
    */
-  def equal(o: Null): Matcher[AnyRef] = 
+  def equal(o: Null)(implicit prettifier: Prettifier): Matcher[AnyRef] =
     new Matcher[AnyRef] {
       def apply(left: AnyRef): MatchResult = {
         MatchResult(
@@ -2454,10 +2455,11 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
           Resources.rawDidNotEqualNull,
           Resources.rawMidSentenceEqualedNull,
           Vector(left), 
-          Vector.empty
+          Vector.empty,
+          prettifier
         )
       }
-      override def toString: String = "equal (" + Prettifier.default(o) + ")"
+      override def toString: String = "equal (" + prettifier(o) + ")"
     }
 
   /**
@@ -3177,7 +3179,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    * @author Bill Venners
    * @author Chee Seng
    */
-  sealed class ResultOfNotWordForCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, shouldBeTrue: Boolean) {
+  sealed class ResultOfNotWordForCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     import org.scalatest.InspectorsHelper._
 
@@ -4236,8 +4238,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                        ^
      * </pre>
      */
-    def startWith(right: String)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "startWith", outerStackDepth) { e =>
+    def startWith(right: String)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original, "startWith", outerStackDepth) { e =>
         if ((e.indexOf(right) == 0) != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -4268,9 +4270,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      * or a <code>scala.util.matching.Regex</code>.
      * </p>
      */
-    def startWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "startWith", outerStackDepth) { e =>
-        val result = startWithRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+    def startWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original, "startWith", outerStackDepth) { e =>
+        val result = startWithRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -4296,8 +4298,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                        ^
      * </pre>
      */
-    def endWith(expectedSubstring: String)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "endWith", outerStackDepth) { e =>
+    def endWith(expectedSubstring: String)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original, "endWith", outerStackDepth) { e =>
         if ((e endsWith expectedSubstring) != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -4323,9 +4325,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                        ^
      * </pre>
      */
-    def endWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "endWith", outerStackDepth) { e =>
-        val result = endWithRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+    def endWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original.asInstanceOf[GenTraversable[String]], "endWith", outerStackDepth) { e =>
+        val result = endWithRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -4356,9 +4358,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      * or a <code>scala.util.matching.Regex</code>.
      * </p>
      */
-    def include(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "include", outerStackDepth) { e =>
-        val result = includeRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+    def include(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original, "include", outerStackDepth) { e =>
+        val result = includeRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -4384,8 +4386,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      *                        ^
      * </pre>
      */
-    def include(expectedSubstring: String)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "include", outerStackDepth) { e =>
+    def include(expectedSubstring: String)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original, "include", outerStackDepth) { e =>
         if ((e.indexOf(expectedSubstring) >= 0) != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -4416,9 +4418,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
      * or a <code>scala.util.matching.Regex</code>.
      * </p>
      */
-    def fullyMatch(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-      doCollected(collected, xs, original, "fullyMatch", outerStackDepth) { e =>
-        val result = fullyMatchRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+    def fullyMatch(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, sourceInfo: SourceInfo): Assertion = {
+      doCollected(collected, xs.asInstanceOf[GenTraversable[String]], original, "fullyMatch", outerStackDepth) { e =>
+        val result = fullyMatchRegexWithGroups(e, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -6172,7 +6174,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfStartWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean) {
+  final class ResultOfStartWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private val outerStackDepth = 2
@@ -6189,7 +6191,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                              ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = { checkRegex(rightRegexString.r) }
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegexString.r, sourceInfo) }
 
     /**
      * This method enables the following syntax: 
@@ -6199,7 +6201,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                              ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = { checkRegex(regexWithGroups.regex, regexWithGroups.groups) }
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(regexWithGroups.regex, sourceInfo, regexWithGroups.groups) }
 
     /**
      * This method enables the following syntax: 
@@ -6209,11 +6211,11 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                              ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = { checkRegex(rightRegex) }
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegex, sourceInfo) }
     
-    private def checkRegex(rightRegex: Regex, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
+    private def checkRegex(rightRegex: Regex, sourceInfo: SourceInfo, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
       doCollected(collected, xs, original, "regex", outerStackDepth) { e =>
-        val result = startWithRegexWithGroups(e, rightRegex, groups)
+        val result = startWithRegexWithGroups(e, rightRegex, groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -6236,7 +6238,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *
      * @return "ResultOfStartWithWordForCollectedString([collected], [xs], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfStartWithWordForCollectedString(" + Prettifier.default(collected) + ", " + Prettifier.default(xs) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfStartWithWordForCollectedString(" + prettifier(collected) + ", " + prettifier(xs) + ", " + prettifier(shouldBeTrue) + ")"
   }
   
   /**
@@ -6246,7 +6248,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfIncludeWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean) {
+  final class ResultOfIncludeWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private val outerStackDepth = 2
@@ -6263,7 +6265,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                            ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = { checkRegex(rightRegexString.r) }
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegexString.r, sourceInfo) }
 
     /**
      * This method enables the following syntax: 
@@ -6273,7 +6275,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                            ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = { checkRegex(regexWithGroups.regex, regexWithGroups.groups) }
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(regexWithGroups.regex, sourceInfo, regexWithGroups.groups) }
 
     /**
      * This method enables the following syntax: 
@@ -6283,11 +6285,11 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                            ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = { checkRegex(rightRegex) }
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegex, sourceInfo) }
     
-    private def checkRegex(rightRegex: Regex, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
+    private def checkRegex(rightRegex: Regex, sourceInfo: SourceInfo, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
       doCollected(collected, xs, original, "regex", outerStackDepth) { e =>
-        val result = includeRegexWithGroups(e, rightRegex, groups)
+        val result = includeRegexWithGroups(e, rightRegex, groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -6310,7 +6312,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *
      * @return "ResultOfIncludeWordForCollectedString([collected], [xs], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfIncludeWordForCollectedString(" + Prettifier.default(collected) + ", " + Prettifier.default(xs) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfIncludeWordForCollectedString(" + prettifier(collected) + ", " + prettifier(xs) + ", " + prettifier(shouldBeTrue) + ")"
   }
   
   /**
@@ -6320,7 +6322,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfEndWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean) {
+  final class ResultOfEndWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private val outerStackDepth = 2
@@ -6337,7 +6339,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                            ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = { checkRegex(rightRegexString.r) }
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegexString.r, sourceInfo) }
 
     /**
      * This method enables the following syntax: 
@@ -6347,7 +6349,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                            ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = { checkRegex(regexWithGroups.regex, regexWithGroups.groups) }
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(regexWithGroups.regex, sourceInfo, regexWithGroups.groups) }
 
     /**
      * This method enables the following syntax: 
@@ -6357,11 +6359,11 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                            ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = { checkRegex(rightRegex) }
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegex, sourceInfo) }
     
-    private def checkRegex(rightRegex: Regex, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
+    private def checkRegex(rightRegex: Regex, sourceInfo: SourceInfo, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
       doCollected(collected, xs, original, "regex", outerStackDepth) { e =>
-        val result = endWithRegexWithGroups(e, rightRegex, groups)
+        val result = endWithRegexWithGroups(e, rightRegex, groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -6384,7 +6386,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *
      * @return "ResultOfEndWithWordForCollectedString([collected], [xs], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfEndWithWordForCollectedString(" + Prettifier.default(collected) + ", " + Prettifier.default(xs) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfEndWithWordForCollectedString(" + prettifier(collected) + ", " + prettifier(xs) + ", " + prettifier(shouldBeTrue) + ")"
   }
   
   /**
@@ -6394,7 +6396,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfFullyMatchWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean) {
+  final class ResultOfFullyMatchWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean)(implicit prettifier: Prettifier) {
 
     // SKIP-SCALATESTJS-START
     private val outerStackDepth = 2
@@ -6411,7 +6413,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                              ^
      * </pre>
      */
-    def regex(rightRegexString: String): Assertion = { checkRegex(rightRegexString.r) }
+    def regex(rightRegexString: String)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegexString.r, sourceInfo) }
 
     /**
      * This method enables the following syntax: 
@@ -6421,7 +6423,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                              ^
      * </pre>
      */
-    def regex(regexWithGroups: RegexWithGroups): Assertion = { checkRegex(regexWithGroups.regex, regexWithGroups.groups) }
+    def regex(regexWithGroups: RegexWithGroups)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(regexWithGroups.regex, sourceInfo, regexWithGroups.groups) }
 
     /**
      * This method enables the following syntax: 
@@ -6431,11 +6433,11 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *                               ^
      * </pre>
      */
-    def regex(rightRegex: Regex): Assertion = { checkRegex(rightRegex) }
+    def regex(rightRegex: Regex)(implicit sourceInfo: SourceInfo): Assertion = { checkRegex(rightRegex, sourceInfo) }
     
-    private def checkRegex(rightRegex: Regex, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
+    private def checkRegex(rightRegex: Regex, sourceInfo: SourceInfo, groups: IndexedSeq[String] = IndexedSeq.empty): Assertion = {
       doCollected(collected, xs, original, "regex", outerStackDepth) { e =>
-        val result = fullyMatchRegexWithGroups(e, rightRegex, groups)
+        val result = fullyMatchRegexWithGroups(e, rightRegex, groups, prettifier)
         if (result.matches != shouldBeTrue)
           indicateFailure(
             shouldBeTrue,
@@ -6458,7 +6460,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *
      * @return "ResultOfFullyMatchWordForCollectedString([collected], [xs], [shouldBeTrue])"
      */
-    override def toString: String = "ResultOfFullyMatchWordForCollectedString(" + Prettifier.default(collected) + ", " + Prettifier.default(xs) + ", " + Prettifier.default(shouldBeTrue) + ")"
+    override def toString: String = "ResultOfFullyMatchWordForCollectedString(" + prettifier(collected) + ", " + prettifier(xs) + ", " + prettifier(shouldBeTrue) + ")"
   }
 
   /**
@@ -7060,7 +7062,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *         ^
      * </pre>
      */
-    def shouldBe(aType: ResultOfATypeInvocation[_]): Assertion = macro TypeMatcherMacro.shouldBeATypeImpl
+    def shouldBe(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = macro TypeMatcherMacro.shouldBeATypeImpl
     
     /**
      * This method enables syntax such as the following:
@@ -7070,7 +7072,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *         ^
      * </pre>
      */
-    def shouldBe(anType: ResultOfAnTypeInvocation[_]): Assertion = macro TypeMatcherMacro.shouldBeAnTypeImpl
+    def shouldBe(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = macro TypeMatcherMacro.shouldBeAnTypeImpl
     
     /**
      * This method enables syntax such as the following:

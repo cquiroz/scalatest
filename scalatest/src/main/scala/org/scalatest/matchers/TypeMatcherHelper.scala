@@ -17,6 +17,7 @@ package org.scalatest.matchers
 
 import org.scalatest.{UnquotedString, Suite, FailureMessages, Resources}
 import org.scalactic.Prettifier
+import org.scalactic.SourceInfo
 import org.scalatest.MatchersHelper._
 import org.scalatest.words.{ResultOfAnTypeInvocation, ResultOfATypeInvocation}
 //import org.scalatest.words.{FactResultOfAnTypeInvocation, FactResultOfATypeInvocation}
@@ -37,7 +38,7 @@ object TypeMatcherHelper {
    * @param aType an instance of <code>ResultOfATypeInvocation</code>
    * @return a type <code>Matcher</code>
    */
-  def aTypeMatcher(aType: ResultOfATypeInvocation[_]): Matcher[Any] =
+  def aTypeMatcher(aType: ResultOfATypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         val clazz = aType.clazz
@@ -46,10 +47,11 @@ object TypeMatcherHelper {
           Resources.rawWasNotAnInstanceOf,
           Resources.rawWasAnInstanceOf,
           Vector(left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName)),
-          Vector(left, UnquotedString(clazz.getName))
+          Vector(left, UnquotedString(clazz.getName)),
+          prettifier
         )
       }
-      override def toString: String = "be (" + Prettifier.default(aType) + ")"
+      override def toString: String = "be (" + prettifier(aType) + ")"
     }
 
   /**
@@ -58,7 +60,7 @@ object TypeMatcherHelper {
    * @param anType an instance of <code>ResultOfAnTypeInvocation</code>
    * @return a type <code>Matcher</code>
    */
-  def anTypeMatcher(anType: ResultOfAnTypeInvocation[_]): Matcher[Any] =
+  def anTypeMatcher(anType: ResultOfAnTypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         val clazz = anType.clazz
@@ -67,10 +69,11 @@ object TypeMatcherHelper {
           Resources.rawWasNotAnInstanceOf,
           Resources.rawWasAnInstanceOf,
           Vector(left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName)),
-          Vector(left, UnquotedString(clazz.getName))
+          Vector(left, UnquotedString(clazz.getName)),
+          prettifier
         )
       }
-      override def toString: String = "be (" + Prettifier.default(anType) + ")"
+      override def toString: String = "be (" + prettifier(anType) + ")"
     }
 
   /**
@@ -79,7 +82,7 @@ object TypeMatcherHelper {
    * @param aType an instance of <code>ResultOfATypeInvocation</code>
    * @return a negated type <code>Matcher</code>
    */
-  def notATypeMatcher(aType: ResultOfATypeInvocation[_]): Matcher[Any] =
+  def notATypeMatcher(aType: ResultOfATypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         val clazz = aType.clazz
@@ -88,10 +91,11 @@ object TypeMatcherHelper {
           Resources.rawWasAnInstanceOf,
           Resources.rawWasNotAnInstanceOf,
           Vector(left, UnquotedString(clazz.getName)),
-          Vector(left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName))
+          Vector(left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName)),
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(aType)
+      override def toString: String = "not be " + prettifier(aType)
     }
 
   /**
@@ -100,7 +104,7 @@ object TypeMatcherHelper {
    * @param anType an instance of <code>ResultOfAnTypeInvocation</code>
    * @return a negated type <code>Matcher</code>
    */
-  def notAnTypeMatcher(anType: ResultOfAnTypeInvocation[_]): Matcher[Any] =
+  def notAnTypeMatcher(anType: ResultOfAnTypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         val clazz = anType.clazz
@@ -109,10 +113,11 @@ object TypeMatcherHelper {
           Resources.rawWasAnInstanceOf,
           Resources.rawWasNotAnInstanceOf,
           Vector(left, UnquotedString(clazz.getName)),
-          Vector(left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName))
+          Vector(left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName)),
+          prettifier
         )
       }
-      override def toString: String = "not be " + Prettifier.default(anType)
+      override def toString: String = "not be " + prettifier(anType)
     }
 
   /**
@@ -122,7 +127,7 @@ object TypeMatcherHelper {
    * @param left the left-hand-side (LHS) to be checked for the type
    * @param aType an instance of <code>ResultOfATypeInvocation</code>
    */
-  def assertAType(left: Any, aType: ResultOfATypeInvocation[_]): org.scalatest.Assertion = {
+  def assertAType(left: Any, aType: ResultOfATypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): org.scalatest.Assertion = {
     val clazz = aType.clazz
     if (!clazz.isAssignableFrom(left.getClass)) {
       val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, clazz.getName)
@@ -138,7 +143,7 @@ object TypeMatcherHelper {
    * @param left the left-hand-side (LHS) to be checked for the type
    * @param aType an instance of <code>ResultOfATypeInvocation</code>
    */
-  def expectAType(left: Any, aType: ResultOfATypeInvocation[_], prettifier: Prettifier): org.scalatest.Fact = {
+  def expectAType(left: Any, aType: ResultOfATypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): org.scalatest.Fact = {
     val clazz = aType.clazz
     if (!clazz.isAssignableFrom(left.getClass)) {
       val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, clazz.getName)
@@ -154,7 +159,7 @@ object TypeMatcherHelper {
    * @param left the left-hand-side (LHS) to be checked for the type
    * @param anType an instance of <code>ResultOfAnTypeInvocation</code>
    */
-  def assertAnType(left: Any, anType: ResultOfAnTypeInvocation[_]): org.scalatest.Assertion = {
+  def assertAnType(left: Any, anType: ResultOfAnTypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): org.scalatest.Assertion = {
     val clazz = anType.clazz
     if (!clazz.isAssignableFrom(left.getClass)) {
       val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, clazz.getName)
@@ -170,7 +175,7 @@ object TypeMatcherHelper {
    * @param left the left-hand-side (LHS) to be checked for the type
    * @param anType an instance of <code>ResultOfAnTypeInvocation</code>
    */
-  def expectAnType(left: Any, anType: ResultOfAnTypeInvocation[_], prettifier: Prettifier): org.scalatest.Fact = {
+  def expectAnType(left: Any, anType: ResultOfAnTypeInvocation[_], prettifier: Prettifier, sourceInfo: SourceInfo): org.scalatest.Fact = {
     val clazz = anType.clazz
     if (!clazz.isAssignableFrom(left.getClass)) {
       val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, clazz.getName)
@@ -186,7 +191,7 @@ object TypeMatcherHelper {
    * @param left the left-hand-side (LHS) to be checked for the type
    * @param aType an instance of <code>ResultOfATypeInvocation</code>
    */
-  def assertATypeShouldBeTrue(left: Any, aType: ResultOfATypeInvocation[_], shouldBeTrue: Boolean): org.scalatest.Assertion = {
+  def assertATypeShouldBeTrue(left: Any, aType: ResultOfATypeInvocation[_], shouldBeTrue: Boolean, prettifier: Prettifier, sourceInfo: SourceInfo): org.scalatest.Assertion = {
     val clazz = aType.clazz
     if (clazz.isAssignableFrom(left.getClass) != shouldBeTrue) {
       throw newTestFailedException(
@@ -233,7 +238,7 @@ object TypeMatcherHelper {
    * @param left the left-hand-side (LHS) to be checked for the type
    * @param anType an instance of <code>ResultOfAnTypeInvocation</code>
    */
-  def assertAnTypeShouldBeTrue(left: Any, anType: ResultOfAnTypeInvocation[_], shouldBeTrue: Boolean): org.scalatest.Assertion = {
+  def assertAnTypeShouldBeTrue(left: Any, anType: ResultOfAnTypeInvocation[_], shouldBeTrue: Boolean, prettifier: Prettifier, sourceInfo: SourceInfo): org.scalatest.Assertion = {
     val clazz = anType.clazz
     if (clazz.isAssignableFrom(left.getClass) != shouldBeTrue) {
       throw newTestFailedException(

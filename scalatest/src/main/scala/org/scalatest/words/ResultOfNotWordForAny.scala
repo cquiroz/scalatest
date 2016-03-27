@@ -234,7 +234,7 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                   ^
    * </pre>
    */
-  def be(aType: ResultOfATypeInvocation[_]): Assertion = macro TypeMatcherMacro.assertATypeShouldBeTrueImpl
+  def be(aType: ResultOfATypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = macro TypeMatcherMacro.assertATypeShouldBeTrueImpl
   
   /**
    * This method enables the following syntax:
@@ -244,7 +244,7 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                   ^
    * </pre>
    */
-  def be(anType: ResultOfAnTypeInvocation[_]): Assertion = macro TypeMatcherMacro.assertAnTypeShouldBeTrueImpl
+  def be(anType: ResultOfAnTypeInvocation[_])(implicit prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = macro TypeMatcherMacro.assertAnTypeShouldBeTrueImpl
 
   /**
    * This method enables the following syntax: 
@@ -952,8 +952,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    * or a <code>scala.util.matching.Regex</code>.
    * </p>
    */
-  def fullyMatch(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-    val result = fullyMatchRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+  def fullyMatch(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    val result = fullyMatchRegexWithGroups(left.asInstanceOf[String], resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
     if (result.matches != shouldBeTrue)
       indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage)
     else
@@ -973,8 +973,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    * or a <code>scala.util.matching.Regex</code>.
    * </p>
    */
-  def include(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-    val result = includeRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+  def include(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    val result = includeRegexWithGroups(left.asInstanceOf[String], resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
     if (result.matches != shouldBeTrue)
       indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage)
     else
@@ -989,8 +989,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                   ^
    * </pre>
    */
-  def include(expectedSubstring: String)(implicit ev: T <:< String): Assertion = {
-    if ((left.indexOf(expectedSubstring) >= 0) != shouldBeTrue)
+  def include(expectedSubstring: String)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    if ((left.asInstanceOf[String].indexOf(expectedSubstring) >= 0) != shouldBeTrue)
       indicateFailure(shouldBeTrue, FailureMessages.didNotIncludeSubstring(left, expectedSubstring), FailureMessages.includedSubstring(left, expectedSubstring))
     else
       indicateSuccess(shouldBeTrue, FailureMessages.includedSubstring(left, expectedSubstring), FailureMessages.didNotIncludeSubstring(left, expectedSubstring))
@@ -1009,8 +1009,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    * or a <code>scala.util.matching.Regex</code>.
    * </p>
    */
-  def startWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-    val result = startWithRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+  def startWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    val result = startWithRegexWithGroups(left.asInstanceOf[String], resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
     if (result.matches != shouldBeTrue)
       indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage)
     else
@@ -1025,8 +1025,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                    ^
    * </pre>
    */
-  def startWith(expectedSubstring: String)(implicit ev: T <:< String): Assertion = {
-    if ((left.indexOf(expectedSubstring) == 0) != shouldBeTrue)
+  def startWith(expectedSubstring: String)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    if ((left.asInstanceOf[String].indexOf(expectedSubstring) == 0) != shouldBeTrue)
       indicateFailure(shouldBeTrue, FailureMessages.didNotStartWith(left, expectedSubstring), FailureMessages.startedWith(left, expectedSubstring))
     else
       indicateSuccess(shouldBeTrue, FailureMessages.startedWith(left, expectedSubstring), FailureMessages.didNotStartWith(left, expectedSubstring))
@@ -1040,8 +1040,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                     ^
    * </pre>
    */
-  def endWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String): Assertion = {
-    val result = endWithRegexWithGroups(left, resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups)
+  def endWith(resultOfRegexWordApplication: ResultOfRegexWordApplication)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    val result = endWithRegexWithGroups(left.asInstanceOf[String], resultOfRegexWordApplication.regex, resultOfRegexWordApplication.groups, prettifier)
     if (result.matches != shouldBeTrue)
       indicateFailure(shouldBeTrue, result.failureMessage, result.negatedFailureMessage)
     else
@@ -1056,8 +1056,8 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                    ^
    * </pre>
    */
-  def endWith(expectedSubstring: String)(implicit ev: T <:< String): Assertion = {
-    if ((left endsWith expectedSubstring) != shouldBeTrue)
+  def endWith(expectedSubstring: String)(implicit ev: T <:< String, prettifier: Prettifier, sourceInfo: SourceInfo): Assertion = {
+    if ((left.asInstanceOf[String] endsWith expectedSubstring) != shouldBeTrue)
       indicateFailure(shouldBeTrue, FailureMessages.didNotEndWith(left, expectedSubstring), FailureMessages.endedWith(left, expectedSubstring))
     else
       indicateSuccess(shouldBeTrue, FailureMessages.endedWith(left, expectedSubstring), FailureMessages.didNotEndWith(left, expectedSubstring))
@@ -1073,7 +1073,7 @@ sealed class ResultOfNotWordForAny[T](val left: T, val shouldBeTrue: Boolean) {
    *                   ^
    * </pre>
    */
-  def matchPattern(right: PartialFunction[Any, _]) = macro MatchPatternMacro.matchPattern
+  def matchPattern(right: PartialFunction[Any, _])(implicit prettifier: Prettifier, sourceInfo: SourceInfo) = macro MatchPatternMacro.matchPattern
   
   /**
    * Overrides toString to return pretty text.

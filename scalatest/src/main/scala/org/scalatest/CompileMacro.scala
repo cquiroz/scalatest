@@ -344,10 +344,13 @@ private[scalatest] object CompileMacro {
       case Apply(
              Select(
                Apply(
-                 _,
-                 List(
-                   Literal(Constant(code))
-                 )
+                 Apply(
+                   _,
+                   List(
+                     Literal(Constant(code))
+                   )
+                 ),
+                 _
                ),
                methodNameTermName
              ),
@@ -360,23 +363,26 @@ private[scalatest] object CompileMacro {
       case Apply(
              Select(
                Apply(
-                 _,
-                 List(
-                   Select(
-                     Apply(
-                       Select(
-                         _,
-                         augmentStringTermName
-                       ),
-                       List(
-                         Literal(
-                           Constant(code)
+                 Apply(
+                   _,
+                   List(
+                     Select(
+                       Apply(
+                         Select(
+                           _,
+                           augmentStringTermName
+                         ),
+                         List(
+                           Literal(
+                             Constant(code)
+                           )
                          )
-                       )
-                     ),
-                     stripMarginTermName
+                       ),
+                       stripMarginTermName
+                     )
                    )
-                 )
+                 ),
+                 _
                ),
                methodNameTermName
              ),
@@ -518,10 +524,13 @@ private[scalatest] object CompileMacro {
       case Apply(
              Select(
                Apply(
-                 _,
-                 List(
-                   Literal(Constant(code))
-                 )
+                 Apply(
+                   _,
+                   List(
+                    Literal(Constant(code))
+                   )
+                 ),
+                 _
                ),
                methodNameTermName
              ),
@@ -534,23 +543,26 @@ private[scalatest] object CompileMacro {
       case Apply(
              Select(
                Apply(
-                 _,
-                 List(
-                   Select(
-                     Apply(
-                       Select(
-                         _,
-                         augmentStringTermName
-                       ),
-                       List(
-                         Literal(
-                           Constant(code)
+                 Apply(
+                   _,
+                   List(
+                     Select(
+                       Apply(
+                         Select(
+                           _,
+                           augmentStringTermName
+                         ),
+                         List(
+                           Literal(
+                             Constant(code)
+                           )
                          )
-                       )
-                     ),
-                     stripMarginTermName
+                       ),
+                       stripMarginTermName
+                     )
                    )
-                 )
+                 ),
+                 _
                ),
                methodNameTermName
              ),
@@ -689,12 +701,15 @@ private[scalatest] object CompileMacro {
       case Apply(
              Select(
                Apply(
-                 _,
-                 List(
-                   Literal(
-                     Constant(code)
+                 Apply(
+                   _,
+                   List(
+                     Literal(
+                       Constant(code)
+                     )
                    )
-                 )
+                 ),
+                 _
                ),
                shouldOrMustTermName
              ),
@@ -707,23 +722,26 @@ private[scalatest] object CompileMacro {
       case Apply(
              Select(
                Apply(
-                 _,
-                 List(
-                   Select(
-                     Apply(
-                       Select(
-                         _,
-                         augmentStringTermName
-                       ),
-                       List(
-                         Literal(
-                           Constant(code)
+                 Apply(
+                   _,
+                   List(
+                     Select(
+                       Apply(
+                         Select(
+                           _,
+                           augmentStringTermName
+                         ),
+                         List(
+                           Literal(
+                             Constant(code)
+                           )
                          )
-                       )
-                     ),
-                     stripMarginTermName
+                       ),
+                       stripMarginTermName
+                     )
                    )
-                 )
+                 ),
+                 _
                ),
                shouldOrMustTermName
              ),
@@ -733,7 +751,9 @@ private[scalatest] object CompileMacro {
         val codeStr = code.toString.stripMargin
         checkCompile(codeStr)
 
-      case _ => c.abort(c.enclosingPosition, "The '" + shouldOrMust + " compile' syntax only works with String literals.")
+      case other =>
+        println("###other: " + showRaw(other))
+        c.abort(c.enclosingPosition, "The '" + shouldOrMust + " compile' syntax only works with String literals.")
     }
   }
 

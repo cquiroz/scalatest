@@ -19,9 +19,9 @@ object ScalatestBuild extends Build {
 
   // To temporarily switch sbt to a different Scala version:
   // > ++ 2.10.5
-  val buildScalaVersion = "2.11.7"
+  val buildScalaVersion = "2.11.8"
 
-  val releaseVersion = "3.0.0-M15"
+  val releaseVersion = "3.0.0-M16-SNAP4"
 
   val scalacheckVersion = "1.12.5"
 
@@ -184,7 +184,7 @@ object ScalatestBuild extends Build {
 
   def scalatestJSLibraryDependencies =
     Seq(
-      "org.scala-js" %% "scalajs-test-interface" % "0.6.7"
+      "org.scala-js" %% "scalajs-test-interface" % "0.6.8"
     )
 
   def scalatestTestOptions =

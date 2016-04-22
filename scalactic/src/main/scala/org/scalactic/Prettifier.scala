@@ -15,6 +15,8 @@
  */
 package org.scalactic
 
+import java.io.Serializable
+
 import scala.collection._
 import mutable.WrappedArray
 import scala.util.Success
@@ -121,7 +123,7 @@ import scala.xml
  * custom one when a test actually fails.
  * </p>
  */
-trait Prettifier extends (Any => String)
+trait Prettifier extends (Any => String) with Serializable
 
 /**
  * Companion object for <code>Prettifier</code> that provides a default <code>Prettifier</code> implementation.

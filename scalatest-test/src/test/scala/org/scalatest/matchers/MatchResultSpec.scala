@@ -58,13 +58,13 @@ class MatchResultSpec extends FreeSpec with Matchers with PrettyMethods {
       mr2Negated.midSentenceNegatedFailureMessageArgs shouldBe (Vector("howdy"))
     }
     "can be pattern matched via an extractor for the failureMessage if it doesn't match" in {
-      inside (mr) { case MatchFailed(failureMessage) => 
-        failureMessage should be ("1 did not equal 2")
+      inside (mr) { case MatchFailed(failureMessageFun) =>
+        failureMessageFun(Prettifier.default) should be ("1 did not equal 2")
       }
     }
     "can be pattern matched via an extractor for the negatedFailureMessage if it does match" in {
-      inside (mr.negated) { case MatchSucceeded(negatedFailureMessage) => 
-        negatedFailureMessage should be ("1 did not equal 2")
+      inside (mr.negated) { case MatchSucceeded(negatedFailureMessageFun) =>
+        negatedFailureMessageFun(Prettifier.default) should be ("1 did not equal 2")
       }
     }
     "should construct localized strings from the raw strings and args" in {

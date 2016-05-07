@@ -222,8 +222,8 @@ object GenScalaTestJS {
   }
 
   def genTest(targetDir: File, version: String, scalaVersion: String): Seq[File] = {
-    //copyFiles("scalatest-test/src/test/scala/org/scalatest", "org/scalatest", List("MatcherStackDepthSpec.scala"), targetDir)
-    copyDir("scalatest-test/src/test/scala/org/scalatest", "org/scalatest", targetDir,
+    copyFiles("scalatest-test/src/test/scala/org/scalatest", "org/scalatest", List("AssertionsSpec.scala"), targetDir)
+    /*copyDir("scalatest-test/src/test/scala/org/scalatest", "org/scalatest", targetDir,
       List(
         "BigSuiteSuite.scala",
         "CatchReporterProp.scala",   // skipped because heavily depends on java reflection
@@ -318,7 +318,7 @@ object GenScalaTestJS {
         "SuiteDiscoveryHelperSuite.scala",
         "XmlSocketReporterSpec.scala"
       )
-    )
+    )*/
   }
 
 }

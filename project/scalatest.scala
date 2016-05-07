@@ -395,9 +395,9 @@ object ScalatestBuild extends Build {
       //jsDependencies += RuntimeDOM % "test",
       libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion % "test",
       scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
-      //jsEnv := NodeJSEnv(executable = "node").value,
+      jsEnv := NodeJSEnv(executable = "node").value,
       //jsEnv := PhantomJSEnv().value,
-      //scalaJSStage in Global := FastOptStage,
+      scalaJSStage in Global := FastOptStage,
       //postLinkJSEnv := PhantomJSEnv().value,
       //postLinkJSEnv := NodeJSEnv(executable = "node").value,
       sourceGenerators in Test += {
@@ -608,17 +608,20 @@ object ScalatestBuild extends Build {
     .settings(
       projectTitle := "ScalaTest Test",
       organization := "org.scalatest",
-      libraryDependencies ++= crossBuildLibraryDependencies(scalaVersion.value),
+      //libraryDependencies ++= crossBuildLibraryDependencies(scalaVersion.value),
       libraryDependencies ++= scalatestJSLibraryDependencies,
       libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion % "test",
-      //jsDependencies += RuntimeDOM % "test",
-      //scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
-      //jsEnv := NodeJSEnv(executable = "node").value,
+      jsDependencies += RuntimeDOM % "test",
+      scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
+      jsEnv := NodeJSEnv(executable = "node").value,
+      //requiresDOM := true, 
       //jsEnv := PhantomJSEnv().value,
       //scalaJSStage in Global := FastOptStage,
       //postLinkJSEnv := PhantomJSEnv().value,
       //postLinkJSEnv := NodeJSEnv(executable = "node").value,
       testOptions in Test := scalatestTestJSOptions,
+      fork in test := false, 
+      parallelExecution in Test := false, 
       publishArtifact := false,
       publish := {},
       publishLocal := {},
@@ -626,11 +629,11 @@ object ScalatestBuild extends Build {
         Def.task {
           GenScalaTestJS.genTest((sourceManaged in Test).value / "scala", version.value, scalaVersion.value)
         }.taskValue
-      },
+      }/*,
       sourceGenerators in Test <+=
         (baseDirectory, sourceManaged in Test, version, scalaVersion) map genFiles("gengen", "GenGen.scala")(GenGen.genTest),
       sourceGenerators in Test <+=
-        (baseDirectory, sourceManaged in Test, version, scalaVersion) map genFiles("genmatchers", "GenMustMatchersTests.scala")(GenMustMatchersTests.genTestForScalaJS)
+        (baseDirectory, sourceManaged in Test, version, scalaVersion) map genFiles("genmatchers", "GenMustMatchersTests.scala")(GenMustMatchersTests.genTestForScalaJS)*/
     ).dependsOn(scalatestJS % "test", commonTestJS % "test").enablePlugins(ScalaJSPlugin)
 
   lazy val scalatestApp = Project("scalatestApp", file("."))

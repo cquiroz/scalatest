@@ -31,6 +31,11 @@ import org.scalatest.exceptions.StackDepth
 import org.scalatest.exceptions.StackDepthException
 import org.scalactic._
 
+/**
+ * Typeclass that enables assertion using [[http://www.scalacheck.org ScalaCheck]], it provides a <code>check</code> method that takes a [[http://www.scalacheck.org ScalaCheck]]'s
+ * <code>Prop</code>, <code>Test.Parameters</code>, list of argument names and a <code>Prettifier</code> (for prettifying error messages) to perform assertion using [[http://www.scalacheck.org ScalaCheck]]'s
+ * <code>Test.check</code>.
+ */
 trait CheckerAsserting[T] {
   type Result
   def check(p: Prop, prms: Test.Parameters, prettifier: Prettifier, pos: source.Position, argNames: Option[List[String]] = None): Result
@@ -38,7 +43,7 @@ trait CheckerAsserting[T] {
 
 abstract class UnitCheckerAsserting {
 
-  abstract class CheckerAssertingImpl[T] extends CheckerAsserting[T] {
+  protected[scalatest] abstract class CheckerAssertingImpl[T] extends CheckerAsserting[T] {
 
     import CheckerAsserting._
 

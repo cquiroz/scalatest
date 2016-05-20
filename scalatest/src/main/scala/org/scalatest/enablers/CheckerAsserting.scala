@@ -149,17 +149,17 @@ abstract class UnitCheckerAsserting {
     }
 }
 
-abstract class ExpectationCheckerAsserting extends UnitCheckerAsserting {
-/*
+/*abstract class ExpectationCheckerAsserting extends UnitCheckerAsserting {
+
   implicit def assertingNatureOfExpectation: CheckerAsserting[Expectation] { type Result = Expectation } = {
     new CheckerAsserting[Expectation] {
       type Result = Expectation
     }
   }
-*/
-}
 
-object CheckerAsserting extends ExpectationCheckerAsserting {
+}*/
+
+object CheckerAsserting extends UnitCheckerAsserting /*ExpectationCheckerAsserting*/ {
 
   implicit def assertingNatureOfAssertion: CheckerAsserting[Assertion] { type Result = Assertion } = {
     new CheckerAssertingImpl[Assertion] {

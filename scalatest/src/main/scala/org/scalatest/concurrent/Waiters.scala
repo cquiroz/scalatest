@@ -24,6 +24,7 @@ import org.scalatest.exceptions.StackDepthExceptionHelper.getStackDepthFun
 import time.{Nanoseconds, Second, Span}
 import PatienceConfiguration._
 import org.scalactic.source
+import reflect.macros.Context
 
 /**
  * Trait that facilitates performing assertions outside the main test thread, such as assertions in callback methods
@@ -437,9 +438,13 @@ trait Waiters extends PatienceConfiguration {
      *
      * @param config the <code>PatienceConfig</code> object containing the <code>timeout</code> parameter
      */
-    def await()(implicit config: PatienceConfig, pos: source.Position): Unit = {
+    def await(config: PatienceConfig, pos: source.Position): Unit = {
       awaitImpl(config.timeout, pos)
     }
+
+    import scala.language.experimental.macros
+
+    def await()(implicit config: PatienceConfig): Unit = macro WaitersMacro.await
 
     /**
      * Wait for an exception to be produced by the by-name passed to <code>apply</code>, or one dismissal,
@@ -568,4 +573,11 @@ trait Waiters extends PatienceConfiguration {
  * them in the Scala interpreter.
  */
 object Waiters extends Waiters
+
+object WaitersMacro {
+
+  def await(context: Context)()(config: context.Tree): context.Expr[Unit] =
+    source.PositionMacro.testPosition(context)
+  //new BooleanMacro[context.type](context, "assertionsHelper").genMacro[Assertion](condition, "macroAssert", context.literal(""), prettifier, pos)
+}
 

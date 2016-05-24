@@ -292,5 +292,19 @@ class WaitersSpec extends fixture.FunSpec with Matchers with ConductorFixture wi
       }
       w.await(dismissals(1))
     }
+    it("should continue to allow explicit PatienceConfig in its await() method after implicit pos is added") { () =>
+      """
+        |val config = PatienceConfig()
+        |val waiter = new Waiter
+        |waiter.await()(config)
+      """.stripMargin should compile
+    }
+    /*it("should continue to allow explicit PatienceConfig in its await(dismissals: Dismissals) method after implicit pos is added") { () =>
+      """
+        |val config = PatienceConfig()
+        |val waiter = new Waiter
+        |waiter.await(Waiters.dismissals(2))(config)
+      """.stripMargin should compile
+    }*/
   }
 }

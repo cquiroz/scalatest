@@ -55,4 +55,40 @@ object PositionMacro {
     )
   }
 
+  def testPosition(context: Context): context.Expr[Unit] = {
+    import context.universe._
+
+    context.macroApplication match {
+      case Apply(Apply(Select(qualifier, methodName), args1), args2) =>
+        val pos =
+          Apply(
+            Select(
+              Select(
+                Select(
+                  Select(
+                    Select(
+                      Ident(newTermName("_root_")),
+                      newTermName("org")
+                    ),
+                    newTermName("scalactic")
+                  ),
+                  newTermName("source")
+                ),
+                newTermName("Position")
+              ),
+              newTermName("apply")
+            ),
+            List(
+              Literal(Constant(context.enclosingPosition.source.file.name)),
+              Literal(Constant(context.enclosingPosition.source.path)),
+              Literal(Constant(context.enclosingPosition.line))
+            )
+          )
+        context.Expr(Apply(Select(qualifier.duplicate, newTermName(methodName.decoded)), args1 ::: args2 ::: List(pos)))
+      case other =>
+        context.error(context.enclosingPosition, "Unexpected Tree in PositionMacro: " + showRaw(other))
+        context.Expr(context.macroApplication)  // Not sure what to return, anyway an error is raised already
+    }
+  }
+
 }

@@ -138,10 +138,13 @@ sealed abstract class Event extends Ordered[Event] with Product with Serializabl
       }
     }
     def getThrowableStackDepth(throwable: Throwable) = {
+      // SKIP-SCALATESTJS-START
       throwable match { 
         case sde: StackDepthException => sde.failedCodeStackDepth 
         case _ => -1
       }
+      // SKIP-SCALATESTJS-END
+      //SCALATESTJS-ONLY -1
     }
     def throwableOption(throwableOption: Option[Throwable]) = {
       throwableOption match {

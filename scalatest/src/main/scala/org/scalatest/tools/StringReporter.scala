@@ -1010,7 +1010,10 @@ private[scalatest] object StringReporter {
                 val stackTraceThisThrowableTruncated = 
                   throwable match {
                     case e: Throwable with StackDepth =>
+                      // SKIP-SCALATESTJS-START
                       val stackDepth = e.failedCodeStackDepth
+                      // SKIP-SCALATESTJS-END
+                      //SCALATESTJS-ONLY val stackDepth = 0
                       stackTraceThisThrowable.head :: (whiteSpace + "...") :: stackTraceThisThrowable.drop(stackDepth + 1).take(shortStackTraceSize - 3) ::: List(whiteSpace + "...")
                     case _ => // In case of IAE or what not, show top 10 stack frames
                       stackTraceThisThrowable.head :: stackTraceThisThrowable.drop(1).take(shortStackTraceSize) ::: List(whiteSpace + "...")

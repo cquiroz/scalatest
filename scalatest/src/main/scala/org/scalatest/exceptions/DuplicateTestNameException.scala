@@ -78,6 +78,7 @@ class DuplicateTestNameException(
   def this(testName: String, failedCodeStackDepthFun: StackDepthException => Int) =
     this(testName, Right(failedCodeStackDepthFun))
 
+  // SKIP-SCALATESTJS-START
   /**
    * Returns an exception of class <code>DuplicateTestNameException</code> with <code>failedExceptionStackDepth</code> set to 0 and 
    * all frames above this stack depth severed off. This can be useful when working with tools (such as IDEs) that do not
@@ -90,6 +91,7 @@ class DuplicateTestNameException(
     e.setStackTrace(truncated)
     e
   }
+  // SKIP-SCALATESTJS-END
 
   /**
    * Indicates whether this object can be equal to the passed object.

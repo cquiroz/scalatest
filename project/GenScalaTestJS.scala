@@ -252,7 +252,9 @@ object GenScalaTestJS {
         "StreamlinedXmlEqualitySpec.scala",    // skipped because use scala.xml
         "StreamlinedXmlNormMethodsSpec.scala", // skipped because use scala.xml
         "StreamlinedXmlSpec.scala",            // skipped because use scala.xml
-        "SuiteSuite.scala"         // skipped because it depends on java reflection
+        "SuiteSuite.scala",         // skipped because it depends on java reflection
+        "SeveredStackTracesSpec.scala",   // skipped because stack depth does not make sense in scala-js
+        "SeveredStackTracesFailureSpec.scala"   // skipped because stack depth does not make sense in scala-js
       )) ++
     copyDir("scalatest-test/src/test/scala/org/scalatest/concurrent", "org/scalatest/concurrent", targetDir,
       List(

@@ -157,6 +157,7 @@ abstract class StackDepthException(
  
   lazy val failedCodeFilePathname: Option[String] = position.map(_.filePathname)
 
+  // SKIP-SCALATESTJS-START
   /**
    * The depth in the stack trace of this exception at which the line of test code that failed resides.
    *
@@ -177,6 +178,7 @@ abstract class StackDepthException(
       }
     stackDepthFun(this)
   }
+  // SKIP-SCALATESTJS-END
 
   /**
    * Returns the detail message string of this <code>StackDepthException</code>.
@@ -208,7 +210,9 @@ abstract class StackDepthException(
         (that canEqual this) &&
         message == that.message &&
         cause == that.cause &&
+        // SKIP-SCALATESTJS-START
         failedCodeStackDepth == that.failedCodeStackDepth &&
+        // SKIP-SCALATESTJS-END
         getStackTrace.deep == that.getStackTrace.deep
       case _ => false
     }
@@ -222,7 +226,10 @@ abstract class StackDepthException(
         41 * (
           41 + message.hashCode
         ) + cause.hashCode
-      ) + failedCodeStackDepth.hashCode
+      )
+        // SKIP-SCALATESTJS-START
+        + failedCodeStackDepth.hashCode
+        // SKIP-SCALATESTJS-END
     ) + getStackTrace.hashCode
 }
 

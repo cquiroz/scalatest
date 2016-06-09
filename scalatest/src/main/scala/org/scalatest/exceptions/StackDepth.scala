@@ -40,10 +40,12 @@ trait StackDepth { this: Throwable =>
    */
   val cause: Option[Throwable]
 
+  // SKIP-SCALATESTJS-START
   /**
    * The depth in the stack trace of this exception at which the line of test code that failed resides.
    */
   val failedCodeStackDepth: Int
+  // SKIP-SCALATESTJS-END
 
   /**
    * A string that provides the full pathname of the source file containing the line of code that failed, suitable
@@ -89,6 +91,7 @@ trait StackDepth { this: Throwable =>
       fileName + ":" + lineNum
   }
 
+  // SKIP-SCALATESTJS-START
   private def stackTraceElement: Option[StackTraceElement] = {
     val stackTrace = getStackTrace()
     position match {
@@ -98,6 +101,7 @@ trait StackDepth { this: Throwable =>
         else Some(stackTrace(failedCodeStackDepth))
     }
   }
+  // SKIP-SCALATESTJS-END
 
   /**
    * A string that provides the filename of the line of code that failed, suitable
@@ -112,6 +116,7 @@ trait StackDepth { this: Throwable =>
    * @return a string containing the filename that caused the failed test
    */
   def failedCodeFileName: Option[String] = {
+    // SKIP-SCALATESTJS-START
     position match {
       case Some(pos) => Some(pos.fileName)
       case None =>
@@ -119,6 +124,8 @@ trait StackDepth { this: Throwable =>
           StackDepthExceptionHelper.getFailedCodeFileName(ele)
         }
     }
+    // SKIP-SCALATESTJS-END
+    //SCALATESTJS-ONLY position.map(_.fileName)
   }
 
   /**
@@ -134,6 +141,7 @@ trait StackDepth { this: Throwable =>
    * @return a string containing the line number that caused the failed test
    */
   def failedCodeLineNumber: Option[Int] = {
+    // SKIP-SCALATESTJS-START
     position match {
       case Some(pos) => Some(pos.lineNumber)
       case None =>
@@ -142,8 +150,11 @@ trait StackDepth { this: Throwable =>
           if (lineNum > 0) Some(lineNum) else None
         }
     }
+    // SKIP-SCALATESTJS-END
+    //SCALATESTJS-ONLY position.map(_.lineNumber)
   }
 
+  // SKIP-SCALATESTJS-START
   /**
    * Returns an exception of the same class with <code>failedExceptionStackDepth</code> set to 0 and 
    * all frames above this stack depth severed off. This can be useful when working with tools (such as IDEs) that do not
@@ -151,4 +162,5 @@ trait StackDepth { this: Throwable =>
    * in the StackDepth exceptions.)
    */
   def severedAtStackDepth: Throwable with StackDepth
+  // SKIP-SCALATESTJS-END
 }

@@ -208,6 +208,7 @@ class TestFailedException(
     failedCodeStackDepthFun: StackDepthException => Int,
     payload: Option[Any]) = this(messageFun, cause, Right(failedCodeStackDepthFun), payload)
 
+  // SKIP-SCALATESTJS-START
   /**
    * Returns an exception of class <code>TestFailedException</code> with <code>failedExceptionStackDepth</code> set to 0 and 
    * all frames above this stack depth severed off. This can be useful when working with tools (such as IDEs) that do not
@@ -220,6 +221,7 @@ class TestFailedException(
     e.setStackTrace(truncated)
     e
   }
+  // SKIP-SCALATESTJS-END
 
   /**
    * Returns an instance of this exception's class, identical to this exception,

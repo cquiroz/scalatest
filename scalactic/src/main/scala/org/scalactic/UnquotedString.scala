@@ -18,7 +18,7 @@ package org.scalactic
 // This is used to pass a string to the FailureMessages apply method
 // but prevent it from being quoted. This is useful when using a string
 // to talk about method names, for example.
-private[scalactic] class UnquotedString(s: String) {
+private[scalactic] class UnquotedString(s: String) extends Serializable {
   override def toString = s
   override def equals(other: Any): Boolean =
     other match {

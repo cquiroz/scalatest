@@ -21,11 +21,11 @@ object ScalatestBuild extends Build {
   // > ++ 2.10.5
   val buildScalaVersion = "2.11.8"
 
-  val releaseVersion = "3.0.0-RC4"
+  val releaseVersion = "3.0.0-RC5"
 
   val scalacheckVersion = "1.13.1"
 
-  val githubTag = "release-3.0.0-RC4" // for scaladoc source urls
+  val githubTag = "release-3.0.0-RC5" // for scaladoc source urls
 
   val scalatestDocSourceUrl =
     "https://github.com/scalatest/scalatest/tree/"+ githubTag +
@@ -410,6 +410,63 @@ object ScalatestBuild extends Build {
       publishLocal := {}
     ).dependsOn(scalacticJS, scalatestJS % "test", commonTestJS % "test").enablePlugins(ScalaJSPlugin)
 
+  lazy val scalatestCompatible = Project("scalatest-compatible", file("scalatest-compatible"))
+    .settings(sharedSettings: _*)
+    .settings(scalatestDocSettings: _*)
+    .settings(
+      projectTitle := "ScalaTest Compatible",
+      organization := "org.scalatest",
+      moduleName := "scalatest-compatible",
+      crossPaths := false, // disable using the Scala version in output paths and artifacts
+      autoScalaLibrary := false, // removes Scala dependency
+      docTaskSetting
+    ).settings(osgiSettings: _*).settings(
+      OsgiKeys.exportPackage := Seq(
+        "org.scalatest.compatible"
+      ),
+      OsgiKeys.importPackage := Seq(
+        "org.scalatest.compatible.*"
+      ),
+      OsgiKeys.additionalHeaders:= Map(
+      "Bundle-Name" -> "ScalaTest Compatible",
+      "Bundle-Description" -> "ScalaTest Compatible a module third party libraries can depend on for ScalaTest's Assertion type.",
+      "Bundle-DocURL" -> "http://www.scalatest.org/",
+      "Bundle-Vendor" -> "Artima, Inc."
+      )
+  )
+
+  lazy val scalatestCompatibleJS = Project("scalatest-compatibleJS", file("scalatest-compatible.js"))
+    .settings(sharedSettings: _*)
+    .settings(scalatestDocSettings: _*)
+    .settings(
+      projectTitle := "ScalaTest Compatible",
+      organization := "org.scalatest",
+      moduleName := "scalatest-compatible",
+      crossPaths := false, // disable using the Scala version in output paths and artifacts
+      autoScalaLibrary := false, // removes Scala dependency
+      sourceGenerators in Compile += {
+        Def.task {
+          GenScalaTestCompatibleJS.genHtml((sourceManaged in Compile).value, version.value, scalaVersion.value)
+
+          GenScalaTestCompatibleJS.genScala((sourceManaged in Compile).value / "scala", version.value, scalaVersion.value)
+        }.taskValue
+      },
+      scalatestJSDocTaskSetting
+    ).settings(osgiSettings: _*).settings(
+    OsgiKeys.exportPackage := Seq(
+      "org.scalatest.compatible"
+    ),
+    OsgiKeys.importPackage := Seq(
+      "org.scalatest.compatible.*"
+    ),
+    OsgiKeys.additionalHeaders:= Map(
+      "Bundle-Name" -> "ScalaTest Compatible",
+      "Bundle-Description" -> "ScalaTest Compatible a module third party libraries can depend on for ScalaTest's Assertion type.",
+      "Bundle-DocURL" -> "http://www.scalatest.org/",
+      "Bundle-Vendor" -> "Artima, Inc."
+    )
+  ).enablePlugins(ScalaJSPlugin)
+
   lazy val scalatest = Project("scalatest", file("scalatest"))
    .settings(sharedSettings: _*)
    .settings(scalatestDocSettings: _*)
@@ -456,6 +513,10 @@ object ScalatestBuild extends Build {
      },
      docTaskSetting
    ).settings(osgiSettings: _*).settings(
+      OsgiKeys.requireBundle := Seq(
+        "org.scalatest.compatible"
+      ),
+      OsgiKeys.privatePackage := Seq.empty,
       OsgiKeys.exportPackage := Seq(
         "org.scalatest",
         "org.scalatest.concurrent",
@@ -496,7 +557,7 @@ object ScalatestBuild extends Build {
         "Bundle-Vendor" -> "Artima, Inc.",
         "Main-Class" -> "org.scalatest.tools.Runner"
       )
-   ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalactic).aggregate(LocalProject("scalatest-test"))
+   ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalatestCompatible, scalactic).aggregate(LocalProject("scalatest-test"))
 
   lazy val scalatestTest = Project("scalatest-test", file("scalatest-test"))
     .settings(sharedSettings: _*)
@@ -568,9 +629,9 @@ object ScalatestBuild extends Build {
       //unmanagedResourceDirectories in Compile <+= sourceManaged( _ / "resources" ),
       scalatestJSDocTaskSetting
     ).settings(osgiSettings: _*).settings(
+      OsgiKeys.privatePackage := Seq.empty,
       OsgiKeys.exportPackage := Seq(
         "org.scalatest",
-        "org.scalatest.compatible",
         "org.scalatest.concurrent",
         "org.scalatest.enablers",
         "org.scalatest.events",
@@ -601,7 +662,7 @@ object ScalatestBuild extends Build {
         "Bundle-Vendor" -> "Artima, Inc.",
         "Main-Class" -> "org.scalatest.tools.Runner"
       )
-    ).dependsOn(scalacticMacroJS % "compile-internal, test-internal", scalacticJS).aggregate(LocalProject("scalatestTestJS")).enablePlugins(ScalaJSPlugin)
+    ).dependsOn(scalacticMacroJS % "compile-internal, test-internal", scalacticJS, scalatestCompatibleJS).aggregate(LocalProject("scalatestTestJS")).enablePlugins(ScalaJSPlugin)
 
   lazy val scalatestTestJS = Project("scalatestTestJS", file("scalatest-test.js"))
     .settings(sharedSettings: _*)
@@ -701,7 +762,7 @@ object ScalatestBuild extends Build {
         "Bundle-Vendor" -> "Artima, Inc.",
         "Main-Class" -> "org.scalatest.tools.Runner"
       )
-    ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalactic % "compile-internal", scalatest % "compile-internal").aggregate(scalactic, scalatest)
+    ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalactic % "compile-internal", scalatestCompatible % "compile-internal", scalatest % "compile-internal").aggregate(scalactic, scalatestCompatible, scalatest)
 
   lazy val scalatestAppJS = Project("scalatestAppJS", file("scalatest-app.js"))
     .settings(sharedSettings: _*)
@@ -730,6 +791,7 @@ object ScalatestBuild extends Build {
     ).settings(osgiSettings: _*).settings(
       OsgiKeys.exportPackage := Seq(
         "org.scalatest",
+        "org.scalatest.compatible",
         "org.scalatest.concurrent",
         "org.scalatest.enablers",
         "org.scalatest.events",
@@ -764,7 +826,7 @@ object ScalatestBuild extends Build {
         "Bundle-Vendor" -> "Artima, Inc.",
         "Main-Class" -> "org.scalatest.tools.Runner"
       )
-    ).dependsOn(scalacticMacroJS % "compile-internal, test-internal", scalacticJS % "compile-internal", scalatestJS % "compile-internal").aggregate(scalacticJS, scalatestJS).enablePlugins(ScalaJSPlugin)
+    ).dependsOn(scalacticMacroJS % "compile-internal, test-internal", scalacticJS % "compile-internal", scalatestCompatibleJS % "compile-internal", scalatestJS % "compile-internal").aggregate(scalacticJS, scalatestJS, scalatestCompatibleJS).enablePlugins(ScalaJSPlugin)
 
   def gentestsLibraryDependencies =
     Seq(

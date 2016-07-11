@@ -24,6 +24,7 @@ import exceptions.StackDepthException
 import exceptions.StackDepthException.toExceptionFunction
 import exceptions.TestFailedException
 import exceptions.TestPendingException
+import enablers.Differ
 
 /**
  * Trait that contains ScalaTest's basic assertion methods.
@@ -995,9 +996,9 @@ trait Assertions extends TripleEquals  {
    * @param actual the actual value, which should equal the passed <code>expected</code> value
    * @throws TestFailedException if the passed <code>actual</code> value does not equal the passed <code>expected</code> value.
    */
-  def assertResult(expected: Any, clue: Any)(actual: Any)(implicit prettifier: Prettifier, pos: source.Position): Assertion = {
+  def assertResult(expected: Any, clue: Any)(actual: Any)(implicit prettifier: Prettifier, pos: source.Position, differ: Differ[Any]): Assertion = {
     if (!areEqualComparingArraysStructurally(actual, expected)) {
-      val (act, exp) = Suite.getObjectsForFailureMessage(actual, expected)
+      val (act, exp) = differ.diff(actual, expected)
       val s = FailureMessages.expectedButGot(prettifier, exp, act)
       val fullMsg = AppendedClues.appendClue(s, clue.toString)
       throw newAssertionFailedException(Some(fullMsg), None, pos)
@@ -1016,9 +1017,9 @@ trait Assertions extends TripleEquals  {
    * @param actual the actual value, which should equal the passed <code>expected</code> value
    * @throws TestFailedException if the passed <code>actual</code> value does not equal the passed <code>expected</code> value.
    */
-  def assertResult(expected: Any)(actual: Any)(implicit prettifier: Prettifier, pos: source.Position): Assertion = {
+  def assertResult(expected: Any)(actual: Any)(implicit prettifier: Prettifier, pos: source.Position, differ: Differ[Any]): Assertion = {
     if (!areEqualComparingArraysStructurally(actual, expected)) {
-      val (act, exp) = Suite.getObjectsForFailureMessage(actual, expected)
+      val (act, exp) = differ.diff(actual, expected)
       val s = FailureMessages.expectedButGot(prettifier, exp, act)
       throw newAssertionFailedException(Some(s), None, pos)
     }

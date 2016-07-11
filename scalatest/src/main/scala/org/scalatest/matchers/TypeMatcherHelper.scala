@@ -21,6 +21,7 @@ import org.scalactic.Prettifier
 import org.scalatest.MatchersHelper._
 import org.scalatest.words.{ResultOfAnTypeInvocation, ResultOfATypeInvocation}
 //import org.scalatest.words.{FactResultOfAnTypeInvocation, FactResultOfATypeInvocation}
+import org.scalatest.enablers.Differ
 
 /**
  * <code>TypeMatcherHelper</code> is called by <code>TypeMatcherMacro</code> to support <code>a [Type]</code> and <code>an [Type]</code> syntax.
@@ -126,7 +127,6 @@ object TypeMatcherHelper {
   def assertAType(left: Any, aType: ResultOfATypeInvocation[_], prettifier: Prettifier, pos: source.Position): org.scalatest.Assertion = {
     val clazz = aType.clazz
     if (!clazz.isAssignableFrom(left.getClass)) {
-      val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, clazz.getName)
       throw newTestFailedException(FailureMessages.wasNotAnInstanceOf(prettifier, left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName)), None, pos)
     }
     org.scalatest.Succeeded
@@ -158,7 +158,6 @@ object TypeMatcherHelper {
   def assertAnType(left: Any, anType: ResultOfAnTypeInvocation[_], prettifier: Prettifier, pos: source.Position): org.scalatest.Assertion = {
     val clazz = anType.clazz
     if (!clazz.isAssignableFrom(left.getClass)) {
-      val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, clazz.getName)
       throw newTestFailedException(FailureMessages.wasNotAnInstanceOf(prettifier, left, UnquotedString(clazz.getName), UnquotedString(left.getClass.getName)), None, pos)
     }
     org.scalatest.Succeeded

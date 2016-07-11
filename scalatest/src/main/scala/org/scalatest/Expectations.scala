@@ -20,15 +20,16 @@ import Fact._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.reflect.ClassTag
+import enablers.Differ
 
 private[scalatest] trait Expectations {
   
   implicit def convertExpectationToAssertion(exp: Expectation): Assertion = exp.toAssertion
 
   // TODO: Need to make this and assertResult use custom equality I think.
-  def expectResult(expected: Any)(actual: Any)(implicit prettifier: Prettifier, pos: source.Position): Fact = {
+  def expectResult(expected: Any)(actual: Any)(implicit prettifier: Prettifier, pos: source.Position, differ: Differ[Any]): Fact = {
     if (!Assertions.areEqualComparingArraysStructurally(actual, expected)) {
-      val (act, exp) = Suite.getObjectsForFailureMessage(actual, expected)
+      val (act, exp) = differ.diff(actual, expected)
       val rawFactMessage = Resources.rawExpectedButGot
       val rawSimplifiedFactMessage = Resources.rawDidNotEqual
       val rawMidSentenceFactMessage = Resources.rawMidSentenceExpectedButGot
@@ -45,7 +46,7 @@ private[scalatest] trait Expectations {
       )(prettifier)
     }
     else {
-      val (act, exp) = Suite.getObjectsForFailureMessage(actual, expected)
+      val (act, exp) = differ.diff(actual, expected)
       val rawFactMessage = Resources.rawExpectedAndGot
       val rawSimplifiedFactMessage = Resources.rawEqualed
       val rawMidSentenceFactMessage = Resources.rawMidSentenceExpectedAndGot

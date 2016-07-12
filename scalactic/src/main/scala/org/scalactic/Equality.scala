@@ -220,6 +220,19 @@ trait Equality[A] extends Equivalence[A] {
    *     <code>Equality</code> instance
    */
   final def areEquivalent(a: A, b: A): Boolean = areEqual(a, b)
+
+  def difference(a: A, b: Any): Difference =
+    new Difference {
+      def inlineDiff: Option[(String, String)] =
+        (a, b) match {
+          case (s1: String, s2: String) => Some(Prettifier.diffStrings(s1, s2))
+          case _ => None
+        }
+
+      def sideBySideDiff: Option[(String, String)] = None
+
+      def analysis: Option[String] = None
+    }
 } 
 
 /**

@@ -5249,7 +5249,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
     def shouldEqual(right: Any)(implicit equality: Equality[T]): Assertion = {
       doCollected(collected, xs, original, prettifier, pos) { e =>
         if (!equality.areEqual(e, right)) {
-          val (eee, rightee) = Suite.getObjectsForFailureMessage(e, right)
+          val (eee, rightee) = equality.difference(e, right).inlineDiff.getOrElse((e, right))
           indicateFailure(FailureMessages.didNotEqual(prettifier, eee, rightee), None, pos)
         }
         else indicateSuccess(FailureMessages.equaled(prettifier, e, right))
@@ -6738,7 +6738,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      */
     def shouldEqual(right: Any)(implicit equality: Equality[T]): Assertion = {
       if (!equality.areEqual(leftSideValue, right)) {
-        val (leftee, rightee) = Suite.getObjectsForFailureMessage(leftSideValue, right)
+        val (leftee, rightee) = equality.difference(leftSideValue, right).inlineDiff.getOrElse((leftSideValue, right))
         indicateFailure(FailureMessages.didNotEqual(prettifier, leftee, rightee), None, pos)
       }
       else indicateSuccess(FailureMessages.equaled(prettifier, leftSideValue, right))

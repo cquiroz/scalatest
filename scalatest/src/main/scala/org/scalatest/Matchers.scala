@@ -1941,7 +1941,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  class ResultOfBeWordForAny[T](left: T, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  class ResultOfBeWordForAny[T](left: T, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[T]) {
 
     /**
      * This method enables the following syntax (positiveNumber is a <code>AMatcher</code>):
@@ -1954,8 +1954,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def a(aMatcher: AMatcher[T]): Assertion = {
       val matcherResult = aMatcher(left)
       if (matcherResult.matches != shouldBeTrue) {
-        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
-      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
+      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
     }
     
     /**
@@ -1969,8 +1969,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def an(anMatcher: AnMatcher[T]): Assertion = {
       val matcherResult = anMatcher(left)
       if (matcherResult.matches != shouldBeTrue) {
-        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
-      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
+      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
     }
 
     /**
@@ -2019,8 +2019,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def a(symbol: Symbol)(implicit toAnyRef: T <:< AnyRef): Assertion = {
       val matcherResult = matchSymbolToPredicateMethod(toAnyRef(left), symbol, true, true, prettifier, pos)
       if (matcherResult.matches != shouldBeTrue) {
-        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
-      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
+      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
     }
     // SKIP-SCALATESTJS-END
 
@@ -2054,8 +2054,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def an(symbol: Symbol)(implicit toAnyRef: T <:< AnyRef): Assertion = {
       val matcherResult = matchSymbolToPredicateMethod(toAnyRef(left), symbol, true, false, prettifier, pos)
       if (matcherResult.matches != shouldBeTrue) {
-        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
-      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
+      } else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
     }
     // SKIP-SCALATESTJS-END
 
@@ -2148,7 +2148,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfIncludeWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfIncludeWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[String]) {
 
     /**
      * This method enables the following syntax: 
@@ -2171,8 +2171,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def regex(regexWithGroups: RegexWithGroups): Assertion = {
       val result = includeRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
       if (result.matches != shouldBeTrue)
-        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier) else result.negatedFailureMessage(prettifier), None, pos)
-      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier), result.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier, differ) else result.negatedFailureMessage(prettifier, differ), None, pos)
+      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier, differ), result.failureMessage(prettifier, differ))
     }
 
     /**
@@ -2203,7 +2203,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfStartWithWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfStartWithWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[String]) {
 
     /**
      * This method enables the following syntax: 
@@ -2226,8 +2226,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def regex(regexWithGroups: RegexWithGroups): Assertion = {
       val result = startWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
       if (result.matches != shouldBeTrue)
-        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier) else result.negatedFailureMessage(prettifier), None, pos)
-      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier), result.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier, differ) else result.negatedFailureMessage(prettifier, differ), None, pos)
+      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier, differ), result.failureMessage(prettifier, differ))
     }
 
     /**
@@ -2258,7 +2258,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfEndWithWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfEndWithWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[String]) {
 
     /**
      * This method enables the following syntax: 
@@ -2281,8 +2281,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def regex(regexWithGroups: RegexWithGroups): Assertion = {
       val result = endWithRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
       if (result.matches != shouldBeTrue)
-        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier) else result.negatedFailureMessage(prettifier), None, pos)
-      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier), result.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier, differ) else result.negatedFailureMessage(prettifier, differ), None, pos)
+      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier, differ), result.failureMessage(prettifier, differ))
     }
 
     /**
@@ -2314,7 +2314,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    *
    * @author Bill Venners
    */
-  final class ResultOfFullyMatchWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfFullyMatchWordForString(left: String, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[String]) {
 
     /**
      * This method enables the following syntax: 
@@ -2337,8 +2337,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
     def regex(regexWithGroups: RegexWithGroups): Assertion = {
       val result = fullyMatchRegexWithGroups(left, regexWithGroups.regex, regexWithGroups.groups)
       if (result.matches != shouldBeTrue)
-        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier) else result.negatedFailureMessage(prettifier), None, pos)
-      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier), result.failureMessage(prettifier))
+        indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier, differ) else result.negatedFailureMessage(prettifier, differ), None, pos)
+      else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier, differ), result.failureMessage(prettifier, differ))
     }
 
     /**
@@ -3115,7 +3115,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfNotWordForCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfNotWordForCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[T]]) {
 
      
     /**
@@ -3248,9 +3248,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val result = beMatcher(e)
         if (result.matches != shouldBeTrue) {
-          indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier) else result.negatedFailureMessage(prettifier), None, pos)
+          indicateFailure(if (shouldBeTrue) result.failureMessage(prettifier, differ) else result.negatedFailureMessage(prettifier, differ), None, pos)
         }
-        else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier), result.failureMessage(prettifier))
+        else indicateSuccess(shouldBeTrue, result.negatedFailureMessage(prettifier, differ), result.failureMessage(prettifier, differ))
       }
     }
     
@@ -3513,9 +3513,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val matcherResult = matchSymbolToPredicateMethod(toAnyRef(e), symbol, false, false, prettifier, pos)
         if (matcherResult.matches != shouldBeTrue) {
-          indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
+          indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
         }
-        else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
       }
     }
     
@@ -3531,9 +3531,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val matcherResult = matchSymbolToPredicateMethod(toAnyRef(e), resultOfAWordApplication.symbol, true, true, prettifier, pos)
         if (matcherResult.matches != shouldBeTrue) {
-          indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
+          indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
         }
-        else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
       }
     }
     
@@ -3549,9 +3549,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val matcherResult = matchSymbolToPredicateMethod(toAnyRef(e), resultOfAnWordApplication.symbol, true, false, prettifier, pos)
         if (matcherResult.matches != shouldBeTrue) {
-          indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier) else matcherResult.negatedFailureMessage(prettifier), None, pos)
+          indicateFailure(if (shouldBeTrue) matcherResult.failureMessage(prettifier, differ) else matcherResult.negatedFailureMessage(prettifier, differ), None, pos)
         }
-        else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier), matcherResult.failureMessage(prettifier))
+        else indicateSuccess(shouldBeTrue, matcherResult.negatedFailureMessage(prettifier, differ), matcherResult.failureMessage(prettifier, differ))
       }
     }
     // SKIP-SCALATESTJS-END
@@ -4221,17 +4221,17 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -4278,17 +4278,17 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -4312,17 +4312,17 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -4374,17 +4374,17 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -4963,7 +4963,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    * @author Bill Venners
    * @author Chee Seng
    */
-  sealed class ResultOfBeWordForCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  sealed class ResultOfBeWordForCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[GenTraversable[T]]) {
 
     // TODO: Missing should(AMatcher) and should(AnMatcher)
 
@@ -5010,9 +5010,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         if (matcherResult.matches != shouldBeTrue) {
           indicateFailure(
             if (shouldBeTrue)
-              matcherResult.failureMessage(prettifier)
+              matcherResult.failureMessage(prettifier, differ)
             else
-              matcherResult.negatedFailureMessage(prettifier),
+              matcherResult.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
@@ -5020,8 +5020,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         else
           indicateSuccess(
             shouldBeTrue,
-            matcherResult.negatedFailureMessage(prettifier),
-            matcherResult.failureMessage(prettifier)
+            matcherResult.negatedFailureMessage(prettifier, differ),
+            matcherResult.failureMessage(prettifier, differ)
           )
       }
     }
@@ -5040,9 +5040,9 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         if (matcherResult.matches != shouldBeTrue) {
           indicateFailure(
             if (shouldBeTrue)
-              matcherResult.failureMessage(prettifier)
+              matcherResult.failureMessage(prettifier, differ)
             else
-              matcherResult.negatedFailureMessage(prettifier),
+              matcherResult.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
@@ -5050,8 +5050,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
         else
           indicateSuccess(
             shouldBeTrue,
-            matcherResult.negatedFailureMessage(prettifier),
-            matcherResult.failureMessage(prettifier)
+            matcherResult.negatedFailureMessage(prettifier, differ),
+            matcherResult.failureMessage(prettifier, differ)
           )
       }
     }
@@ -5163,8 +5163,8 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfBeWordForCollectedArray[T](collected: Collected, xs: scala.collection.GenTraversable[Array[T]], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position)
-    extends ResultOfBeWordForCollectedAny(collected, xs, original, shouldBeTrue, prettifier, pos) {
+  final class ResultOfBeWordForCollectedArray[T](collected: Collected, xs: scala.collection.GenTraversable[Array[T]], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[GenTraversable[Array[T]]])
+    extends ResultOfBeWordForCollectedAny(collected, xs, original, shouldBeTrue, prettifier, pos, differ) {
   
     /**
      * This method enables the following syntax:
@@ -5195,7 +5195,7 @@ trait Matchers extends Assertions with Tolerance with ShouldVerb with MatcherWor
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfCollectedAny[T](collected: Collected, xs: scala.collection.GenTraversable[T], original: Any, prettifier: Prettifier, pos: source.Position, differ: Differ[GenTraversable[T]]) {
 
 // TODO: shouldBe null works, b ut should be (null) does not when type is Any: 
 /*
@@ -5233,7 +5233,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         MatchFailed.unapply(result)(prettifier) match {
           case Some(failureMessage) =>
             indicateFailure(failureMessage, None, pos)
-          case None => indicateSuccess(result.negatedFailureMessage(prettifier))
+          case None => indicateSuccess(result.negatedFailureMessage(prettifier, differ))
         }
       }
     }
@@ -5417,7 +5417,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         MatchFailed.unapply(result)(prettifier) match {
           case Some(failureMessage) =>
             indicateFailure(failureMessage, None, pos)
-          case None => indicateSuccess(result.negatedFailureMessage(prettifier))
+          case None => indicateSuccess(result.negatedFailureMessage(prettifier, differ))
         }
       }
     }
@@ -5437,7 +5437,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         MatchFailed.unapply(result)(prettifier) match {
           case Some(failureMessage) =>
             indicateFailure(failureMessage, None, pos)
-          case None => indicateSuccess(result.negatedFailureMessage(prettifier))
+          case None => indicateSuccess(result.negatedFailureMessage(prettifier, differ))
         }
       }
     }
@@ -5451,7 +5451,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(beWord: BeWord): ResultOfBeWordForCollectedAny[T] =
-      new ResultOfBeWordForCollectedAny[T](collected, xs, original, true, prettifier, pos)
+      new ResultOfBeWordForCollectedAny[T](collected, xs, original, true, prettifier, pos, differ)
 
     /**
      * This method enables syntax such as the following:
@@ -5462,7 +5462,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(notWord: NotWord): ResultOfNotWordForCollectedAny[T] = 
-      new ResultOfNotWordForCollectedAny(collected, xs, original, false, prettifier, pos)
+      new ResultOfNotWordForCollectedAny(collected, xs, original, false, prettifier, pos, differ)
 
     /**
      * This method enables syntax such as the following:
@@ -5603,8 +5603,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val result = beMatcher.apply(e)
         if (!result.matches)
-          indicateFailure(result.failureMessage(prettifier), None, pos)
-        else indicateSuccess(result.negatedFailureMessage(prettifier))
+          indicateFailure(result.failureMessage(prettifier, differ), None, pos)
+        else indicateSuccess(result.negatedFailureMessage(prettifier, differ))
       }
     }
 
@@ -5660,8 +5660,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val matcherResult = matchSymbolToPredicateMethod(toAnyRef(e), symbol, false, true, prettifier, pos)
         if (!matcherResult.matches) 
-          indicateFailure(matcherResult.failureMessage(prettifier), None, pos)
-        else indicateSuccess(matcherResult.negatedFailureMessage(prettifier))
+          indicateFailure(matcherResult.failureMessage(prettifier, differ), None, pos)
+        else indicateSuccess(matcherResult.negatedFailureMessage(prettifier, differ))
       }
     }
     
@@ -5677,9 +5677,9 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val matcherResult = matchSymbolToPredicateMethod(toAnyRef(e), resultOfAWordApplication.symbol, true, true, prettifier, pos)
         if (!matcherResult.matches) {
-          indicateFailure(matcherResult.failureMessage(prettifier), None, pos)
+          indicateFailure(matcherResult.failureMessage(prettifier, differ), None, pos)
         }
-        else indicateSuccess(matcherResult.negatedFailureMessage(prettifier))
+        else indicateSuccess(matcherResult.negatedFailureMessage(prettifier, differ))
       }
     }
 
@@ -5695,9 +5695,9 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
       doCollected(collected, xs, original, prettifier, pos) { e =>
         val matcherResult = matchSymbolToPredicateMethod(toAnyRef(e), resultOfAnWordApplication.symbol, true, false, prettifier, pos)
         if (!matcherResult.matches) {
-          indicateFailure(matcherResult.failureMessage(prettifier), None, pos)
+          indicateFailure(matcherResult.failureMessage(prettifier, differ), None, pos)
         }
-        else indicateSuccess(matcherResult.negatedFailureMessage(prettifier))
+        else indicateSuccess(matcherResult.negatedFailureMessage(prettifier, differ))
       }
     }
     // SKIP-SCALATESTJS-END
@@ -5782,8 +5782,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         try  {
           val result = rightMatcherX1.apply(e.asInstanceOf[U])
           if (result.matches)
-            indicateFailure(result.negatedFailureMessage(prettifier), None, pos)
-          else indicateSuccess(result.failureMessage(prettifier))
+            indicateFailure(result.negatedFailureMessage(prettifier, differ), None, pos)
+          else indicateSuccess(result.failureMessage(prettifier, differ))
         }
         catch {
           case tfe: TestFailedException =>
@@ -5807,7 +5807,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         MatchSucceeded.unapply(result)(prettifier) match {
           case Some(negatedFailureMessage) =>
             indicateFailure(negatedFailureMessage, None, pos)
-          case None => indicateSuccess(result.failureMessage(prettifier))
+          case None => indicateSuccess(result.failureMessage(prettifier, differ))
         }
       }
     }
@@ -5867,7 +5867,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(beWord: BeWord): ResultOfBeWordForCollectedAny[T] =
-      new ResultOfBeWordForCollectedAny[T](collected, xs, original, false, prettifier, pos)
+      new ResultOfBeWordForCollectedAny[T](collected, xs, original, false, prettifier, pos, differ)
 
    /**
      * This method enables syntax such as the following:
@@ -5962,7 +5962,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(startWithWord: StartWithWord)(implicit ev: T <:< String): ResultOfStartWithWordForCollectedString = 
-      new ResultOfStartWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos)
+      new ResultOfStartWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
     
     /**
      * This method enables syntax such as the following:
@@ -5973,7 +5973,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(endWithWord: EndWithWord)(implicit ev: T <:< String): ResultOfEndWithWordForCollectedString = 
-      new ResultOfEndWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos)
+      new ResultOfEndWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
     
     /**
      * This method enables syntax such as the following:
@@ -5984,7 +5984,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(includeWord: IncludeWord)(implicit ev: T <:< String): ResultOfIncludeWordForCollectedString = 
-      new ResultOfIncludeWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos)
+      new ResultOfIncludeWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
     
     /**
      * This method enables syntax such as the following:
@@ -5995,7 +5995,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(fullyMatchWord: FullyMatchWord)(implicit ev: T <:< String): ResultOfFullyMatchWordForCollectedString = 
-      new ResultOfFullyMatchWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos)
+      new ResultOfFullyMatchWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, true, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
 
     /**
      * This method enables syntax such as the following:
@@ -6006,7 +6006,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(fullyMatchWord: FullyMatchWord)(implicit ev: T <:< String): ResultOfFullyMatchWordForCollectedString = 
-      new ResultOfFullyMatchWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos)
+      new ResultOfFullyMatchWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
 
     /**
      * This method enables syntax such as the following:
@@ -6017,7 +6017,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(startWithWord: StartWithWord)(implicit ev: T <:< String): ResultOfStartWithWordForCollectedString = 
-      new ResultOfStartWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos)
+      new ResultOfStartWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
 
     /**
      * This method enables syntax such as the following:
@@ -6028,7 +6028,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(endWithWord: EndWithWord)(implicit ev: T <:< String): ResultOfEndWithWordForCollectedString = 
-      new ResultOfEndWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos)
+      new ResultOfEndWithWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
 
     /**
      * This method enables syntax such as the following:
@@ -6039,7 +6039,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(includeWord: IncludeWord)(implicit ev: T <:< String): ResultOfIncludeWordForCollectedString = 
-      new ResultOfIncludeWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos)
+      new ResultOfIncludeWordForCollectedString(collected, xs.asInstanceOf[GenTraversable[String]], original, false, prettifier, pos, differ.asInstanceOf[Differ[GenTraversable[String]]])
 
     /**
      * Overrides to return pretty toString.
@@ -6129,7 +6129,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfStartWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfStartWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[GenTraversable[String]]) {
 
     /**
      * This method enables the following syntax: 
@@ -6167,17 +6167,17 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -6197,7 +6197,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfIncludeWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfIncludeWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[String]]) {
 
     /**
      * This method enables the following syntax: 
@@ -6235,17 +6235,17 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -6265,7 +6265,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfEndWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfEndWithWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[String]]) {
 
     /**
      * This method enables the following syntax: 
@@ -6303,17 +6303,17 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -6333,7 +6333,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * @author Bill Venners
    * @author Chee Seng
    */
-  final class ResultOfFullyMatchWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position) {
+  final class ResultOfFullyMatchWordForCollectedString(collected: Collected, xs: scala.collection.GenTraversable[String], original: Any, shouldBeTrue: Boolean, prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[String]]) {
 
     /**
      * This method enables the following syntax: 
@@ -6371,17 +6371,17 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
         if (result.matches != shouldBeTrue)
           indicateFailure(
             if (shouldBeTrue)
-              result.failureMessage(prettifier)
+              result.failureMessage(prettifier, differ)
             else
-              result.negatedFailureMessage(prettifier),
+              result.negatedFailureMessage(prettifier, differ),
             None,
             pos
           )
         else
           indicateSuccess(
             shouldBeTrue,
-            result.negatedFailureMessage(prettifier),
-            result.failureMessage(prettifier)
+            result.negatedFailureMessage(prettifier, differ),
+            result.failureMessage(prettifier, differ)
           )
       }
     }
@@ -6402,8 +6402,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def all[E, C[_]](xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(AllCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def all[E, C[_]](xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(AllCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6413,8 +6413,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def all[K, V, JMAP[k, v] <: java.util.Map[k, v]](xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(AllCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def all[K, V, JMAP[k, v] <: java.util.Map[k, v]](xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(AllCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6424,8 +6424,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def all(xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(AllCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def all(xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(AllCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax:
@@ -6435,8 +6435,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def atLeast[E, C[_]](num: Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(AtLeastCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def atLeast[E, C[_]](num: Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(AtLeastCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6446,8 +6446,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def atLeast[K, V, JMAP[k, v] <: java.util.Map[k, v]](num: Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(AtLeastCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def atLeast[K, V, JMAP[k, v] <: java.util.Map[k, v]](num: Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(AtLeastCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6457,8 +6457,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def atLeast(num: Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(AtLeastCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def atLeast(num: Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(AtLeastCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax:
@@ -6468,8 +6468,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def every[E, C[_]](xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(EveryCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def every[E, C[_]](xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(EveryCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6479,8 +6479,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def every[K, V, JMAP[k, v] <: java.util.Map[k, v]](xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(EveryCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def every[K, V, JMAP[k, v] <: java.util.Map[k, v]](xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(EveryCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6490,8 +6490,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def every(xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(EveryCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def every(xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(EveryCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax:
@@ -6501,8 +6501,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def exactly[E, C[_]](num: Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(ExactlyCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def exactly[E, C[_]](num: Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(ExactlyCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6512,8 +6512,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def exactly[K, V, JMAP[k, v] <: java.util.Map[k, v]](num: Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(ExactlyCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def exactly[K, V, JMAP[k, v] <: java.util.Map[k, v]](num: Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(ExactlyCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6523,8 +6523,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def exactly(num: Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(ExactlyCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def exactly(num: Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(ExactlyCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax:
@@ -6534,8 +6534,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def no[E, C[_]](xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(NoCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def no[E, C[_]](xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(NoCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6545,8 +6545,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def no[K, V, JMAP[k, v] <: java.util.Map[k, v]](xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(NoCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def no[K, V, JMAP[k, v] <: java.util.Map[k, v]](xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(NoCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6556,8 +6556,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def no(xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(NoCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def no(xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(NoCollected, collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax:
@@ -6567,8 +6567,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def between[E, C[_]](from: Int, upTo:Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(BetweenCollected(from, upTo), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def between[E, C[_]](from: Int, upTo:Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(BetweenCollected(from, upTo), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6578,8 +6578,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def between[K, V, JMAP[k, v] <: java.util.Map[k, v]](from: Int, upTo:Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(BetweenCollected(from, upTo), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def between[K, V, JMAP[k, v] <: java.util.Map[k, v]](from: Int, upTo:Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(BetweenCollected(from, upTo), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6589,8 +6589,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def between(from: Int, upTo:Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(BetweenCollected(from, upTo), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def between(from: Int, upTo:Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(BetweenCollected(from, upTo), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax:
@@ -6600,8 +6600,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def atMost[E, C[_]](num: Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[E] =
-    new ResultOfCollectedAny(AtMostCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def atMost[E, C[_]](num: Int, xs: C[E])(implicit collecting: Collecting[E, C[E]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[E]]): ResultOfCollectedAny[E] =
+    new ResultOfCollectedAny(AtMostCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>java.util.Map</code>:
@@ -6611,8 +6611,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def atMost[K, V, JMAP[k, v] <: java.util.Map[k, v]](num: Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
-    new ResultOfCollectedAny(AtMostCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def atMost[K, V, JMAP[k, v] <: java.util.Map[k, v]](num: Int, xs: JMAP[K, V])(implicit collecting: Collecting[org.scalatest.Entry[K, V], JMAP[K, V]], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[org.scalatest.Entry[K,V]]]): ResultOfCollectedAny[org.scalatest.Entry[K, V]] =
+    new ResultOfCollectedAny(AtMostCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax for <code>String</code>:
@@ -6622,8 +6622,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * ^
    * </pre>
    */
-  def atMost(num: Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position): ResultOfCollectedAny[Char] =
-    new ResultOfCollectedAny(AtMostCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos)
+  def atMost(num: Int, xs: String)(implicit collecting: Collecting[Char, String], prettifier: Prettifier, pos: source.Position, differ: Differ[scala.collection.GenTraversable[Char]]): ResultOfCollectedAny[Char] =
+    new ResultOfCollectedAny(AtMostCollected(num), collecting.genTraversableFrom(xs), xs, prettifier, pos, differ)
 
   /**
    * This method enables the following syntax: 
@@ -6662,19 +6662,19 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
 
   private object ShouldMethodHelper {
 
-    def shouldMatcher[T](left: T, rightMatcher: Matcher[T], prettifier: Prettifier, pos: source.Position): Assertion = {
+    def shouldMatcher[T](left: T, rightMatcher: Matcher[T], prettifier: Prettifier, pos: source.Position, differ: Differ[T]): Assertion = {
       val result = rightMatcher(left)
       MatchFailed.unapply(result)(prettifier) match {
         case Some(failureMessage) => indicateFailure(failureMessage, None, pos)
-        case None => indicateSuccess(result.negatedFailureMessage(prettifier))
+        case None => indicateSuccess(result.negatedFailureMessage(prettifier, differ))
       }
     }
 
-    def shouldNotMatcher[T](left: T, rightMatcher: Matcher[T], prettifier: Prettifier, pos: source.Position): Assertion = {
+    def shouldNotMatcher[T](left: T, rightMatcher: Matcher[T], prettifier: Prettifier, pos: source.Position, differ: Differ[T]): Assertion = {
       val result = rightMatcher(left)
       MatchSucceeded.unapply(result)(prettifier) match {
         case Some(negatedFailureMessage) => indicateFailure(negatedFailureMessage, None, pos)
-        case None => indicateSuccess(result.failureMessage(prettifier))
+        case None => indicateSuccess(result.failureMessage(prettifier, differ))
       }
     }
   }
@@ -6690,7 +6690,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    *
    * @author Bill Venners
    */
-  sealed class AnyShouldWrapper[T](val leftSideValue: T, val pos: source.Position, val prettifier: Prettifier) {
+  sealed class AnyShouldWrapper[T](val leftSideValue: T, val pos: source.Position, val prettifier: Prettifier, differ: Differ[T]) {
 
     /**
      * This method enables syntax such as the following:
@@ -6701,7 +6701,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(rightMatcherX1: Matcher[T]): Assertion = {
-      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherX1, prettifier, pos)
+      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherX1, prettifier, pos, differ)
     }
 
     /**
@@ -6713,7 +6713,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should[TYPECLASS1[_]](rightMatcherFactory1: MatcherFactory1[T, TYPECLASS1])(implicit typeClass1: TYPECLASS1[T]): Assertion = {
-      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory1.matcher, prettifier, pos)
+      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory1.matcher, prettifier, pos, differ)
     }
 
     /**
@@ -6725,7 +6725,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should[TYPECLASS1[_], TYPECLASS2[_]](rightMatcherFactory2: MatcherFactory2[T, TYPECLASS1, TYPECLASS2])(implicit typeClass1: TYPECLASS1[T], typeClass2: TYPECLASS2[T]): Assertion = {
-      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory2.matcher, prettifier, pos)
+      ShouldMethodHelper.shouldMatcher(leftSideValue, rightMatcherFactory2.matcher, prettifier, pos, differ)
     }
 
     /**
@@ -6847,7 +6847,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *        ^
      * </pre>
      */
-    def should(beWord: BeWord): ResultOfBeWordForAny[T] = new ResultOfBeWordForAny(leftSideValue, true, prettifier, pos)
+    def should(beWord: BeWord): ResultOfBeWordForAny[T] = new ResultOfBeWordForAny(leftSideValue, true, prettifier, pos, differ)
   
     /**
      * This method enables syntax such as the following:
@@ -6965,8 +6965,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
     def shouldBe(beMatcher: BeMatcher[T]): Assertion = {
       val result = beMatcher.apply(leftSideValue)
       if (!result.matches)
-        indicateFailure(result.failureMessage(prettifier), None, pos)
-      else indicateSuccess(result.negatedFailureMessage(prettifier))
+        indicateFailure(result.failureMessage(prettifier, differ), None, pos)
+      else indicateSuccess(result.negatedFailureMessage(prettifier, differ))
     }
 
     /**
@@ -7082,7 +7082,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *        ^
      * </pre>
      */
-    def shouldNot(beWord: BeWord): ResultOfBeWordForAny[T] = new ResultOfBeWordForAny(leftSideValue, false, prettifier, pos)
+    def shouldNot(beWord: BeWord): ResultOfBeWordForAny[T] = new ResultOfBeWordForAny(leftSideValue, false, prettifier, pos, differ)
 
     /**
      * This method enables syntax such as the following:
@@ -7093,7 +7093,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(rightMatcherX1: Matcher[T]): Assertion = {
-      ShouldMethodHelper.shouldNotMatcher(leftSideValue, rightMatcherX1, prettifier, pos)
+      ShouldMethodHelper.shouldNotMatcher(leftSideValue, rightMatcherX1, prettifier, pos, differ)
     }
     
     /**
@@ -7105,7 +7105,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot[TYPECLASS1[_]](rightMatcherFactory1: MatcherFactory1[T, TYPECLASS1])(implicit typeClass1: TYPECLASS1[T]): Assertion = {
-      ShouldMethodHelper.shouldNotMatcher(leftSideValue, rightMatcherFactory1.matcher, prettifier, pos)
+      ShouldMethodHelper.shouldNotMatcher(leftSideValue, rightMatcherFactory1.matcher, prettifier, pos, differ)
     }
     
     /**
@@ -7186,8 +7186,8 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
     def shouldBe(symbol: Symbol)(implicit toAnyRef: T <:< AnyRef): Assertion = {
       val matcherResult = matchSymbolToPredicateMethod(toAnyRef(leftSideValue), symbol, false, true, prettifier, pos)
       if (!matcherResult.matches) 
-        indicateFailure(matcherResult.failureMessage(prettifier), None, pos)
-      else indicateSuccess(matcherResult.negatedFailureMessage(prettifier))
+        indicateFailure(matcherResult.failureMessage(prettifier, differ), None, pos)
+      else indicateSuccess(matcherResult.negatedFailureMessage(prettifier, differ))
     }
 
     /**
@@ -7202,12 +7202,12 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
       val matcherResult = matchSymbolToPredicateMethod(toAnyRef(leftSideValue), resultOfAWordApplication.symbol, true, true, prettifier, pos)
       if (!matcherResult.matches) {
         indicateFailure(
-          matcherResult.failureMessage(prettifier),
+          matcherResult.failureMessage(prettifier, differ),
           None,
           pos
         )
       }
-      else indicateSuccess(matcherResult.negatedFailureMessage(prettifier))
+      else indicateSuccess(matcherResult.negatedFailureMessage(prettifier, differ))
     }
 
     /**
@@ -7222,12 +7222,12 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
       val matcherResult = matchSymbolToPredicateMethod(toAnyRef(leftSideValue), resultOfAnWordApplication.symbol, true, false, prettifier, pos)
       if (!matcherResult.matches) {
         indicateFailure(
-          matcherResult.failureMessage(prettifier),
+          matcherResult.failureMessage(prettifier, differ),
           None,
           pos
         )
       }
-      else indicateSuccess(matcherResult.negatedFailureMessage(prettifier))
+      else indicateSuccess(matcherResult.negatedFailureMessage(prettifier, differ))
     }
     // SKIP-SCALATESTJS-END
     
@@ -7361,7 +7361,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(includeWord: IncludeWord)(implicit ev: T <:< String): ResultOfIncludeWordForString = {
-      new ResultOfIncludeWordForString(leftSideValue, true, prettifier, pos)
+      new ResultOfIncludeWordForString(leftSideValue, true, prettifier, pos, differ.asInstanceOf[Differ[String]])
     }
 
     /**
@@ -7373,7 +7373,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(startWithWord: StartWithWord)(implicit ev: T <:< String): ResultOfStartWithWordForString = {
-      new ResultOfStartWithWordForString(leftSideValue, true, prettifier, pos)
+      new ResultOfStartWithWordForString(leftSideValue, true, prettifier, pos, differ.asInstanceOf[Differ[String]])
     }
 
     /**
@@ -7385,7 +7385,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(endWithWord: EndWithWord)(implicit ev: T <:< String): ResultOfEndWithWordForString = {
-      new ResultOfEndWithWordForString(leftSideValue, true, prettifier, pos)
+      new ResultOfEndWithWordForString(leftSideValue, true, prettifier, pos, differ.asInstanceOf[Differ[String]])
     }
 
     /**
@@ -7397,7 +7397,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(startWithWord: StartWithWord)(implicit ev: T <:< String): ResultOfStartWithWordForString = 
-      new ResultOfStartWithWordForString(leftSideValue, false, prettifier, pos)
+      new ResultOfStartWithWordForString(leftSideValue, false, prettifier, pos, differ.asInstanceOf[Differ[String]])
 
     /**
      * This method enables syntax such as the following:
@@ -7408,7 +7408,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(endWithWord: EndWithWord)(implicit ev: T <:< String): ResultOfEndWithWordForString = 
-      new ResultOfEndWithWordForString(leftSideValue, false, prettifier, pos)
+      new ResultOfEndWithWordForString(leftSideValue, false, prettifier, pos, differ.asInstanceOf[Differ[String]])
 
     /**
      * This method enables syntax such as the following:
@@ -7419,7 +7419,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(includeWord: IncludeWord)(implicit ev: T <:< String): ResultOfIncludeWordForString = 
-      new ResultOfIncludeWordForString(leftSideValue, false, prettifier, pos)
+      new ResultOfIncludeWordForString(leftSideValue, false, prettifier, pos, differ.asInstanceOf[Differ[String]])
   }
 
   /**
@@ -7433,7 +7433,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    *
    * @author Bill Venners
    */
-  final class StringShouldWrapper(val leftSideString: String, pos: source.Position, prettifier: Prettifier) extends AnyShouldWrapper(leftSideString, pos, prettifier) with StringShouldWrapperForVerb {
+  final class StringShouldWrapper(val leftSideString: String, pos: source.Position, prettifier: Prettifier, differ: Differ[String]) extends AnyShouldWrapper(leftSideString, pos, prettifier, differ) with StringShouldWrapperForVerb {
 
     /**
      * This method enables syntax such as the following:
@@ -7466,7 +7466,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def should(fullyMatchWord: FullyMatchWord): ResultOfFullyMatchWordForString = {
-      new ResultOfFullyMatchWordForString(leftSideString, true, prettifier, pos)
+      new ResultOfFullyMatchWordForString(leftSideString, true, prettifier, pos, differ)
     }
 
     /**
@@ -7478,7 +7478,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      * </pre>
      */
     def shouldNot(fullyMatchWord: FullyMatchWord): ResultOfFullyMatchWordForString = 
-      new ResultOfFullyMatchWordForString(leftSideString, false, prettifier, pos)
+      new ResultOfFullyMatchWordForString(leftSideString, false, prettifier, pos, differ)
 
     /**
      * This method enables syntax such as the following:
@@ -7679,13 +7679,13 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
    * Implicitly converts an object of type <code>T</code> to a <code>AnyShouldWrapper[T]</code>,
    * to enable <code>should</code> methods to be invokable on that object.
    */
-  implicit def convertToAnyShouldWrapper[T](o: T)(implicit pos: source.Position, prettifier: Prettifier): AnyShouldWrapper[T] = new AnyShouldWrapper(o, pos, prettifier)
+  implicit def convertToAnyShouldWrapper[T](o: T)(implicit pos: source.Position, prettifier: Prettifier, differ: Differ[T]): AnyShouldWrapper[T] = new AnyShouldWrapper(o, pos, prettifier, differ)
 
   /**
    * Implicitly converts an object of type <code>java.lang.String</code> to a <code>StringShouldWrapper</code>,
    * to enable <code>should</code> methods to be invokable on that object.
    */
-  implicit def convertToStringShouldWrapper(o: String)(implicit pos: source.Position, prettifier: Prettifier): StringShouldWrapper = new StringShouldWrapper(o, pos, prettifier)
+  implicit def convertToStringShouldWrapper(o: String)(implicit pos: source.Position, prettifier: Prettifier, differ: Differ[String]): StringShouldWrapper = new StringShouldWrapper(o, pos, prettifier, differ)
 
   /**
    * Implicitly converts an object of type <code>scala.util.matching.Regex</code> to a <code>RegexWrapper</code>,

@@ -17,6 +17,7 @@ package org.scalatest.matchers
 
 import org.scalactic.Prettifier
 import org.scalatest.Resources
+import org.scalatest.enablers.Differ
 
 /**
  * The result of a match operation, such as one performed by a <a href="Matcher.html"><code>Matcher</code></a> or
@@ -235,28 +236,28 @@ final case class MatchResult(
    *
    * @return failure message to report if a match fails
    */
-  def failureMessage(implicit prettifier: Prettifier): String = if (failureMessageArgs.isEmpty) rawFailureMessage else makeString(rawFailureMessage, failureMessageArgs, prettifier)
+  def failureMessage[T](implicit prettifier: Prettifier, differ: Differ[T]): String = if (failureMessageArgs.isEmpty) rawFailureMessage else makeString(rawFailureMessage, failureMessageArgs, prettifier)
 
   /**
    * Construct message with a meaning opposite to that of the failure message, using <code>rawNegatedFailureMessage</code>, <code>negatedFailureMessageArgs</code> and <code>prettifier</code>
    *
    * @return message with a meaning opposite to that of the failure message
    */
-  def negatedFailureMessage(implicit prettifier: Prettifier): String = if (negatedFailureMessageArgs.isEmpty) rawNegatedFailureMessage else makeString(rawNegatedFailureMessage, negatedFailureMessageArgs, prettifier)
+  def negatedFailureMessage[T](implicit prettifier: Prettifier, differ: Differ[T]): String = if (negatedFailureMessageArgs.isEmpty) rawNegatedFailureMessage else makeString(rawNegatedFailureMessage, negatedFailureMessageArgs, prettifier)
 
   /**
    * Construct failure message suitable for appearing mid-sentence, using <code>rawMidSentenceFailureMessage</code>, <code>midSentenceFailureMessageArgs</code> and <code>prettifier</code>
    *
    * @return failure message suitable for appearing mid-sentence
    */
-  def midSentenceFailureMessage(implicit prettifier: Prettifier): String = if (midSentenceFailureMessageArgs.isEmpty) rawMidSentenceFailureMessage else makeString(rawMidSentenceFailureMessage, midSentenceFailureMessageArgs, prettifier)
+  def midSentenceFailureMessage[T](implicit prettifier: Prettifier, differ: Differ[T]): String = if (midSentenceFailureMessageArgs.isEmpty) rawMidSentenceFailureMessage else makeString(rawMidSentenceFailureMessage, midSentenceFailureMessageArgs, prettifier)
 
   /**
    * Construct negated failure message suitable for appearing mid-sentence, using <code>rawMidSentenceNegatedFailureMessage</code>, <code>midSentenceNegatedFailureMessageArgs</code> and <code>prettifier</code>
    *
    * @return negated failure message suitable for appearing mid-sentence
    */
-  def midSentenceNegatedFailureMessage(implicit prettifier: Prettifier): String = if (midSentenceNegatedFailureMessageArgs.isEmpty) rawMidSentenceNegatedFailureMessage else makeString(rawMidSentenceNegatedFailureMessage, midSentenceNegatedFailureMessageArgs, prettifier)
+  def midSentenceNegatedFailureMessage[T](implicit prettifier: Prettifier, differ: Differ[T]): String = if (midSentenceNegatedFailureMessageArgs.isEmpty) rawMidSentenceNegatedFailureMessage else makeString(rawMidSentenceNegatedFailureMessage, midSentenceNegatedFailureMessageArgs, prettifier)
 
   /**
    * Get a negated version of this MatchResult, matches field will be negated and all messages field will be substituted with its counter-part.

@@ -32,7 +32,6 @@ import org.scalatest.MatchersHelper.fullyMatchRegexWithGroups
 import org.scalatest.MatchersHelper.includeRegexWithGroups
 import org.scalatest.MatchersHelper.startWithRegexWithGroups
 import org.scalatest.Resources
-import org.scalatest.Suite.getObjectsForFailureMessage
 import org.scalatest.UnquotedString
 import scala.annotation.tailrec
 import org.scalatest.exceptions.NotAllowedException
@@ -716,7 +715,7 @@ final class NotWord {
               Vector(right)
             )
           case _ => 
-            val (leftee, rightee) = getObjectsForFailureMessage(left, right) // TODO: To move this to reporter
+            val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, right) // TODO: To move this to reporter
             MatchResult(
               !areEqualComparingArraysStructurally(left, right),
               Resources.rawWasEqualTo,

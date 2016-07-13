@@ -5485,10 +5485,10 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *          ^
      * </pre>
      */
-    def shouldBe(right: Any): Assertion = {
+    def shouldBe(right: Any)(implicit equality: Equality[T]): Assertion = {
       doCollected(collected, xs, original, prettifier, pos) { e =>
-        if (e != right) {
-          val (eee, rightee) = Suite.getObjectsForFailureMessage(e, right)
+        if (!equality.areEqual(e, right)) {
+          val (eee, rightee) = equality.difference(e, right).inlineDiff.getOrElse((e, right))
           indicateFailure(FailureMessages.wasNot(prettifier, eee, rightee), None, pos)
         }
         else indicateSuccess(FailureMessages.was(prettifier, e, right))
@@ -6736,7 +6736,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *   ^
      * </pre>
      */
-    def shouldEqual(right: Any)(implicit equality: Equality[T]): Assertion = {
+    def shouldEqual[E >: T](right: Any)(implicit equality: Equality[T]): Assertion = {
       if (!equality.areEqual(leftSideValue, right)) {
         val (leftee, rightee) = equality.difference(leftSideValue, right).inlineDiff.getOrElse((leftSideValue, right))
         indicateFailure(FailureMessages.didNotEqual(prettifier, leftee, rightee), None, pos)
@@ -6857,11 +6857,10 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *         ^
      * </pre>
      */
-    def shouldBe(right: Any): Assertion = {
-      if (!areEqualComparingArraysStructurally(leftSideValue, right)) {
-        val (leftee, rightee) = Suite.getObjectsForFailureMessage(leftSideValue, right)
-        val localPrettifier = prettifier // Grabbing a local copy so we don't attempt to serialize AnyShouldWrapper (since first param to indicateFailure is a by-name)
-        indicateFailure(FailureMessages.wasNotEqualTo(localPrettifier, leftee, rightee), None, pos)
+    def shouldBe[E >: T](right: Any)(implicit equality: Equality[E]): Assertion = {
+      if (!equality.areEqual(leftSideValue, right)) {
+        val (leftee, rightee) = equality.difference(leftSideValue, right).inlineDiff.getOrElse((leftSideValue, right))
+        indicateFailure(FailureMessages.wasNotEqualTo(prettifier, leftee, rightee), None, pos)
       }
       else indicateSuccess(FailureMessages.wasEqualTo(prettifier, leftSideValue, right))
     }

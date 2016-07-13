@@ -453,7 +453,7 @@ class OrSpec extends UnitSpec with Accumulation with TypeCheckedTripleEquals {
 
     //  def combine[G, ELE, EVERY[b] <: Every[b], SEQ[s]](xs: SEQ[G Or EVERY[ELE]])(implicit seq: Sequenceable[SEQ]): SEQ[G] Or Every[ELE] =
     // G = Int, ELE = Nothing, SEQ = List
-    List(Good(3)).combined shouldBe Good(List(3))
+    List(Good(3)).combined shouldEqual (Good(List(3)))
     List(Bad(One("oops"))).combined shouldBe Bad(One("oops"))
 
     List(Good(3), Good(4)).combined shouldBe Good(List(3, 4))

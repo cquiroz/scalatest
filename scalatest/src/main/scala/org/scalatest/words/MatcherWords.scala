@@ -294,7 +294,7 @@ trait MatcherWords {
         val equality = implicitly[Equality[T]]
         new Matcher[T] {
           def apply(left: T): MatchResult = {
-            val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, right) // TODO: to move this code to reporters
+            val (leftee, rightee) = equality.difference(left, right).inlineDiff.getOrElse((left, right))
             MatchResult(
               equality.areEqual(left, right),
               Resources.rawDidNotEqual,

@@ -526,7 +526,7 @@ final class BeWord {
           areEqualComparingArraysStructurally(left, right),
           Resources.rawWasNotEqualTo,
           Resources.rawWasEqualTo,
-          Vector(leftee, rightee), 
+          Vector(leftee, rightee),
           Vector(left, right)
         )
       }

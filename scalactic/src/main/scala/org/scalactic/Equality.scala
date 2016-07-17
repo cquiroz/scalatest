@@ -184,7 +184,7 @@ package org.scalactic
  *
  * @tparam A the type whose equality is being customized
  */
-trait Equality[A] extends Equivalence[A] {
+trait Equality[A] extends Equivalence[A] with Differ[A] {
 
 /*
  * <p>
@@ -220,6 +220,8 @@ trait Equality[A] extends Equivalence[A] {
    *     <code>Equality</code> instance
    */
   final def areEquivalent(a: A, b: A): Boolean = areEqual(a, b)
+
+  def difference(a: A, b: Any): Difference = Differ.default[A].difference(a, b)
 } 
 
 /**

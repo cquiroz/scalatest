@@ -5249,7 +5249,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
     def shouldEqual(right: Any)(implicit equality: Equality[T]): Assertion = {
       doCollected(collected, xs, original, prettifier, pos) { e =>
         if (!equality.areEqual(e, right)) {
-          val (eee, rightee) = Suite.getObjectsForFailureMessage(e, right)
+          val (eee, rightee) = equality.difference(e, right).inlineDiff.getOrElse((e, right))
           indicateFailure(FailureMessages.didNotEqual(prettifier, eee, rightee), None, pos)
         }
         else indicateSuccess(FailureMessages.equaled(prettifier, e, right))
@@ -5485,10 +5485,10 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *          ^
      * </pre>
      */
-    def shouldBe(right: Any): Assertion = {
+    def shouldBe(right: Any)(implicit differ: Differ[T]): Assertion = {
       doCollected(collected, xs, original, prettifier, pos) { e =>
         if (e != right) {
-          val (eee, rightee) = Suite.getObjectsForFailureMessage(e, right)
+          val (eee, rightee) = differ.difference(e, right).inlineDiff.getOrElse((e, right))
           indicateFailure(FailureMessages.wasNot(prettifier, eee, rightee), None, pos)
         }
         else indicateSuccess(FailureMessages.was(prettifier, e, right))
@@ -6738,7 +6738,7 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      */
     def shouldEqual(right: Any)(implicit equality: Equality[T]): Assertion = {
       if (!equality.areEqual(leftSideValue, right)) {
-        val (leftee, rightee) = Suite.getObjectsForFailureMessage(leftSideValue, right)
+        val (leftee, rightee) = equality.difference(leftSideValue, right).inlineDiff.getOrElse((leftSideValue, right))
         indicateFailure(FailureMessages.didNotEqual(prettifier, leftee, rightee), None, pos)
       }
       else indicateSuccess(FailureMessages.equaled(prettifier, leftSideValue, right))
@@ -6857,9 +6857,9 @@ org.scalatest.exceptions.TestFailedException: org.scalatest.Matchers$ResultOfCol
      *         ^
      * </pre>
      */
-    def shouldBe(right: Any): Assertion = {
+    def shouldBe(right: Any)(implicit differ: Differ[T]): Assertion = {
       if (!areEqualComparingArraysStructurally(leftSideValue, right)) {
-        val (leftee, rightee) = Suite.getObjectsForFailureMessage(leftSideValue, right)
+        val (leftee, rightee) = differ.difference(leftSideValue, right).inlineDiff.getOrElse((leftSideValue, right))
         val localPrettifier = prettifier // Grabbing a local copy so we don't attempt to serialize AnyShouldWrapper (since first param to indicateFailure is a by-name)
         indicateFailure(FailureMessages.wasNotEqualTo(localPrettifier, leftee, rightee), None, pos)
       }

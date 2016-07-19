@@ -518,7 +518,7 @@ final class BeWord {
    *               ^
    * </pre>
    **/
-  def apply(right: Any): Matcher[Any] =
+  /*def apply(right: Any): Matcher[Any] =
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, right) // TODO: To move this to reporter
@@ -529,6 +529,27 @@ final class BeWord {
           Vector(leftee, rightee),
           Vector(left, right)
         )
+      }
+      override def toString: String = "be (" + Prettifier.default(right) + ")"
+    }*/
+  def apply(right: Any): MatcherFactory1[Any, Differ] =
+    new MatcherFactory1[Any, Differ] {
+      def matcher[T <: Any : Differ]: Matcher[T] = {
+        val differ = implicitly[Differ[T]]
+          new Matcher[Any] {
+            def apply(left: Any): MatchResult = {
+              val (leftee, rightee) = Suite.getObjectsForFailureMessage(left, right) // TODO: To move this to reporter
+              MatchResult(
+                areEqualComparingArraysStructurally(left, right),
+                Resources.rawWasNotEqualTo,
+                Resources.rawWasEqualTo,
+                Vector(leftee, rightee),
+                Vector(left, right)
+              )
+            }
+
+            override def toString: String = "be (" + Prettifier.default(right) + ")"
+          }
       }
       override def toString: String = "be (" + Prettifier.default(right) + ")"
     }

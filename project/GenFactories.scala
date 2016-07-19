@@ -902,8 +902,12 @@ $endif$
      *                         ^
      * </pre>
      */
-    def be(any: Any): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] =
+    //def be(any: Any): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] =
+      //thisMatcherFactory.and(MatcherWords.not.apply(MatcherWords.be(any)))
+
+    def be(any: Any): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Differ] =
       thisMatcherFactory.and(MatcherWords.not.apply(MatcherWords.be(any)))
+
 
     /**
      * This method enables the following syntax given a <code>MatcherFactory$arity$</code>:
@@ -2196,7 +2200,10 @@ $endif$
      *                        ^
      * </pre>
      */
-    def be(any: Any): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] =
+    //def be(any: Any): MatcherFactory$arity$[SC, $commaSeparatedTCNs$] =
+      //thisMatcherFactory.or(MatcherWords.not.apply(MatcherWords.be(any)))
+
+    def be(any: Any): MatcherFactory$arityPlusOne$[SC, $commaSeparatedTCNs$, Differ] =
       thisMatcherFactory.or(MatcherWords.not.apply(MatcherWords.be(any)))
 
     /**

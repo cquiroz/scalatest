@@ -701,7 +701,7 @@ final class NotWord {
    *                   ^
    * </pre>
    **/
-  def be(right: Any): Matcher[Any] = {
+  /*def be(right: Any): Matcher[Any] = {
     new Matcher[Any] {
       def apply(left: Any): MatchResult = {
         left match {
@@ -728,7 +728,8 @@ final class NotWord {
       }
       override def toString: String = "not be " + Prettifier.default(right)
     }
-  }
+  }*/
+  def be(right: Any): MatcherFactory1[Any, Differ] = apply(MatcherWords.be(right))
   
   /**
      * This method enables the following syntax:

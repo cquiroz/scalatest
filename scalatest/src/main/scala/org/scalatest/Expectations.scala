@@ -152,4 +152,3 @@ trait Expectations {
 }
 
 object Expectations extends Expectations
-

@@ -36,6 +36,8 @@ import org.scalatest.FailureMessages.decorateToStringValue
 trait InspectorAsserting[T] {
   type Result
 
+  def succeed(result: T): Boolean
+
   /**
    * Implementation method for <code>Inspectors</code> <code>forAll</code> syntax.
    */
@@ -89,14 +91,14 @@ abstract class UnitInspectorAsserting {
     def forAll[E](xs: GenTraversable[E], original: Any, shorthand: Boolean, prettifier: Prettifier, pos: source.Position)(fun: E => T): Result = {
       val xsIsMap = isMap(original)
       val result =
-        runFor(xs.toIterator, xsIsMap, 0, new ForResult[E], fun, _.failedElements.length > 0)
+        runFor(xs.toIterator, xsIsMap, 0, new ForResult[E], fun, _.failedElements.length > 0, succeed)
       if (result.failedElements.length > 0)
         indicateFailure(
           if (shorthand)
             Resources.allShorthandFailed(indentErrorMessages(result.messageAcc).mkString(", \n"), decorateToStringValue(prettifier, original))
           else
             Resources.forAllFailed(indentErrorMessages(result.messageAcc).mkString(", \n"), decorateToStringValue(prettifier, original)),
-          Some(result.failedElements(0)._3),
+          result.failedElements(0)._3,
           pos
         )
       else indicateSuccess("forAll succeeded")
@@ -159,7 +161,7 @@ abstract class UnitInspectorAsserting {
 
       val xsIsMap = isMap(original)
       val result =
-        runFor(xs.toIterator, xsIsMap, 0, new ForResult[E], fun, _.passedCount > max)
+        runFor(xs.toIterator, xsIsMap, 0, new ForResult[E], fun, _.passedCount > max, succeed)
       if (result.passedCount > max)
         indicateFailure(
           if (shorthand)
@@ -330,7 +332,7 @@ abstract class UnitInspectorAsserting {
  */
 abstract class ExpectationInspectorAsserting extends UnitInspectorAsserting {
 
-  private[scalatest] implicit def assertingNatureOfExpectation(implicit prettifier: Prettifier): InspectorAsserting[Expectation] { type Result = Expectation } = {
+  /*private[scalatest] */implicit def assertingNatureOfExpectation(implicit prettifier: Prettifier): InspectorAsserting[Expectation] = {
     new InspectorAssertingImpl[Expectation] {
       type Result = Expectation
       def indicateSuccess(message: => String): Expectation = Fact.Yes(message)(prettifier)
@@ -409,16 +411,18 @@ object InspectorAsserting extends ExpectationInspectorAsserting {
     if (count > 1) Resources.forAssertionsElements(count.toString) else Resources.forAssertionsElement(count.toString)
 
   private[scalatest] final case class ForResult[T](passedCount: Int = 0, messageAcc: IndexedSeq[String] = IndexedSeq.empty,
-                          passedElements: IndexedSeq[(Int, T)] = IndexedSeq.empty, failedElements: IndexedSeq[(Int, T, Throwable)] = IndexedSeq.empty)
+                          passedElements: IndexedSeq[(Int, T)] = IndexedSeq.empty, failedElements: IndexedSeq[(Int, T, Option[Throwable])] = IndexedSeq.empty)
 
   @tailrec
-  private[scalatest] final def runFor[T, ASSERTION](itr: Iterator[T], xsIsMap: Boolean, index:Int, result: ForResult[T], fun: T => ASSERTION, stopFun: ForResult[_] => Boolean): ForResult[T] = {
+  private[scalatest] final def runFor[T, ASSERTION](itr: Iterator[T], xsIsMap: Boolean, index:Int, result: ForResult[T], fun: T => ASSERTION, stopFun: ForResult[_] => Boolean, succeedFun: ASSERTION => Boolean): ForResult[T] = {
     if (itr.hasNext) {
       val head = itr.next
       val newResult =
         try {
-          fun(head)
-          result.copy(passedCount = result.passedCount + 1, passedElements = result.passedElements :+ (index, head))
+          if (succeedFun(fun(head)))
+            result.copy(passedCount = result.passedCount + 1, passedElements = result.passedElements :+ (index, head))
+          else
+            result.copy(messageAcc = result.messageAcc :+ createMessage(messageKey, e, xsIsMap), failedElements = result.failedElements :+ (index, head, None))
         }
         catch {
           case e if !shouldPropagate(e) =>
@@ -427,7 +431,7 @@ object InspectorAsserting extends ExpectationInspectorAsserting {
               case entry: Entry[_, _] if xsIsMap => entry.getKey.toString
               case _ => index.toString
             }
-            result.copy(messageAcc = result.messageAcc :+ createMessage(messageKey, e, xsIsMap), failedElements = result.failedElements :+ (index, head, e))
+            result.copy(messageAcc = result.messageAcc :+ createMessage(messageKey, e, xsIsMap), failedElements = result.failedElements :+ (index, head, Some(e)))
         }
       if (stopFun(newResult))
         newResult

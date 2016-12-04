@@ -97,7 +97,8 @@ abstract class UnitInspectorAsserting {
           else
             Resources.forAllFailed(indentErrorMessages(result.messageAcc).mkString(", \n"), decorateToStringValue(prettifier, original)),
           Some(result.failedElements(0)._3),
-          pos
+          pos,
+          result.failedElements.flatMap(_._4)
         )
       else indicateSuccess("forAll succeeded")
     }
@@ -303,6 +304,8 @@ abstract class UnitInspectorAsserting {
     private[scalatest] def indicateSuccess(message: => String): Result
 
     private[scalatest] def indicateFailure(message: => String, optionalCause: Option[Throwable], pos: source.Position): Result
+
+    private[scalatest] def indicateFailure(message: => String, optionalCause: Option[Throwable], pos: source.Position, analysis: scala.collection.immutable.IndexedSeq[String]): Result
   }
 
   /**
@@ -319,6 +322,16 @@ abstract class UnitInspectorAsserting {
           (_: StackDepthException) => Some(msg),
           optionalCause,
           pos
+        )
+      }
+      def indicateFailure(message: => String, optionalCause: Option[Throwable], pos: source.Position, analysis: scala.collection.immutable.IndexedSeq[String]): Unit = {
+        val msg: String = message
+        throw new TestFailedException(
+          (_: StackDepthException) => Some(msg),
+          optionalCause,
+          Left(pos),
+          None,
+          analysis
         )
       }
     }
@@ -359,6 +372,16 @@ object InspectorAsserting extends UnitInspectorAsserting /*ExpectationInspectorA
           (_: StackDepthException) => Some(msg),
           optionalCause,
           pos
+        )
+      }
+      def indicateFailure(message: => String, optionalCause: Option[Throwable], pos: source.Position, analysis: scala.collection.immutable.IndexedSeq[String]): Assertion = {
+        val msg: String = message
+        throw new TestFailedException(
+          (_: StackDepthException) => Some(msg),
+          optionalCause,
+          Left(pos),
+          None,
+          analysis
         )
       }
     }
@@ -409,7 +432,7 @@ object InspectorAsserting extends UnitInspectorAsserting /*ExpectationInspectorA
     if (count > 1) Resources.forAssertionsElements(count.toString) else Resources.forAssertionsElement(count.toString)
 
   private[scalatest] final case class ForResult[T](passedCount: Int = 0, messageAcc: IndexedSeq[String] = IndexedSeq.empty,
-                          passedElements: IndexedSeq[(Int, T)] = IndexedSeq.empty, failedElements: IndexedSeq[(Int, T, Throwable)] = IndexedSeq.empty)
+                          passedElements: IndexedSeq[(Int, T)] = IndexedSeq.empty, failedElements: scala.collection.immutable.IndexedSeq[(Int, T, Throwable, scala.collection.immutable.IndexedSeq[String])] = Vector.empty)
 
   @tailrec
   private[scalatest] final def runFor[T, ASSERTION](itr: Iterator[T], xsIsMap: Boolean, index:Int, result: ForResult[T], fun: T => ASSERTION, stopFun: ForResult[_] => Boolean): ForResult[T] = {
@@ -421,13 +444,21 @@ object InspectorAsserting extends UnitInspectorAsserting /*ExpectationInspectorA
           result.copy(passedCount = result.passedCount + 1, passedElements = result.passedElements :+ (index, head))
         }
         catch {
+          case tfe: TestFailedException =>
+            val messageKey = head match {
+              case tuple: Tuple2[_, _] if xsIsMap => tuple._1.toString
+              case entry: Entry[_, _] if xsIsMap => entry.getKey.toString
+              case _ => index.toString
+            }
+            result.copy(messageAcc = result.messageAcc :+ createMessage(messageKey, tfe, xsIsMap), failedElements = result.failedElements :+ (index, head, tfe, tfe.analysis))
+
           case e if !shouldPropagate(e) =>
             val messageKey = head match {
               case tuple: Tuple2[_, _] if xsIsMap => tuple._1.toString
               case entry: Entry[_, _] if xsIsMap => entry.getKey.toString
               case _ => index.toString
             }
-            result.copy(messageAcc = result.messageAcc :+ createMessage(messageKey, e, xsIsMap), failedElements = result.failedElements :+ (index, head, e))
+            result.copy(messageAcc = result.messageAcc :+ createMessage(messageKey, e, xsIsMap), failedElements = result.failedElements :+ (index, head, e, Vector.empty))
         }
       if (stopFun(newResult))
         newResult

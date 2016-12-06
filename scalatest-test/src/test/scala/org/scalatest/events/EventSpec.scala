@@ -97,6 +97,74 @@ class EventSpec extends FunSpec with Checkers {
     }
   }
 */
+
+  describe("A TestFailed event") {
+
+    it("should carry correct differences value when used with s1 shouldEqual s2 syntax") {
+      class ExampleSpec extends FunSuite with Matchers {
+        test("test") {
+          "s1" shouldEqual "s2"
+        }
+      }
+      val rep = new EventRecordingReporter
+      val suite = new ExampleSpec
+      suite.run(None, Args(rep))
+      val failedEvents = rep.testFailedEventsReceived
+      assert(failedEvents.length == 1)
+      val analysis = failedEvents(0).analysis
+      assert(analysis.length == 1)
+      assert(analysis(0) == "\"s[1]\" -> \"s[2]\"")
+    }
+
+    it("should carry correct differences value when used with s1 should equal s2 syntax") {
+      class ExampleSpec extends FunSuite with Matchers {
+        test("test") {
+          "s1" should equal ("s2")
+        }
+      }
+      val rep = new EventRecordingReporter
+      val suite = new ExampleSpec
+      suite.run(None, Args(rep))
+      val failedEvents = rep.testFailedEventsReceived
+      assert(failedEvents.length == 1)
+      val analysis = failedEvents(0).analysis
+      assert(analysis.length == 1)
+      assert(analysis(0) == "\"s[1]\" -> \"s[2]\"")
+    }
+
+    it("should carry correct differences value when used with all(s1) shouldEqual s2 syntax") {
+      class ExampleSpec extends FunSuite with Matchers {
+        test("test") {
+          all(List("s1")) shouldEqual "s2"
+        }
+      }
+      val rep = new EventRecordingReporter
+      val suite = new ExampleSpec
+      suite.run(None, Args(rep))
+      val failedEvents = rep.testFailedEventsReceived
+      assert(failedEvents.length == 1)
+      val analysis = failedEvents(0).analysis
+      assert(analysis.length == 1)
+      assert(analysis(0) == "\"s[1]\" -> \"s[2]\"")
+    }
+
+    it("should carry correct differences value when used with all(s1) should equal s2 syntax") {
+      class ExampleSpec extends FunSuite with Matchers {
+        test("test") {
+          all(List("s1")) should equal ("s2")
+        }
+      }
+      val rep = new EventRecordingReporter
+      val suite = new ExampleSpec
+      suite.run(None, Args(rep))
+      val failedEvents = rep.testFailedEventsReceived
+      assert(failedEvents.length == 1)
+      val analysis = failedEvents(0).analysis
+      assert(analysis.length == 1)
+      assert(analysis(0) == "\"s[1]\" -> \"s[2]\"")
+    }
+
+  }
   
   describe("A TestCanceled event") {
     it("should carry suite class name as its rerunner when it is fired from top level suite") {

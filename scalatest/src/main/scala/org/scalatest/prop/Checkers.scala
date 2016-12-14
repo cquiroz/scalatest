@@ -301,8 +301,6 @@ trait Checkers extends Configuration {
       pos: source.Position
     ): Assertion = {
     val params = getScalaCheckParams(configParams, config)
-    ): Assertion = {
-    val params = getScalaCheckParams(configParams, config)
     asserting.check(Prop.forAll(f)(p, a1, s1, pp1, a2, s2, pp2, a3, s3, pp3, a4, s4, pp4), params, prettifier, pos)
   }
 

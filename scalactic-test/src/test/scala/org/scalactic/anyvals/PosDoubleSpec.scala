@@ -187,10 +187,10 @@ class PosDoubleSpec extends FunSpec with Matchers with PropertyChecks with TypeC
         val opNonZeroInt = PosDouble(3.0) + NonZeroInt(3)
         opNonZeroInt shouldEqual 6
 
-        /*val opNonZeroLong = PosDouble(3.0) + NonZeroLong(3L)
+        val opNonZeroLong = PosDouble(3.0) + NonZeroLong(3L)
         opNonZeroLong shouldEqual 6L
 
-        val opNonZeroFloat = PosDouble(3.0) + NonZeroFloat(3.0F)
+        /*val opNonZeroFloat = PosDouble(3.0) + NonZeroFloat(3.0F)
         opNonZeroFloat shouldEqual 6.0F
 
         val opNonZeroDouble = PosDouble(3.0) + NonZeroDouble(3.0)

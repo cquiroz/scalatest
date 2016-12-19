@@ -105,6 +105,13 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     val pos = (ia.toLong << 32) + ib
     (PosLong.ensuringValid(pos), rb)
   }
+  def nextNonZeroLong: (NonZeroLong, Randomizer) = {
+    val (ia, ra) = thisRandomizer.next(31) // 31 ensures sign bit is 0
+    val (ib, rb) = ra.next(32)
+    val candidate = (ia.toLong << 32) + ib
+    val nz = if (candidate == 0L) 1L else candidate
+    (NonZeroLong.ensuringValid(nz), rb)
+  }
   def nextPosFloat: (PosFloat, Randomizer) = {
     val (f, r) = nextFloat
     val candidate = f.abs // 0.0f or greater

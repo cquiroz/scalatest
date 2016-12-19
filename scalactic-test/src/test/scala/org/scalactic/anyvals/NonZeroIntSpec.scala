@@ -123,15 +123,11 @@ class NonZeroIntSpec extends FunSpec with Matchers with GeneratorDrivenPropertyC
       (NonZeroInt(3): Float) shouldEqual 3.0F
       (NonZeroInt(3): Double) shouldEqual 3.0
 
-      /*(NonZeroInt(3): NonZeroInt) shouldEqual NonZeroInt(3)
-      (NonZeroInt(3): PosLong) shouldEqual PosLong(3L)
+      (NonZeroInt(3): NonZeroLong) shouldEqual NonZeroLong(3)
+      /*
       (NonZeroInt(3): PosFloat) shouldEqual PosFloat(3.0F)
       (NonZeroInt(3): PosDouble) shouldEqual PosDouble(3.0)
-
-      (NonZeroInt(3): PosZInt) shouldEqual PosZInt(3)
-      (NonZeroInt(3): PosZLong) shouldEqual PosZLong(3L)
-      (NonZeroInt(3): PosZFloat) shouldEqual PosZFloat(3.0F)
-      (NonZeroInt(3): PosZDouble) shouldEqual PosZDouble(3.0)*/
+      */
     }
 
     it("should be sortable") {
@@ -184,10 +180,10 @@ class NonZeroIntSpec extends FunSpec with Matchers with GeneratorDrivenPropertyC
         val opNonZeroInt = NonZeroInt(3) + NonZeroInt(3)
         opNonZeroInt shouldEqual 6
 
-        /*val opNonZeroLong = NonZeroInt(3) + NonZeroLong(3L)
+        val opNonZeroLong = NonZeroInt(3) + NonZeroLong(3L)
         opNonZeroLong shouldEqual 6L
 
-        val opNonZeroFloat = NonZeroInt(3) + NonZeroFloat(3.0F)
+        /*val opNonZeroFloat = NonZeroInt(3) + NonZeroFloat(3.0F)
         opNonZeroFloat shouldEqual 6.0F
 
         val opNonZeroDouble = NonZeroInt(3) + NonZeroDouble(3.0)
@@ -613,6 +609,18 @@ class NonZeroIntSpec extends FunSpec with Matchers with GeneratorDrivenPropertyC
         def widen(value: Double): Double = value
         widen(nzint) shouldEqual widen(nzint.toInt)
       }
+      forAll { (nzint: NonZeroLong) =>
+        def widen(value: NonZeroLong): NonZeroLong = value
+        widen(nzint) shouldEqual widen(NonZeroLong.from(nzint.toLong).get)
+      }
+      /*forAll { (plong: NonZeroLong) =>
+        def widen(value: NonZeroFloat): NonZeroFloat = value
+        widen(plong) shouldEqual widen(NonZeroFloat.from(plong.toLong).get)
+      }
+      forAll { (plong: NonZeroLong) =>
+        def widen(value: NonZeroDouble): NonZeroDouble = value
+        widen(plong) shouldEqual widen(NonZeroDouble.from(plong.toLong).get)
+      }*/
     }
     it("should offer an ensuringValid method that takes an Int => Int, throwing AssertionError if the result is invalid") {
       NonZeroInt(33).ensuringValid(_ + 1) shouldEqual NonZeroInt(34)

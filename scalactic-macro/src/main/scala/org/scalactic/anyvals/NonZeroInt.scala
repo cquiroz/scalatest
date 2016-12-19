@@ -879,6 +879,15 @@ object NonZeroInt {
   implicit def widenToDouble(non0: NonZeroInt): Double = non0.value
 
   /**
+    * Implicit widening conversion from <code>NonZeroInt</code> to <code>NonZeroLong</code>.
+    *
+    * @param non0 the <code>NonZeroInt</code> to widen
+    * @return the <code>Int</code> value underlying the specified <code>NonZeroInt</code>,
+    *     widened to <code>NonZeroLong</code>.
+    */
+  implicit def widenToNonZeroLong(non0: NonZeroInt): NonZeroLong = NonZeroLong.ensuringValid(non0.value)
+
+  /**
     * Implicit Ordering instance.
     */
   implicit val nonZeroIntOrd: Ordering[NonZeroInt] =

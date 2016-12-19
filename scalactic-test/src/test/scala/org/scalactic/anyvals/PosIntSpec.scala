@@ -181,10 +181,10 @@ class PosIntSpec extends FunSpec with Matchers with GeneratorDrivenPropertyCheck
         val opNonZeroInt = PosInt(3) + NonZeroInt(3)
         opNonZeroInt shouldEqual 6
 
-        /*val opNonZeroLong = PosInt(3) + NonZeroLong(3L)
+        val opNonZeroLong = PosInt(3) + NonZeroLong(3L)
         opNonZeroLong shouldEqual 6L
 
-        val opNonZeroFloat = PosInt(3) + NonZeroFloat(3.0F)
+        /*val opNonZeroFloat = PosInt(3) + NonZeroFloat(3.0F)
         opNonZeroFloat shouldEqual 6.0F
 
         val opNonZeroDouble = PosInt(3) + NonZeroDouble(3.0)

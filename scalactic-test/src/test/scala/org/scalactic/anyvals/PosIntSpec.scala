@@ -73,7 +73,6 @@ class PosIntSpec extends FunSpec with Matchers with GeneratorDrivenPropertyCheck
       it("returns PosInt if the passed Int is greater than 0") {
         PosInt.ensuringValid(50).value shouldBe 50
         PosInt.ensuringValid(100).value shouldBe 100
-        pending
       }
 
       it("throws AssertionError if the passed Int is NOT greater than 0") {
@@ -177,6 +176,19 @@ class PosIntSpec extends FunSpec with Matchers with GeneratorDrivenPropertyCheck
 
         val opPosZDouble = PosInt(3) + PosZDouble(3.0)
         opPosZDouble shouldEqual 6.0
+
+        // When adding a NonZero*
+        val opNonZeroInt = PosInt(3) + NonZeroInt(3)
+        opNonZeroInt shouldEqual 6
+
+        /*val opNonZeroLong = PosInt(3) + NonZeroLong(3L)
+        opNonZeroLong shouldEqual 6L
+
+        val opNonZeroFloat = PosInt(3) + NonZeroFloat(3.0F)
+        opNonZeroFloat shouldEqual 6.0F
+
+        val opNonZeroDouble = PosInt(3) + NonZeroDouble(3.0)
+        opNonZeroDouble shouldEqual 6.0*/
       }
     }
 

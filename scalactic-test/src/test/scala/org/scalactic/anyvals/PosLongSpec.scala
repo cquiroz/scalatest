@@ -175,6 +175,19 @@ class PosLongSpec extends FunSpec with Matchers with GeneratorDrivenPropertyChec
 
         val opPosZDouble = PosLong(3L) + PosZDouble(3.0)
         opPosZDouble shouldEqual 6.0
+
+        // When adding a NonZero*
+        val opNonZeroInt = PosLong(3L) + NonZeroInt(3)
+        opNonZeroInt shouldEqual 6
+
+        /*val opNonZeroLong = PosLong(3L) + NonZeroLong(3L)
+        opNonZeroLong shouldEqual 6L
+
+        val opNonZeroFloat = PosLong(3L) + NonZeroFloat(3.0F)
+        opNonZeroFloat shouldEqual 6.0F
+
+        val opNonZeroDouble = PosLong(3L) + NonZeroDouble(3.0)
+        opNonZeroDouble shouldEqual 6.0*/
       }
     }
 

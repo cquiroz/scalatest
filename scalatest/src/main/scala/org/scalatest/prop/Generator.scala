@@ -473,6 +473,27 @@ object Generator extends LowerPriorityGeneratorImplicits {
       override def toString = "Generator[PosZInt]"
     }
 
+  implicit val nonZeroIntGenerator: Generator[NonZeroInt] =
+    new Generator[NonZeroInt] {
+      private val nonZeroIntEdges = List(NonZeroInt.MinValue, NonZeroInt(1), NonZeroInt.MaxValue)
+      override def initEdges(maxLength: Int, rnd: Randomizer): (List[NonZeroInt], Randomizer) = {
+        require(maxLength >= 0, "; the maxLength passed to next must be >= 0")
+        val (allEdges, nextRnd) = Randomizer.shuffle(nonZeroIntEdges, rnd)
+        (allEdges.take(maxLength), nextRnd)
+      }
+      def next(size: Int, edges: List[NonZeroInt], rnd: Randomizer): (NonZeroInt, List[NonZeroInt], Randomizer) = {
+        require(size >= 0, "; the size passed to next must be >= 0")
+        edges match {
+          case head :: tail =>
+            (head, tail, rnd)
+          case _ =>
+            val (nonZeroInt, nextRnd) = rnd.nextNonZeroInt
+            (nonZeroInt, Nil, nextRnd)
+        }
+      }
+      override def toString = "Generator[NonZeroInt]"
+    }
+
   implicit val posLongGenerator: Generator[PosLong] =
     new Generator[PosLong] {
       private val posLongEdges = List(PosLong(1L), PosLong.MaxValue)

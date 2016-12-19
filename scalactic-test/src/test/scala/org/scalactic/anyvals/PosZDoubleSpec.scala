@@ -188,6 +188,19 @@ class PosZDoubleSpec extends FunSpec with Matchers with PropertyChecks {
 
         val opPosZDouble = PosZDouble(3.0) + PosZDouble(3.0)
         opPosZDouble shouldEqual 6.0
+
+        // When adding a NonZero*
+        val opNonZeroInt = PosZDouble(3.0) + NonZeroInt(3)
+        opNonZeroInt shouldEqual 6
+
+        /*val opNonZeroLong = PosZDouble(3.0) + NonZeroLong(3L)
+        opNonZeroLong shouldEqual 6L
+
+        val opNonZeroFloat = PosZDouble(3.0) + NonZeroFloat(3.0F)
+        opNonZeroFloat shouldEqual 6.0F
+
+        val opNonZeroDouble = PosZDouble(3.0) + NonZeroDouble(3.0)
+        opNonZeroDouble shouldEqual 6.0*/
       }
     }
 

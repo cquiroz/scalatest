@@ -166,6 +166,19 @@ class PosFloatSpec extends FunSpec with Matchers with PropertyChecks with TypeCh
 
         val opPosZDouble = PosFloat(3.0F) + PosZDouble(3.0)
         opPosZDouble shouldEqual 6.0
+
+        // When adding a NonZero*
+        val opNonZeroInt = PosFloat(3.0F) + NonZeroInt(3)
+        opNonZeroInt shouldEqual 6
+
+        /*val opNonZeroLong = PosFloat(3.0F) + NonZeroLong(3L)
+        opNonZeroLong shouldEqual 6L
+
+        val opNonZeroFloat = PosFloat(3.0F) + NonZeroFloat(3.0F)
+        opNonZeroFloat shouldEqual 6.0F
+
+        val opNonZeroDouble = PosFloat(3.0F) + NonZeroDouble(3.0)
+        opNonZeroDouble shouldEqual 6.0*/
       }
     }
 

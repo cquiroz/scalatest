@@ -158,13 +158,82 @@ object GenAnyVals {
     List(targetFile, genMacro(targetDir, "Long", typeName, typeBooleanExpr))
   }
 
+  def genFloatAnyVal(targetDir: File, typeName: String, typeDesc: String, typeNote: String, typeBooleanExpr: String, typeValidExample: String, typeInvalidExample: String,
+                    typeValidValue: String, typeInvalidValue: String, typeMinValue: String, typeMinValueNumber: String, typeMaxValue: String, typeMaxValueNumber: String,
+                     classExtraMethods: String, objectExtraMethods: String, widensToTypes: Seq[String]): List[File] = {
+    val templateSource = scala.io.Source.fromFile("project/templates/FloatAnyVal.template")
+    val templateText = try templateSource.mkString finally templateSource.close()
+    val st = new org.antlr.stringtemplate.StringTemplate(templateText)
+
+    st.setAttribute("typeName", typeName)
+    st.setAttribute("typeDesc", typeDesc)
+    st.setAttribute("typeNote", typeNote)
+    st.setAttribute("typeBooleanExpr", typeBooleanExpr)
+    st.setAttribute("typeValidExample", typeValidExample)
+    st.setAttribute("typeInvalidExample", typeInvalidExample)
+    st.setAttribute("typeValidValue", typeValidValue)
+    st.setAttribute("typeInvalidValue", typeInvalidValue)
+    st.setAttribute("typeMinValue", typeMinValue)
+    st.setAttribute("typeMinValueNumber", typeMinValueNumber)
+    st.setAttribute("typeMaxValue", typeMaxValue)
+    st.setAttribute("typeMaxValueNumber", typeMaxValueNumber)
+    st.setAttribute("classExtraMethods", classExtraMethods)
+    st.setAttribute("objectExtraMethods", objectExtraMethods)
+
+    val widensToOtherAnyVals =
+      widensToTypes.map { targetType =>
+        s"""/**
+            |   * Implicit widening conversion from <code>$typeName</code> to <code>$targetType</code>.
+            |   *
+            |   * @param pos the <code>$typeName</code> to widen
+            |   * @return the <code>$targetType</code> widen from <code>$typeName</code>.
+            |   */
+            |  implicit def widenTo$targetType(pos: $typeName): $targetType = $targetType.ensuringValid(pos.value)
+            |
+        """.stripMargin
+      }.mkString
+
+    st.setAttribute("widensToOtherAnyVals", widensToOtherAnyVals)
+
+    val targetFile = new File(targetDir, typeName + ".scala")
+    val bw = new BufferedWriter(new FileWriter(targetFile))
+
+    bw.write(st.toString)
+    bw.flush()
+    bw.close()
+    println("Generated: " + targetFile.getAbsolutePath)
+    List(targetFile, genMacro(targetDir, "Float", typeName, typeBooleanExpr))
+  }
+
+  // Float valid: 1.1
+  // Float invalid: 0.0
+
   def genMain(dir: File, version: String, scalaVersion: String): Seq[File] = {
     dir.mkdirs()
 
     genIntAnyVal(dir, "NonZeroInt", "non-zero", "Note: a <code>NonZeroInt</code> may not equal 0.", "i != 0", "NonZeroInt(42)", "NonZeroInt(0)", "42", "0", "Int.MinValue", "-2147483648",
                  "Int.MaxValue", "2147483647", List("NonZeroLong")) :::
     genLongAnyVal(dir, "NonZeroLong", "non-zero", "Note: a <code>NonZeroLong</code> may not equal 0.", "i != 0L", "NonZeroLong(42)", "NonZeroLong(0)", "42", "0", "Long.MinValue", "-9223372036854775808",
-                  "Long.MaxValue", "9223372036854775807", List())
+                  "Long.MaxValue", "9223372036854775807", List("NonZeroFloat")) :::
+    genFloatAnyVal(dir, "NonZeroFloat", "non-zero", "Note: a <code>NonZeroFloat</code> may not equal 0.0.", "i != 0.0f", "NonZeroFloat(1.1f)", "NonZeroFloat(0.0f)", "1.1", "0.0", "Float.MinValue", "-3.4028235E38",
+                   "Float.MaxValue", "3.4028235E38",
+                   "def isNaN: Boolean = value.isNaN",
+                   """/**
+                     |  * The positive infinity value, which is <code>NonZeroFloat.ensuringValid(Float.PositiveInfinity)</code>.
+                     |  */
+                     |final val PositiveInfinity: NonZeroFloat = NonZeroFloat.ensuringValid(Float.PositiveInfinity) // Can't use the macro here
+                     |
+                     |/**
+                     |  * The negative infinity value, which is <code>NonZeroFloat.ensuringValid(Float.NegativeInfinity)</code>.
+                     |  */
+                     |final val NegativeInfinity: NonZeroFloat = NonZeroFloat.ensuringValid(Float.NegativeInfinity) // Can't use the macro here
+                     |
+                     |/**
+                     |  * The not a number value, which is <code>NonZeroFloat.ensuringValid(Float.NaN)</code>.
+                     |  */
+                     |final val NaN: NonZeroFloat = NonZeroFloat.ensuringValid(Float.NaN) // Can't use the macro here
+                   """.stripMargin,
+                   List())
   }
 
 }

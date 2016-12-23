@@ -43,7 +43,7 @@ import scala.language.implicitConversions
  * import anyvals._
  *
  * scala&gt; $typeValidExample$
- * res0: org.scalactic.anyvals.$typeName$ = $typeName$(1)
+ * res0: org.scalactic.anyvals.$typeName$ = $typeValidExample$
  *
  * scala&gt; $typeInvalidExample$
  * &lt;console&gt;:14: error: $typeName$.apply can only be invoked on a $typeDesc$ ($typeBooleanExpr$) integer literal, like $typeValidExample$.
@@ -82,7 +82,7 @@ import scala.language.implicitConversions
  *
  * <pre class="stREPL">
  * scala&gt; $typeName$.from(x)
- * res3: Option[org.scalactic.anyvals.$typeName$] = Some($typeName$(1))
+ * res3: Option[org.scalactic.anyvals.$typeName$] = Some($typeName$($typeValidValue$))
  *
  * scala&gt; val y = $typeInvalidValue$L
  * y: Long = $typeInvalidValue$

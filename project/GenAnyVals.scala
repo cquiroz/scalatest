@@ -262,9 +262,9 @@ object GenAnyVals {
                  "Int.MaxValue", "2147483647", List("NonZeroLong", "NonZeroFloat", "NonZeroDouble")) :::
     genLongAnyVal(dir, "NonZeroLong", "non-zero", "Note: a <code>NonZeroLong</code> may not equal 0.", "i != 0L", "NonZeroLong(42)", "NonZeroLong(0)", "42", "0", "Long.MinValue", "-9223372036854775808",
                   "Long.MaxValue", "9223372036854775807", List("NonZeroFloat", "NonZeroDouble")) :::
-    genFloatAnyVal(dir, "NonZeroFloat", "non-zero", "Note: a <code>NonZeroFloat</code> may not equal 0.0.", "i != 0.0f", "NonZeroFloat(1.1f)", "NonZeroFloat(0.0f)", "1.1", "0.0", "Float.MinValue", "-3.4028235E38",
+    genFloatAnyVal(dir, "NonZeroFloat", "non-zero", "Note: a <code>NonZeroFloat</code> may not equal 0.0.", "i != 0.0f && !i.isNaN", "NonZeroFloat(1.1f)", "NonZeroFloat(0.0f)", "1.1", "0.0", "Float.MinValue", "-3.4028235E38",
                    "Float.MaxValue", "3.4028235E38",
-                   "def isNaN: Boolean = value.isNaN",
+                   "",
                    """/**
                      |  * The positive infinity value, which is <code>NonZeroFloat.ensuringValid(Float.PositiveInfinity)</code>.
                      |  */
@@ -274,11 +274,6 @@ object GenAnyVals {
                      |  * The negative infinity value, which is <code>NonZeroFloat.ensuringValid(Float.NegativeInfinity)</code>.
                      |  */
                      |final val NegativeInfinity: NonZeroFloat = NonZeroFloat.ensuringValid(Float.NegativeInfinity) // Can't use the macro here
-                     |
-                     |/**
-                     |  * The not a number value, which is <code>NonZeroFloat.ensuringValid(Float.NaN)</code>.
-                     |  */
-                     |final val NaN: NonZeroFloat = NonZeroFloat.ensuringValid(Float.NaN) // Can't use the macro here
                    """.stripMargin,
                    List("NonZeroDouble")) :::
     genDoubleAnyVal(dir, "NonZeroDouble", "non-zero", "Note: a <code>NonZeroDouble</code> may not equal 0.0.", "i != 0.0 && !i.isNaN", "NonZeroDouble(1.1)", "NonZeroDouble(0.0)", "1.1", "0.0", "Double.MinValue", "-1.7976931348623157E308",

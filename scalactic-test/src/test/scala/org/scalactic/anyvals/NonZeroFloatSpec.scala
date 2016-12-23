@@ -56,8 +56,8 @@ class NonZeroFloatSpec extends FunSpec with Matchers with PropertyChecks with Ty
         NonZeroFloat.ensuringValid(-99.9F).value shouldBe -99.9F
         NonZeroFloat.ensuringValid(Float.NegativeInfinity).value shouldBe Float.NegativeInfinity
       }
-      it("returns NonZeroFloat if the passed Float is NaN") {
-        NonZeroFloat.ensuringValid(Float.NaN).value.isNaN shouldBe true
+      it("throws AssertionError if the passed Float is NaN") {
+        an [AssertionError] should be thrownBy NonZeroFloat.ensuringValid(Float.NaN)
       }
       it("throws AssertionError if the passed Float is 0") {
         an [AssertionError] should be thrownBy NonZeroFloat.ensuringValid(0.0F)
@@ -573,7 +573,7 @@ class NonZeroFloatSpec extends FunSpec with Matchers with PropertyChecks with Ty
     NonZeroFloat(33.0f).ensuringValid(_ + 1.0f) shouldEqual NonZeroFloat(34.0f)
     NonZeroFloat(33.0f).ensuringValid(_ => Float.PositiveInfinity) shouldEqual NonZeroFloat.ensuringValid(Float.PositiveInfinity)
     NonZeroFloat(33.0f).ensuringValid(_ => Float.NegativeInfinity) shouldEqual NonZeroFloat.ensuringValid(Float.NegativeInfinity)
-    NonZeroFloat(33.0f).ensuringValid(_ => Float.NaN).isNaN shouldBe true
+    an [AssertionError] should be thrownBy { NonZeroFloat.MaxValue.ensuringValid(_ => Float.NaN) }
     an [AssertionError] should be thrownBy { NonZeroFloat.MaxValue.ensuringValid(_ - NonZeroFloat.MaxValue) }
   }
 }

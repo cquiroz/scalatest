@@ -124,8 +124,14 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     (PosZFloat.ensuringValid(pos), r)
   }
   def nextNonZeroFloat: (NonZeroFloat, Randomizer) = {
-    val (candicate, r) = nextFloat
-    val pos = if (candicate != 0.0f) candicate else candicate + 1.0f
+    val (candidate, r) = nextFloat
+    val pos =
+      if (candidate == 0.0f)
+        1.0f
+      else if (candidate.isNaN)
+        -1.0f
+      else
+        candidate
     (NonZeroFloat.ensuringValid(pos), r)
   }
   def nextPosDouble: (PosDouble, Randomizer) = {

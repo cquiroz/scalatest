@@ -139,6 +139,11 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     val pos = d.abs // 0.0 or greater
     (PosZDouble.ensuringValid(pos), r)
   }
+  def nextNonZeroDouble: (NonZeroDouble, Randomizer) = {
+    val (candidate, r) = nextDouble
+    val pos = if (candidate != 0.0) candidate else candidate + 1.0
+    (NonZeroDouble.ensuringValid(pos), r)
+  }
   // Maybe add in some > 16 bit UTF-16 encodings
   def nextString(length: Int): (String, Randomizer) = {
     require(length >= 0, "; the length passed to nextString must be >= 0")

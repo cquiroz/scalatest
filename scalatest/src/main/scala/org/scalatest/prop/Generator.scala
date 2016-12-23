@@ -662,6 +662,27 @@ object Generator extends LowerPriorityGeneratorImplicits {
       override def toString = "Generator[PosZDouble]"
     }
 
+  implicit val nonZeroDoubleGenerator: Generator[NonZeroDouble] =
+    new Generator[NonZeroDouble] {
+      private val nonZeroDoubleEdges = List(NonZeroDouble.MinValue, NonZeroDouble(1.0), NonZeroDouble.MaxValue)
+      override def initEdges(maxLength: Int, rnd: Randomizer): (List[NonZeroDouble], Randomizer) = {
+        require(maxLength >= 0, "; the maxLength passed to next must be >= 0")
+        val (allEdges, nextRnd) = Randomizer.shuffle(nonZeroDoubleEdges, rnd)
+        (allEdges.take(maxLength), nextRnd)
+      }
+      def next(size: Int, edges: List[NonZeroDouble], rnd: Randomizer): (NonZeroDouble, List[NonZeroDouble], Randomizer) = {
+        require(size >= 0, "; the size passed to next must be >= 0")
+        edges match {
+          case head :: tail =>
+            (head, tail, rnd)
+          case _ =>
+            val (nonZeroDouble, nextRnd) = rnd.nextNonZeroDouble
+            (nonZeroDouble, Nil, nextRnd)
+        }
+      }
+      override def toString = "Generator[NonZeroDouble]"
+    }
+
   // Should throw IAE on negative size in all generators, even the ones that ignore size.
   implicit val stringGenerator: Generator[String] =
     new Generator[String] {

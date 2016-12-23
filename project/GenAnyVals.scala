@@ -252,8 +252,7 @@ object GenAnyVals {
     List(targetFile, genMacro(targetDir, "Double", typeName, typeBooleanExpr))
   }
 
-  // Float valid: 1.1
-  // Float invalid: 0.0
+
 
   def genMain(dir: File, version: String, scalaVersion: String): Seq[File] = {
     dir.mkdirs()
@@ -274,6 +273,8 @@ object GenAnyVals {
                      |  * The negative infinity value, which is <code>NonZeroFloat.ensuringValid(Float.NegativeInfinity)</code>.
                      |  */
                      |final val NegativeInfinity: NonZeroFloat = NonZeroFloat.ensuringValid(Float.NegativeInfinity) // Can't use the macro here
+                     |
+                     |final val MinPositiveValue: NonZeroFloat = NonZeroFloat.ensuringValid(Float.MinPositiveValue)
                    """.stripMargin,
                    List("NonZeroDouble")) :::
     genDoubleAnyVal(dir, "NonZeroDouble", "non-zero", "Note: a <code>NonZeroDouble</code> may not equal 0.0.", "i != 0.0 && !i.isNaN", "NonZeroDouble(1.1)", "NonZeroDouble(0.0)", "1.1", "0.0", "Double.MinValue", "-1.7976931348623157E308",

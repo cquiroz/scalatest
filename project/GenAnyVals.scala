@@ -252,15 +252,37 @@ object GenAnyVals {
     List(targetFile, genMacro(targetDir, "Double", typeName, typeBooleanExpr))
   }
 
+  /*private val wideOrderList =
+    List(
+      ("NonZero", (n: String) => n),
+      ("Pos", ""),
 
+    )*/
+
+  val primitiveTypes =
+    List(
+      "Int",
+      "Long",
+      "Float",
+      "Double"
+    )
+
+  val anyValTypes =
+    List(
+      "NonZero"
+    )
+
+  def nonZeroWidens(primitiveType: String): List[String] = {
+    primitiveTypes.dropWhile(_ != primitiveType).tail.map(p => "NonZero" + p)
+  }
 
   def genMain(dir: File, version: String, scalaVersion: String): Seq[File] = {
     dir.mkdirs()
 
     genIntAnyVal(dir, "NonZeroInt", "non-zero", "Note: a <code>NonZeroInt</code> may not equal 0.", "i != 0", "NonZeroInt(42)", "NonZeroInt(0)", "42", "0", "Int.MinValue", "-2147483648",
-                 "Int.MaxValue", "2147483647", List("NonZeroLong", "NonZeroFloat", "NonZeroDouble")) :::
+                 "Int.MaxValue", "2147483647", nonZeroWidens("Int")) :::
     genLongAnyVal(dir, "NonZeroLong", "non-zero", "Note: a <code>NonZeroLong</code> may not equal 0.", "i != 0L", "NonZeroLong(42)", "NonZeroLong(0)", "42", "0", "Long.MinValue", "-9223372036854775808",
-                  "Long.MaxValue", "9223372036854775807", List("NonZeroFloat", "NonZeroDouble")) :::
+                  "Long.MaxValue", "9223372036854775807", nonZeroWidens("Long")) :::
     genFloatAnyVal(dir, "NonZeroFloat", "non-zero", "Note: a <code>NonZeroFloat</code> may not equal 0.0.", "i != 0.0f && !i.isNaN", "NonZeroFloat(1.1f)", "NonZeroFloat(0.0f)", "1.1", "0.0", "Float.MinValue", "-3.4028235E38",
                    "Float.MaxValue", "3.4028235E38",
                    "",
@@ -276,7 +298,7 @@ object GenAnyVals {
                      |
                      |final val MinPositiveValue: NonZeroFloat = NonZeroFloat.ensuringValid(Float.MinPositiveValue)
                    """.stripMargin,
-                   List("NonZeroDouble")) :::
+                   nonZeroWidens("Float")) :::
     genDoubleAnyVal(dir, "NonZeroDouble", "non-zero", "Note: a <code>NonZeroDouble</code> may not equal 0.0.", "i != 0.0 && !i.isNaN", "NonZeroDouble(1.1)", "NonZeroDouble(0.0)", "1.1", "0.0", "Double.MinValue", "-1.7976931348623157E308",
                     "Double.MaxValue", "1.7976931348623157E308",
                     "",
@@ -292,7 +314,7 @@ object GenAnyVals {
                       |
                       |final val MinPositiveValue: NonZeroDouble = NonZeroDouble.ensuringValid(Double.MinPositiveValue)
                     """.stripMargin,
-                    List())
+                    nonZeroWidens("Double"))
   }
 
 }

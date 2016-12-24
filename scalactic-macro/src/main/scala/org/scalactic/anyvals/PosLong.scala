@@ -996,6 +996,38 @@ object PosLong {
    */
   implicit def widenToPosZDouble(pos: PosLong): PosZDouble = PosZDouble.ensuringValid(pos.value)
 
+ /**
+   * Implicit widening conversion from <code>PosLong</code> to
+   * <code>NonZeroLong</code>.
+   *
+   * @param pos the <code>PosLong</code> to widen
+   * @return the <code>Long</code> value underlying the specified
+   *     <code>PosLong</code>, widened to <code>NonZeroLong</code>.
+   */
+ implicit def widenToNonZeroLong(pos: PosLong): NonZeroLong = NonZeroLong.ensuringValid(pos.value)
+
+ /**
+   * Implicit widening conversion from <code>PosLong</code> to
+   * <code>NonZeroFloat</code>.
+   *
+   * @param pos the <code>PosLong</code> to widen
+   * @return the <code>Long</code> value underlying the specified
+   *     <code>PosLong</code>, widened to <code>Float</code> and
+   *     wrapped in a <code>NonZeroFloat</code>.
+   */
+ implicit def widenToNonZeroFloat(pos: PosLong): NonZeroFloat = NonZeroFloat.ensuringValid(pos.value)
+
+ /**
+   * Implicit widening conversion from <code>PosLong</code> to
+   * <code>NonZeroDouble</code>.
+   *
+   * @param pos the <code>PosLong</code> to widen
+   * @return the <code>Long</code> value underlying the specified
+   *     <code>PosLong</code>, widened to <code>Double</code> and
+   *     wrapped in a <code>NonZeroDouble</code>.
+   */
+ implicit def widenToNonZeroDouble(pos: PosLong): NonZeroDouble = NonZeroDouble.ensuringValid(pos.value)
+
   /**
    * Implicit Ordering instance.
    */

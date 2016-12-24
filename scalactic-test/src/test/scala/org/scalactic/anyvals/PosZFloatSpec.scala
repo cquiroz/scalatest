@@ -131,6 +131,11 @@ class PosZFloatSpec extends FunSpec with Matchers with PropertyChecks with TypeC
       "PosZFloat(3.0F): PosZLong" shouldNot typeCheck
       (PosZFloat(3.0F): PosZFloat) shouldEqual PosZFloat(3.0F)
       (PosZFloat(3.0F): PosZDouble) shouldEqual PosZDouble(3.0)
+
+      "PosZFloat(3.0F): NonZeroInt" shouldNot typeCheck
+      "PosZFloat(3.0F): NonZeroLong" shouldNot typeCheck
+      "PosZFloat(3.0F): NonZeroFloat" shouldNot typeCheck
+      "PosZFloat(3.0F): NonZeroDouble" shouldNot typeCheck
     }
 
     it("should be sortable") {

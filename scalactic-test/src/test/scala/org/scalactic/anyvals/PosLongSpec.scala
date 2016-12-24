@@ -128,6 +128,11 @@ class PosLongSpec extends FunSpec with Matchers with GeneratorDrivenPropertyChec
       (PosLong(3L): PosZLong) shouldEqual PosZLong(3L)
       (PosLong(3L): PosZFloat) shouldEqual PosZFloat(3.0F)
       (PosLong(3L): PosZDouble) shouldEqual PosZDouble(3.0)
+
+      "PosLong(3L): NonZeroInt" shouldNot typeCheck
+      (PosLong(3L): NonZeroLong) shouldEqual NonZeroLong(3L)
+      (PosLong(3L): NonZeroFloat) shouldEqual NonZeroFloat(3.0F)
+      (PosLong(3L): NonZeroDouble) shouldEqual NonZeroDouble(3.0)
     }
 
     it("should be sortable") {
@@ -183,11 +188,11 @@ class PosLongSpec extends FunSpec with Matchers with GeneratorDrivenPropertyChec
         val opNonZeroLong = PosLong(3L) + NonZeroLong(3L)
         opNonZeroLong shouldEqual 6L
 
-        /*val opNonZeroFloat = PosLong(3L) + NonZeroFloat(3.0F)
+        val opNonZeroFloat = PosLong(3L) + NonZeroFloat(3.0F)
         opNonZeroFloat shouldEqual 6.0F
 
         val opNonZeroDouble = PosLong(3L) + NonZeroDouble(3.0)
-        opNonZeroDouble shouldEqual 6.0*/
+        opNonZeroDouble shouldEqual 6.0
       }
     }
 
@@ -631,6 +636,18 @@ class PosLongSpec extends FunSpec with Matchers with GeneratorDrivenPropertyChec
         forAll { (plong: PosLong) =>
           def widen(value: PosZDouble): PosZDouble = value
           widen(plong) shouldEqual widen(PosZDouble.from(plong.toLong).get)
+        }
+        forAll { (plong: PosLong) =>
+          def widen(value: NonZeroLong): NonZeroLong = value
+          widen(plong) shouldEqual widen(NonZeroLong.from(plong.toLong).get)
+        }
+        forAll { (plong: PosLong) =>
+          def widen(value: NonZeroFloat): NonZeroFloat = value
+          widen(plong) shouldEqual widen(NonZeroFloat.from(plong.toLong).get)
+        }
+        forAll { (plong: PosLong) =>
+          def widen(value: NonZeroDouble): NonZeroDouble = value
+          widen(plong) shouldEqual widen(NonZeroDouble.from(plong.toLong).get)
         }
       }
     }

@@ -950,6 +950,42 @@ object PosInt {
   implicit def widenToPosZDouble(pos: PosInt): PosZDouble = PosZDouble.ensuringValid(pos.value)
 
   /**
+    * Implicit widening conversion from <code>PosInt</code> to <code>NonZeroInt</code>.
+    *
+    * @param pos the <code>PosInt</code> to widen
+    * @return the <code>Int</code> value underlying the specified <code>PosInt</code>,
+    *     widened to <code>Long</code> and wrapped in a <code>NonZereInt</code>.
+    */
+  implicit def widenToNonZeroInt(pos: PosInt): NonZeroInt = NonZeroInt.ensuringValid(pos.value)
+
+  /**
+    * Implicit widening conversion from <code>PosInt</code> to <code>NonZeroLong</code>.
+    *
+    * @param pos the <code>PosInt</code> to widen
+    * @return the <code>Int</code> value underlying the specified <code>PosInt</code>,
+    *     widened to <code>Long</code> and wrapped in a <code>NonZeroLong</code>.
+    */
+  implicit def widenToNonZeroLong(pos: PosInt): NonZeroLong = NonZeroLong.ensuringValid(pos.value)
+
+  /**
+    * Implicit widening conversion from <code>PosInt</code> to <code>NonZeroFloat</code>.
+    *
+    * @param pos the <code>PosInt</code> to widen
+    * @return the <code>Int</code> value underlying the specified <code>PosInt</code>,
+    *     widened to <code>Float</code> and wrapped in a <code>NonZeroFloat</code>.
+    */
+  implicit def widenToNonZeroFloat(pos: PosInt): NonZeroFloat = NonZeroFloat.ensuringValid(pos.value)
+
+  /**
+    * Implicit widening conversion from <code>PosInt</code> to <code>NonZeroDouble</code>.
+    *
+    * @param pos the <code>PosInt</code> to widen
+    * @return the <code>Int</code> value underlying the specified <code>PosInt</code>,
+    *     widened to <code>Double</code> and wrapped in a <code>NonZeroDouble</code>.
+    */
+  implicit def widenToNonZeroDouble(pos: PosInt): NonZeroDouble = NonZeroDouble.ensuringValid(pos.value)
+
+  /**
    * Implicit Ordering instance.
    */
   implicit val posIntOrd: Ordering[PosInt] =

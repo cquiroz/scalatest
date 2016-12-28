@@ -88,7 +88,7 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     (PosZInt.ensuringValid(i), r)
   }
   def nextNonZeroInt: (NonZeroInt, Randomizer) = {
-    val (i, r) = next(31) // 31 ensures sign bit is 0
+    val (i, r) = nextInt
     val non0 = if (i == 0) 1 else i
     (NonZeroInt.ensuringValid(non0), r)
   }
@@ -511,7 +511,7 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
       val nextPair = nextNonZeroInt
       val (nextValue, nextRnd) = nextPair
 
-      if (nextValue >= min && nextValue <= max && nextValue != 0)
+      if (nextValue >= min && nextValue <= max && nextValue.value != 0)
         nextPair
       else {
         val minMaxModulusAbs = (nextValue % (max - min)).abs

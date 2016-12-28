@@ -893,7 +893,25 @@ class CommonGeneratorsSpec extends WordSpec with Matchers {
           edges.length should (be >= 1 or be <= 7)
           edges should contain (min)
           edges should contain (max)
+      /*def nonZeroIntsBetween(from: NonZeroInt, to: NonZeroInt): Generator[NonZeroInt] =
+    new Generator[PosInt] { thisPosIntGenerator =>
+      private val intEdges = List(PosInt(1), PosInt.MaxValue).filter(i => i >= from && i <= to)
+      private val fromToEdges = (from :: to :: intEdges).distinct // distinct in case from equals to
+      override def initEdges(maxLength: Int, rnd: Randomizer): (List[PosInt], Randomizer) = {
+        require(maxLength >= 0, "; the maxLength passed to next must be >= 0")
+        val (allEdges, nextRnd) = Randomizer.shuffle(fromToEdges, rnd)
+        (allEdges.take(maxLength), nextRnd)
+      }
+      def next(size: Int, edges: List[PosInt], rnd: Randomizer): (PosInt, List[PosInt], Randomizer) = {
+        require(size >= 0, "; the size passed to next must be >= 0")
+        edges match {
+          case head :: tail => (head, tail, rnd)
+          case _ =>
+            val (nextPosInt, nextRandomizer) = rnd.choosePosInt(from, to)
+            (nextPosInt, Nil, nextRandomizer)
         }
+      }
+    }*/  }
       }
 
       "returns a generator whose initEdges method includes normal PosDouble edges only if they are between min and max, inclusive" in {
@@ -1223,6 +1241,87 @@ class CommonGeneratorsSpec extends WordSpec with Matchers {
         forAll (combos) { case List(from, to) =>
           val requiredEdges = included(from, to)
           val minMaxGen: Generator[PosZDouble] = posZDoublesBetween(from, to)
+          val (edges, _) = minMaxGen.initEdges(100, Randomizer.default)
+          edges should contain allElementsOf requiredEdges
+          val outOfBoundsEdges = sortedEdges.filter(i => i < from || i > to)
+          edges should contain noElementsOf outOfBoundsEdges
+        }
+      }
+    }
+
+    "offer a nonZeroIntsBetween method" that {
+      val NonZeroIntMaxValueMinusOne = NonZeroInt(2147483646)
+
+      "throws IAE if max is less than min" in {
+        val loHiPairs =
+          for {
+            lo <- nonZeroIntsBetween(NonZeroInt.MinValue, NonZeroInt.ensuringValid(PosInt.MaxValue - 1)) // Hmm. Using the method to test itself
+            hi <- nonZeroIntsBetween(if (lo.value == -1) NonZeroInt.ensuringValid(lo + 2) else NonZeroInt.ensuringValid(lo + 1), NonZeroInt.MaxValue)
+          } yield (lo, hi)
+        import org.scalatest.prop.GeneratorDrivenPropertyChecks._
+        forAll (loHiPairs) { case (lo, hi) =>
+          an [IllegalArgumentException] should be thrownBy {
+            nonZeroIntsBetween(hi, lo)
+          }
+        }
+      }
+
+      "produces NonZeroInts between min and max" in {
+
+        import org.scalatest.prop.GeneratorDrivenPropertyChecks._
+
+        val minMaxPairs: Generator[(NonZeroInt, NonZeroInt)] =
+          for {
+            min <- nonZeroIntsBetween(NonZeroInt.MinValue, NonZeroIntMaxValueMinusOne)
+            max <- nonZeroIntsBetween(min, NonZeroInt.MaxValue)
+          } yield (min, max)
+
+        forAll (minMaxPairs) { case (min, max) =>
+          val minMaxGen: Generator[NonZeroInt] = nonZeroIntsBetween(min, max)
+          val samples = minMaxGen.samples(10)
+          import org.scalatest.Inspectors._
+          forAll (samples) { i =>
+            i should be >= min
+            i should be <= max
+          }
+        }
+      }
+      "returns a generator whose initEdges method includes min and max" in {
+
+        import org.scalatest.prop.GeneratorDrivenPropertyChecks._
+
+        val minMaxPairs: Generator[(NonZeroInt, NonZeroInt)] =
+          for {
+            min <- nonZeroIntsBetween(NonZeroInt.MinValue, NonZeroIntMaxValueMinusOne)
+            max <- nonZeroIntsBetween(min, NonZeroInt.MaxValue)
+          } yield (min, max)
+
+        forAll (minMaxPairs) { case (min, max) =>
+          val minMaxGen: Generator[NonZeroInt] = nonZeroIntsBetween(min, max)
+          val (edges, _) = minMaxGen.initEdges(100, Randomizer.default)
+          val expectedEdgesSize = (CommonGenerators.nonZeroIntEdges.filter(nz => nz >= min && nz <= max).toSet ++ Set(min, max)).size
+          edges should (have length expectedEdgesSize)
+          edges should contain (min)
+          edges should contain (max)
+        }
+      }
+      "returns a generator whose initEdges method includes normal NonZeroInt edges only if they are between min and max, inclusive" in {
+
+        import org.scalatest.Inspectors._
+
+        val (edges, rnd1) = nonZeroInts.initEdges(100, Randomizer.default)
+        val sortedEdges = edges.sorted
+        val combos = sortedEdges.combinations(2).toList.map(_.sorted)
+
+        def included(from: NonZeroInt, to: NonZeroInt): List[NonZeroInt] = {
+          val fromIdx = sortedEdges.indexOf(from)
+          val toIdx = sortedEdges.indexOf(to)
+          sortedEdges.drop(fromIdx).take(toIdx - fromIdx + 1)
+        }
+
+        forAll (combos) { case List(from, to) =>
+          val requiredEdges = included(from, to)
+          val minMaxGen: Generator[NonZeroInt] = nonZeroIntsBetween(from, to)
           val (edges, _) = minMaxGen.initEdges(100, Randomizer.default)
           edges should contain allElementsOf requiredEdges
           val outOfBoundsEdges = sortedEdges.filter(i => i < from || i > to)

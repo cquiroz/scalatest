@@ -360,6 +360,32 @@ trait CommonGenerators {
     }
   }
 
+  def nonZeroIntsBetween(from: NonZeroInt, to: NonZeroInt): Generator[NonZeroInt] = {
+    require(from <= to)
+    new Generator[NonZeroInt] {
+      thisNonZeroIntGenerator =>
+      private val nonZeroIntEdges = List(NonZeroInt.MinValue, NonZeroInt(-1), NonZeroInt(1), NonZeroInt.MaxValue).filter(i => i >= from && i <= to)
+      private val fromToEdges = (from :: to :: nonZeroIntEdges).distinct
+
+      // distinct in case from equals to
+      override def initEdges(maxLength: Int, rnd: Randomizer): (List[NonZeroInt], Randomizer) = {
+        require(maxLength >= 0, "; the maxLength passed to next must be >= 0")
+        val (allEdges, nextRnd) = Randomizer.shuffle(fromToEdges, rnd)
+        (allEdges.take(maxLength), nextRnd)
+      }
+
+      def next(size: Int, edges: List[NonZeroInt], rnd: Randomizer): (NonZeroInt, List[NonZeroInt], Randomizer) = {
+        require(size >= 0, "; the size passed to next must be >= 0")
+        edges match {
+          case head :: tail => (head, tail, rnd)
+          case _ =>
+            val (nextNonZeroInt, nextRandomizer) = rnd.chooseNonZeroInt(from, to)
+            (nextNonZeroInt, Nil, nextRandomizer)
+        }
+      }
+    }
+  }
+
   def specificValues[T](first: T, second: T, rest: T*): Generator[T] =
     new Generator[T] {
       private val seq: Seq[T] = first +: second +: rest
@@ -555,6 +581,8 @@ trait CommonGenerators {
   val posZFloatValues: Generator[Float] = Generator.posZFloatGenerator.map(_.value)
   val posDoubleValues: Generator[Double] = Generator.posDoubleGenerator.map(_.value)
   val posZDoubleValues: Generator[Double] = Generator.posZDoubleGenerator.map(_.value)
+
+  val nonZeroInts: Generator[NonZeroInt] = Generator.nonZeroIntGenerator
 
   def instancesOf[A, B](construct: A => B)(deconstruct: B => A)(implicit genOfA: Generator[A]): Generator[B] =
     new GeneratorFor1[A, B](construct, deconstruct)(genOfA)
@@ -792,4 +820,6 @@ object CommonGenerators extends CommonGenerators {
       7727,  7741,  7753,  7757,  7759,  7789,  7793,  7817,  7823,  7829,
       7841,  7853,  7867,  7873,  7877,  7879,  7883,  7901,  7907,  7919
     )
+
+  private[scalatest] val nonZeroIntEdges = List(NonZeroInt.MinValue, NonZeroInt(-1), NonZeroInt(1), NonZeroInt.MaxValue)
 }

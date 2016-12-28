@@ -611,13 +611,13 @@ class CommonGeneratorsSpec extends WordSpec with Matchers {
       "throws IAE if max is less than min" in {
         val loHiPairs =
           for {
-            lo <- intsBetween(PosInt.MinValue, PosInt.MaxValue - 1) // Hmm. Using the method to test itself
-            hi <- intsBetween(lo + 1, PosInt.MaxValue)
+            lo <- posIntsBetween(PosInt.MinValue, PosInt.ensuringValid(PosInt.MaxValue - 1)) // Hmm. Using the method to test itself
+            hi <- posIntsBetween(PosInt.ensuringValid(lo + 1), PosInt.MaxValue)
           } yield (lo, hi)
         import org.scalatest.prop.GeneratorDrivenPropertyChecks._
         forAll (loHiPairs) { case (lo, hi) =>
           an [IllegalArgumentException] should be thrownBy {
-            intsBetween(hi, lo)
+            posIntsBetween(hi, lo)
           }
         }
       }
@@ -926,13 +926,13 @@ class CommonGeneratorsSpec extends WordSpec with Matchers {
       "throws IAE if max is less than min" in {
         val loHiPairs =
           for {
-            lo <- intsBetween(PosZInt.MinValue, PosZInt.MaxValue - 1) // Hmm. Using the method to test itself
-            hi <- intsBetween(lo + 1, PosZInt.MaxValue)
+            lo <- posZIntsBetween(PosZInt.MinValue, PosZInt.ensuringValid(PosZInt.MaxValue - 1)) // Hmm. Using the method to test itself
+            hi <- posZIntsBetween(PosZInt.ensuringValid(lo + 1), PosZInt.MaxValue)
           } yield (lo, hi)
         import org.scalatest.prop.GeneratorDrivenPropertyChecks._
         forAll (loHiPairs) { case (lo, hi) =>
           an [IllegalArgumentException] should be thrownBy {
-            intsBetween(hi, lo)
+            posZIntsBetween(hi, lo)
           }
         }
       }

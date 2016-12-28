@@ -106,7 +106,7 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     (PosLong.ensuringValid(pos), rb)
   }
   def nextNonZeroLong: (NonZeroLong, Randomizer) = {
-    val (ia, ra) = thisRandomizer.next(31) // 31 ensures sign bit is 0
+    val (ia, ra) = thisRandomizer.nextLong
     val (ib, rb) = ra.next(32)
     val candidate = (ia.toLong << 32) + ib
     val nz = if (candidate == 0L) 1L else candidate
@@ -520,6 +520,84 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
           (NonZeroInt.ensuringValid(nextBetween + 1), nextRnd)
         else
           (NonZeroInt.ensuringValid(nextBetween), nextRnd)
+      }
+    }
+  }
+
+  def chooseNonZeroLong(from: NonZeroLong, to: NonZeroLong): (NonZeroLong, Randomizer) = {
+
+    if (from == to) {
+      (from, nextRandomizer) // TODO: Shouldn't this be thisRandomizer because I didn't use it? I am trying this in choosePosInt.
+    }
+    else {
+      val min = math.min(from, to)
+      val max = math.max(from, to)
+
+      // generate a non-zero Int
+      val nextPair = nextNonZeroLong
+      val (nextValue, nextRnd) = nextPair
+
+      if (nextValue >= min && nextValue <= max && nextValue.value != 0L)
+        nextPair
+      else {
+        val minMaxModulusAbs = (nextValue % (max - min)).abs
+        val nextBetween = min + minMaxModulusAbs
+        if (nextBetween == 0L)
+          (NonZeroLong.ensuringValid(nextBetween + 1L), nextRnd)
+        else
+          (NonZeroLong.ensuringValid(nextBetween), nextRnd)
+      }
+    }
+  }
+
+  def chooseNonZeroFloat(from: NonZeroFloat, to: NonZeroFloat): (NonZeroFloat, Randomizer) = {
+
+    if (from == to) {
+      (from, nextRandomizer) // TODO: Shouldn't this be thisRandomizer because I didn't use it? I am trying this in choosePosInt.
+    }
+    else {
+      val min = math.min(from, to)
+      val max = math.max(from, to)
+
+      // generate a non-zero Int
+      val nextPair = nextNonZeroFloat
+      val (nextValue, nextRnd) = nextPair
+
+      if (nextValue >= min && nextValue <= max && nextValue.value != 0.0f)
+        nextPair
+      else {
+        val minMaxModulusAbs = (nextValue % (max - min)).abs
+        val nextBetween = min + minMaxModulusAbs
+        if (nextBetween == 0.0f)
+          (NonZeroFloat.ensuringValid(nextBetween + 1.0f), nextRnd)
+        else
+          (NonZeroFloat.ensuringValid(nextBetween), nextRnd)
+      }
+    }
+  }
+
+  def chooseNonZeroDouble(from: NonZeroDouble, to: NonZeroDouble): (NonZeroDouble, Randomizer) = {
+
+    if (from == to) {
+      (from, nextRandomizer) // TODO: Shouldn't this be thisRandomizer because I didn't use it? I am trying this in choosePosInt.
+    }
+    else {
+      val min = math.min(from, to)
+      val max = math.max(from, to)
+
+      // generate a non-zero Int
+      val nextPair = nextNonZeroDouble
+      val (nextValue, nextRnd) = nextPair
+
+      if (nextValue >= min && nextValue <= max && nextValue.value != 0.0)
+        nextPair
+      else {
+        val minMaxModulusAbs = (nextValue % (max - min)).abs
+        val nextBetween = min + minMaxModulusAbs
+        if (nextBetween == 0.0)
+          (NonZeroDouble.ensuringValid(nextBetween + 1.0), nextRnd)
+        else
+          (NonZeroDouble.ensuringValid(nextBetween), nextRnd)
       }
     }
   }

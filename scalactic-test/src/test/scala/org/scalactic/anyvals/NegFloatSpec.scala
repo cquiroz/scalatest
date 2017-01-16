@@ -17,8 +17,6 @@ package org.scalactic.anyvals
 
 import org.scalatest._
 import OptionValues._
-import org.scalacheck.Gen._
-import org.scalacheck.{Arbitrary, Gen}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.prop.PropertyChecks
 // SKIP-SCALATESTJS-START
@@ -31,16 +29,6 @@ import org.scalactic.Equality
 
 trait NegFloatSpecSupport {
 
-  val negZFloatGen: Gen[NegZFloat] =
-    for {i <- choose(Float.MinValue, 0.0f)} yield NegZFloat.ensuringValid(i)
-
-  implicit val arbNegZFloat: Arbitrary[NegZFloat] = Arbitrary(negZFloatGen)
-
-  val negFloatGen: Gen[NegFloat] =
-    for {i <- choose(Float.MinValue, -Float.MinPositiveValue)} yield NegFloat.ensuringValid(i)
-
-  implicit val arbNegFloat: Arbitrary[NegFloat] = Arbitrary(negFloatGen)
-
   implicit def tryEquality[T]: Equality[Try[T]] = new Equality[Try[T]] {
     override def areEqual(a: Try[T], b: Any): Boolean = a match {
       // I needed this because with GenDrivenPropertyChecks, got:
@@ -51,6 +39,11 @@ trait NegFloatSpecSupport {
           case Success(bFloat: Float) if bFloat.isNaN => true
           case _ => false
         }
+      case Success(double: Double) if double.isNaN =>
+        b match {
+          case Success(bDouble: Double) if bDouble.isNaN => true
+          case _ => false
+        }
       case _: Success[_] => a == b
       case Failure(ex) => b match {
         case _: Success[_] => false
@@ -59,6 +52,24 @@ trait NegFloatSpecSupport {
       }
     }
   }
+
+  implicit val doubleEquality: Equality[Double] =
+    new Equality[Double] {
+      override def areEqual(a: Double, b: Any): Boolean =
+        (a, b) match {
+          case (a, bDouble: Double) if a.isNaN && bDouble.isNaN  => true
+          case _ => a == b
+        }
+    }
+
+  implicit val floatEquality: Equality[Float] =
+    new Equality[Float] {
+      override def areEqual(a: Float, b: Any): Boolean =
+        (a, b) match {
+          case (a, bFloat: Float) if a.isNaN && bFloat.isNaN => true
+          case _ => a == b
+        }
+    }
 }
 
 class NegFloatSpec extends FunSpec with Matchers with PropertyChecks with TypeCheckedTripleEquals with NegFloatSpecSupport {

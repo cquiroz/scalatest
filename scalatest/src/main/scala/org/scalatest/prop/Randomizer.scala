@@ -142,6 +142,86 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     val pos = d.abs // 0.0 or greater
     (PosZDouble.ensuringValid(pos), r)
   }
+  def nextNegInt: (NegInt, Randomizer) = {
+    val (i, r) = nextInt
+    val neg =
+      if (i > 0)
+        -i
+      else if (i == 0)
+        i - 1
+      else
+        i
+    (NegInt.ensuringValid(neg), r)
+  }
+  def nextNegZInt: (NegZInt, Randomizer) = {
+    val (i, r) = nextInt
+    val neg =
+      if (i > 0)
+        -i
+      else
+        i
+    (NegZInt.ensuringValid(neg), r)
+  }
+  def nextNegLong: (NegLong, Randomizer) = {
+    val (i, r) = nextLong
+    val neg =
+      if (i > 0L)
+        -i
+      else if (i == 0L)
+        i - 1L
+      else
+        i
+    (NegLong.ensuringValid(neg), r)
+  }
+  def nextNegZLong: (NegZLong, Randomizer) = {
+    val (i, r) = nextLong
+    val neg =
+      if (i > 0L)
+        -i
+      else
+        i
+    (NegZLong.ensuringValid(neg), r)
+  }
+  def nextNegFloat: (NegFloat, Randomizer) = {
+    val (f, r) = nextFloat
+    val neg =
+    if (f > 0.0f)
+      -f
+    else if (f == 0.0f)
+      f - 1.0f
+    else
+      f
+    (NegFloat.ensuringValid(neg), r)
+  }
+  def nextNegZFloat: (NegZFloat, Randomizer) = {
+    val (f, r) = nextFloat
+    val neg =
+    if (f > 0.0f)
+      -f
+    else
+      f
+    (NegZFloat.ensuringValid(neg), r)
+  }
+  def nextNegDouble: (NegDouble, Randomizer) = {
+    val (d, r) = nextDouble
+    val neg =
+      if (d > 0.0)
+        -d
+      else if (d == 0.0)
+        d - 1.0f
+      else
+        d
+    (NegDouble.ensuringValid(neg), r)
+  }
+  def nextNegZDouble: (NegZDouble, Randomizer) = {
+    val (d, r) = nextDouble
+    val neg =
+      if (d > 0.0f)
+        -d
+      else
+        d
+    (NegZDouble.ensuringValid(neg), r)
+  }
   // Maybe add in some > 16 bit UTF-16 encodings
   def nextString(length: Int): (String, Randomizer) = {
     require(length >= 0, "; the length passed to nextString must be >= 0")

@@ -16,8 +16,6 @@
 package org.scalactic.anyvals
 
 import org.scalatest._
-import org.scalacheck.Gen._
-import org.scalacheck.{Arbitrary, Gen}
 import org.scalactic.Equality
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.prop.PropertyChecks
@@ -33,15 +31,23 @@ import org.scalactic.{Pass, Fail}
 
 trait NegDoubleSpecSupport {
 
-  val negZDoubleGen: Gen[NegZDouble] =
-    for {i <- choose(Double.MinValue, 0.0)} yield NegZDouble.ensuringValid(i)
+  implicit val doubleEquality: Equality[Double] =
+    new Equality[Double] {
+      override def areEqual(a: Double, b: Any): Boolean =
+        (a, b) match {
+          case (a, bDouble: Double) if a.isNaN && bDouble.isNaN  => true
+          case _ => a == b
+        }
+    }
 
-  implicit val arbNegZDouble: Arbitrary[NegZDouble] = Arbitrary(negZDoubleGen)
-
-  val negDoubleGen: Gen[NegDouble] =
-    for {i <- choose(Double.MinValue, -Double.MinPositiveValue)} yield NegDouble.ensuringValid(i)
-
-  implicit val arbNegDouble: Arbitrary[NegDouble] = Arbitrary(negDoubleGen)
+  implicit val floatEquality: Equality[Float] =
+    new Equality[Float] {
+      override def areEqual(a: Float, b: Any): Boolean =
+        (a, b) match {
+          case (a, bFloat: Float) if a.isNaN && bFloat.isNaN => true
+          case _ => a == b
+        }
+    }
 
   implicit def tryEquality[T]: Equality[Try[T]] = new Equality[Try[T]] {
     override def areEqual(a: Try[T], b: Any): Boolean = a match {

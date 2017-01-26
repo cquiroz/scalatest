@@ -129,7 +129,7 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     val finite =
       n match {
         case Float.PositiveInfinity => Float.MaxValue
-        case Float.NegativeInfinity => Float.MaxValue
+        case Float.NegativeInfinity => Float.MinValue
         case _ => n
       }
     (FiniteFloat.ensuringValid(finite), r)
@@ -139,7 +139,7 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     val finite =            // See if it produces non-normal (less than max precision) values
       n match {
         case Double.PositiveInfinity => Double.MaxValue
-        case Double.NegativeInfinity => Double.MaxValue
+        case Double.NegativeInfinity => Double.MinValue
         case _ => n
       }
     (FiniteDouble.ensuringValid(finite), r)

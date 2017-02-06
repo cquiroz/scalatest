@@ -579,6 +579,8 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
       if (nextValue >= min && nextValue <= max)
         nextPair
       else {
+        //val currentMillis = scala.compat.Platform.currentTime
+        //val randomPercent = chooseLong(0, 10000L)._1 / 10000L
         val nextBetween = min + (nextValue % (max - min)).abs
         (nextBetween, nextRnd)
       }
@@ -1191,9 +1193,23 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
     }
   }
 
-  def chooseFiniteDouble(from: FiniteDouble, to: FiniteDouble): (FiniteDouble, Randomizer) = {
+  def addUntilSignificant(a: Double, b: Double): Double = {
+    println("###a: " + b + ", b: " + b)
+    if (b != 0.0) {
+      val result = a + b
+      if (result == a)
+        addUntilSignificant(a, b * 10.0)
+      else
+        result
+    }
+    else
+      b
+  }
 
-    if (from == to) {
+  def chooseFiniteDouble(from: FiniteDouble, to: FiniteDouble): (FiniteDouble, Randomizer) = {
+    val (nextBetween, nextRnd) = chooseDouble(from.value, to.value)
+    (FiniteDouble.ensuringValid(nextBetween), nextRnd)
+    /*if (from == to) {
       (from, nextRandomizer)
     }
     else {
@@ -1206,10 +1222,11 @@ class Randomizer(private[scalatest] val seed: Long) { thisRandomizer =>
       if (nextValue >= min && nextValue <= max)
         nextPair
       else {
-        val nextBetween = min + (nextValue % (max - min)).abs
+        val beta = (nextValue % (max - min)).abs
+        val nextBetween = addUntilSignificant(min, beta)
         (FiniteDouble.ensuringValid(nextBetween), nextRnd)
       }
-    }
+    }*/
   }
 }
 

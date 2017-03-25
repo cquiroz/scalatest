@@ -17,7 +17,7 @@ package org.scalatest
 
 import matchers.BePropertyMatchResult
 import matchers.BePropertyMatcher
-import org.scalatest.prop.Checkers
+import org.scalatest.check.Checkers
 
 trait CustomFileBePropertyMatchers {
 

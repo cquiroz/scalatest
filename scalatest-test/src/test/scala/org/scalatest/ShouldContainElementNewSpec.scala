@@ -15,7 +15,7 @@
  */
 package org.scalatest
 
-import org.scalatest.prop.Checkers
+import org.scalatest.check.Checkers
 import org.scalatest.exceptions.TestFailedException
 import org.scalactic.Equality
 import org.scalactic.Explicitly

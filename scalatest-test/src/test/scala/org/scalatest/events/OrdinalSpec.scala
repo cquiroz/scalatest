@@ -16,7 +16,7 @@
 package org.scalatest.events
 
 import org.scalatest._
-import org.scalatest.prop.Checkers
+import org.scalatest.check.Checkers
 import org.scalacheck._
 import Arbitrary._
 import Prop._

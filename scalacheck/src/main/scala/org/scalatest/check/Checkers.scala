@@ -38,7 +38,7 @@ import org.scalactic._
  * </p>
  * <pre class="stHighlight">
  * import org.scalatest.junit.JUnitSuite
- * import org.scalatest.prop.Checkers
+ * import org.scalatest.check.Checkers
  * import org.scalacheck.Arbitrary._
  * import org.scalacheck.Prop._
  *
@@ -211,7 +211,7 @@ repeatedly pass generated data to the function. In this case, the test data is c
  * <pre class="stHighlight">
  * import org.scalacheck.Prop
  * import org.scalacheck.Test.Parameters
- * import org.scalatest.prop.Checkers._
+ * import org.scalatest.check.Checkers._
  *
  * check(Prop.forAll((n: Int) => n + 0 == n), Parameters.Default { override val minSuccessfulTests = 5 })
  * </pre>

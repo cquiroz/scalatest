@@ -20,7 +20,7 @@ import Arbitrary._
 import Matchers._
 import Prop._
 import org.scalactic.Prettifier
-import org.scalatest.prop.Checkers
+import org.scalatest.check.Checkers
 import Integer.MIN_VALUE
 import org.scalatest.enablers.Length
 import org.scalatest.enablers.Size

@@ -3461,13 +3461,13 @@ $okayExpressions$
         bw.write("import org.scalacheck.Prop.{Exception => _, _}\n")
       }
       if (!mixinInvitationStyle)
-        bw.write("import " + traitOrObjectName + "._\n")
+        bw.write("import " + (if (doItForCheckers) "org.scalatest.check." else "") + traitOrObjectName + "._\n")
       if (checkMethod == "expect")
         bw.write("import org.scalatest.Expectations._\n")
       bw.write("\n")
       bw.write(
         "class " + checkMethod.capitalize + suiteClassName + " extends FunSpec " +
-          (if (mixinInvitationStyle) "with " + traitOrObjectName else "") + " {\n")
+          (if (mixinInvitationStyle) "with " + (if (doItForCheckers) "org.scalatest.check." else "") + traitOrObjectName else "") + " {\n")
       bw.write(generatorSuitePostamble)
       val alpha = "abcdefghijklmnopqrstuv"
       for (i <- 1 to 6) {

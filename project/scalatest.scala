@@ -394,14 +394,13 @@ object ScalatestBuild extends Build {
     .settings(
       projectTitle := "Scalactic Test",
       organization := "org.scalactic",
-      libraryDependencies += scalacheckDependency("test"),
       publishArtifact := false,
       publish := {},
       publishLocal := {},
       sourceGenerators in Test += Def.task {
         GenAnyVals.genTest((sourceManaged in Test).value / "scala" / "org" / "scalactic" / "anyvals", version.value, scalaVersion.value)
       }.taskValue
-    ).dependsOn(scalactic, scalatest % "test", commonTest % "test")
+    ).dependsOn(scalactic, scalatest % "test", commonTest % "test", scalacheck % "test")
 
   lazy val scalacticTestJS = Project("scalacticTestJS", file("scalactic-test.js"))
     .settings(sharedSettings: _*)
@@ -427,6 +426,44 @@ object ScalatestBuild extends Build {
       publishLocal := {}
     ).dependsOn(scalacticJS, scalatestJS % "test", commonTestJS % "test").enablePlugins(ScalaJSPlugin)
 
+  lazy val scalacheck = Project("scalacheck", file("scalacheck"))
+    .settings(
+      javaHome := getJavaHome,
+      scalaVersion := buildScalaVersion,
+      crossScalaVersions := Seq(buildScalaVersion, "2.10.6", "2.12.1"),
+      version := releaseVersion,
+      projectTitle := "ScalaTest ScalaCheck",
+      organization := "org.scalatestplus.scalacheck",
+      moduleName := "scalatestplus-scalacheck",
+      libraryDependencies ++= Seq(
+        "org.scalacheck" %% "scalacheck" % scalacheckVersion
+      ),
+      sourceGenerators in Compile += Def.task {
+        genFiles("genscalacheckgen", "GenScalaCheckGen.scala")(GenScalaCheckGen.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
+      }.taskValue
+    ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalactic, scalatest, commonTest % "test")
+
+  lazy val scalacheckJS = Project("scalacheckJS", file("scalacheck.js"))
+    .settings(
+      javaHome := getJavaHome,
+      scalaVersion := buildScalaVersion,
+      crossScalaVersions := Seq(buildScalaVersion, "2.10.6", "2.12.1"),
+      version := releaseVersion,
+      projectTitle := "ScalaTest ScalaCheck",
+      organization := "org.scalatestplus.scalacheck",
+      moduleName := "scalatestplus-scalacheck",
+      libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion % "optional",
+      //jsDependencies += RuntimeDOM % "test",
+      sourceGenerators in Compile += {
+        Def.task {
+          GenScalaCheckJS.genScala((sourceManaged in Compile).value / "scala", version.value, scalaVersion.value)
+        }.taskValue
+      },
+      sourceGenerators in Compile += Def.task {
+        genFiles("genscalacheckgen", "GenScalaCheckGen.scala")(GenScalaCheckGen.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
+      }.taskValue
+    ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalactic, scalatest, commonTest % "test")
+
   lazy val scalatest = Project("scalatest", file("scalatest"))
    .settings(sharedSettings: _*)
    .settings(scalatestDocSettings: _*)
@@ -448,9 +485,6 @@ object ScalatestBuild extends Build {
      genLogicStylesTask,
      sourceGenerators in Compile += Def.task {
        genFiles("gengen", "GenGen.scala")(GenGen.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
-     }.taskValue,
-     sourceGenerators in Compile += Def.task {
-       genFiles("genscalacheckgen", "GenScalaCheckGen.scala")(GenScalaCheckGen.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
      }.taskValue,
      sourceGenerators in Compile += Def.task {
        genFiles("gentables", "GenTable.scala")(GenTable.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
@@ -540,7 +574,7 @@ object ScalatestBuild extends Build {
       publishArtifact := false,
       publish := {},
       publishLocal := {}
-    ).dependsOn(scalatest % "test", commonTest % "test")
+    ).dependsOn(scalatest % "test", commonTest % "test", scalacheck % "test")
 
   lazy val scalatestJS = Project("scalatestJS", file("scalatest.js"))
     .settings(sharedSettings: _*)
@@ -911,7 +945,7 @@ object ScalatestBuild extends Build {
       genGenTask,
       sourceGenerators in Test <+=
         (baseDirectory, sourceManaged in Test, version, scalaVersion) map genFiles("genscalacheckgen", "GenScalaCheckGen.scala")(GenScalaCheckGen.genTest)
-    ).dependsOn(scalatest, commonTest, scalacticMacro % "compile-internal, test-internal")
+    ).dependsOn(scalatest, commonTest, scalacticMacro % "compile-internal, test-internal", scalacheck)
 
   lazy val genTablesTests = Project("genTablesTests", file("gentests/GenTables"))
     .settings(gentestsSharedSettings: _*)

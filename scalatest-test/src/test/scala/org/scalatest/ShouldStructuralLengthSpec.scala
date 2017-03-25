@@ -16,7 +16,7 @@
 
 package org.scalatest
 
-import prop.Checkers
+import check.Checkers
 import Integer.MIN_VALUE
 import org.scalacheck._
 import Arbitrary._

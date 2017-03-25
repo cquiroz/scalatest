@@ -15,7 +15,7 @@
  */
 package org.scalatest.events
 
-import org.scalatest.prop.Checkers
+import org.scalatest.check.Checkers
 import org.scalatest.SharedHelpers.{ EventRecordingReporter, thisLineNumber }
 
 // SKIP-SCALATESTJS-START

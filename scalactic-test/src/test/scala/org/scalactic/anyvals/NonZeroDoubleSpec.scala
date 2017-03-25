@@ -19,7 +19,6 @@ import org.scalatest._
 import org.scalactic.Equality
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.prop.PropertyChecks
-import org.scalatest.check.ScalaCheckGenerators
 // SKIP-SCALATESTJS-START
 import scala.collection.immutable.NumericRange
 // SKIP-SCALATESTJS-END
@@ -103,7 +102,7 @@ class NonZeroDoubleSpec extends FunSpec with Matchers with PropertyChecks with T
         NonZeroDouble.passOrElse(-99.0)(i => i) shouldBe Pass
       }
       it("returns an error value produced by passing the given Double to the given function if the passed Doule is NOT non-zero, wrapped in a Fail") {
-        NonZeroDouble.passOrElse(0.0)(i => s"$i did not taste good") shouldBe Fail("0.0 did not taste good")
+        NonZeroDouble.passOrElse(0.0)(i => s"$i did not taste good") shouldBe Fail(0.0 + " did not taste good")
       }
     }
     describe("should offer a goodOrElse factory method that") {
@@ -115,7 +114,7 @@ class NonZeroDoubleSpec extends FunSpec with Matchers with PropertyChecks with T
         NonZeroDouble.goodOrElse(-99.0)(i => i) shouldBe Good(NonZeroDouble(-99.0))
       }
       it("returns an error value produced by passing the given Double to the given function if the passed Double is NOT non-zero, wrapped in a Bad") {
-        NonZeroDouble.goodOrElse(0.0)(i => s"$i did not taste good") shouldBe Bad("0.0 did not taste good")
+        NonZeroDouble.goodOrElse(0.0)(i => s"$i did not taste good") shouldBe Bad(0.0 + " did not taste good")
       }
     }
     describe("should offer a rightOrElse factory method that") {
@@ -127,7 +126,7 @@ class NonZeroDoubleSpec extends FunSpec with Matchers with PropertyChecks with T
         NonZeroDouble.rightOrElse(-99.0)(i => i) shouldBe Right(NonZeroDouble(-99.0))
       }
       it("returns an error value produced by passing the given Double to the given function if the passed Double is NOT non-zero, wrapped in a Left") {
-        NonZeroDouble.rightOrElse(0.0)(i => s"$i did not taste good") shouldBe Left("0.0 did not taste good")
+        NonZeroDouble.rightOrElse(0.0)(i => s"$i did not taste good") shouldBe Left(0.0 + " did not taste good")
       }
     }
     describe("should offer an isValid predicate method that") {

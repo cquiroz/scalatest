@@ -3373,9 +3373,10 @@ $okayExpressions$
 
   val thisYear = Calendar.getInstance.get(Calendar.YEAR)
 
-  def genPropertyChecks(targetDir: File) {
+  def genPropertyChecks(targetDir: File): Seq[File] = {
     targetDir.mkdirs()
-    val bw = new BufferedWriter(new FileWriter(new File(targetDir, "ScalaCheckDrivenPropertyChecks.scala")))
+    val file = new File(targetDir, "ScalaCheckDrivenPropertyChecks.scala")
+    val bw = new BufferedWriter(new FileWriter(file))
 
     try {
       val st = new org.antlr.stringtemplate.StringTemplate(copyrightTemplate)
@@ -3430,6 +3431,7 @@ $okayExpressions$
       }
       bw.write("}\n")
       bw.write(generatorDrivenPropertyChecksCompanionObjectVerbatimString)
+      List(file)
     }
     finally {
       bw.close()
@@ -3437,7 +3439,7 @@ $okayExpressions$
   }
 
   // Invitation style indicates how GeneratorDrivenPropertyChecks is imported
-  def genGeneratorDrivenSuite(targetDir: File, mixinInvitationStyle: Boolean, withTables: Boolean, doItForCheckers: Boolean, generatorSuiteTemplate: String, checkMethod: String) {
+  def genGeneratorDrivenSuite(targetDir: File, mixinInvitationStyle: Boolean, withTables: Boolean, doItForCheckers: Boolean, generatorSuiteTemplate: String, checkMethod: String): File = {
 
     targetDir.mkdirs()
 
@@ -3450,7 +3452,8 @@ $okayExpressions$
     val suiteClassName = traitOrObjectName + (if (mixinInvitationStyle) "Mixin" else "Import") + "Suite"
     val fileName = checkMethod.capitalize + suiteClassName + ".scala"
 
-    val bw = new BufferedWriter(new FileWriter(new File(targetDir, fileName)))
+    val file = new File(targetDir, fileName)
+    val bw = new BufferedWriter(new FileWriter(file))
 
     try {
       val st = new org.antlr.stringtemplate.StringTemplate(copyrightTemplate)
@@ -3525,6 +3528,7 @@ $okayExpressions$
       }
 
       bw.write("}\n")
+      file
     }
     finally {
       bw.close()
@@ -3544,24 +3548,32 @@ $okayExpressions$
     genTest(testDir, version, scalaVersion)
   }
 
-  def genMain(dir: File, version: String, scalaVersion: String) {
+  def genMain(dir: File, version: String, scalaVersion: String): Seq[File] = {
     genPropertyChecks(dir)
   }
 
-  def genTest(dir: File, version: String, scalaVersion: String) {
-    genGeneratorDrivenSuite(dir, true, false, false, generatorSuiteAssertTemplate, "assert")
-    genGeneratorDrivenSuite(dir, false, false, false, generatorSuiteAssertTemplate, "assert")
-    genGeneratorDrivenSuite(dir, true, true, false, generatorSuiteAssertTemplate, "assert")
-    genGeneratorDrivenSuite(dir, false, true, false, generatorSuiteAssertTemplate, "assert")
-    genGeneratorDrivenSuite(dir, true, true, true, generatorSuiteAssertTemplate, "assert")
-    genGeneratorDrivenSuite(dir, false, true, true, generatorSuiteAssertTemplate, "assert")
-
-    genGeneratorDrivenSuite(dir, true, false, false, generatorSuiteExpectTemplate, "expect")
-    genGeneratorDrivenSuite(dir, false, false, false, generatorSuiteExpectTemplate, "expect")
-    genGeneratorDrivenSuite(dir, true, true, false, generatorSuiteExpectTemplate, "expect")
-    genGeneratorDrivenSuite(dir, false, true, false, generatorSuiteExpectTemplate, "expect")
-    genGeneratorDrivenSuite(dir, true, true, true, generatorSuiteExpectTemplate, "expect")
-    genGeneratorDrivenSuite(dir, false, true, true, generatorSuiteExpectTemplate, "expect")
-
+  def genScalaJS(targetDir: File, version: String, scalaVersion: String): Seq[File] = {
+    GenScalacticJS.copyDir("scalacheck/src/main/scala/org/scalatest/prop", "org/scalatest/prop", targetDir, List.empty) ++
+    GenScalacticJS.copyDir("scalacheck/src/main/scala/org/scalatest/check", "org/scalatest/check", targetDir, List.empty)
   }
+
+  def genTest(dir: File, version: String, scalaVersion: String): Seq[File] = {
+    List(
+      genGeneratorDrivenSuite(dir, true, false, false, generatorSuiteAssertTemplate, "assert"),
+      genGeneratorDrivenSuite(dir, false, false, false, generatorSuiteAssertTemplate, "assert"),
+      genGeneratorDrivenSuite(dir, true, true, false, generatorSuiteAssertTemplate, "assert"),
+      genGeneratorDrivenSuite(dir, false, true, false, generatorSuiteAssertTemplate, "assert"),
+      genGeneratorDrivenSuite(dir, true, true, true, generatorSuiteAssertTemplate, "assert"),
+      genGeneratorDrivenSuite(dir, false, true, true, generatorSuiteAssertTemplate, "assert"),
+      genGeneratorDrivenSuite(dir, true, false, false, generatorSuiteExpectTemplate, "expect"),
+      genGeneratorDrivenSuite(dir, false, false, false, generatorSuiteExpectTemplate, "expect"),
+      genGeneratorDrivenSuite(dir, true, true, false, generatorSuiteExpectTemplate, "expect"),
+      genGeneratorDrivenSuite(dir, false, true, false, generatorSuiteExpectTemplate, "expect"),
+      genGeneratorDrivenSuite(dir, true, true, true, generatorSuiteExpectTemplate, "expect"),
+      genGeneratorDrivenSuite(dir, false, true, true, generatorSuiteExpectTemplate, "expect")
+    )
+  }
+
+  def genTestJS(dir: File, version: String, scalaVersion: String): Seq[File] =
+    GenScalacticJS.copyDir("scalacheck/src/test/scala/org/scalatest/check", "org/scalatest/check", dir, List.empty)
 }

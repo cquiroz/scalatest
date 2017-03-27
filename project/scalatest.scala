@@ -149,20 +149,16 @@ object ScalatestBuild extends Build {
     scalacticDocScalacOptionsSetting
   )
 
-  def scalacheckDependency(config: String) =
-    "org.scalacheck" %% "scalacheck" % scalacheckVersion % config
-
   def crossBuildLibraryDependencies(theScalaVersion: String) =
     CrossVersion.partialVersion(theScalaVersion) match {
       // if scala 2.11+ is used, add dependency on scala-xml module
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
         Seq(
           "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-          "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-          scalacheckDependency("optional")
+          "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
         )
       case _ =>
-        Seq(scalacheckDependency("optional"))
+        Seq.empty
     }
 
   def scalaLibraries(theScalaVersion: String) =
@@ -258,15 +254,13 @@ object ScalatestBuild extends Build {
   lazy val commonTest = Project("common-test", file("common-test"))
     .settings(sharedSettings: _*)
     .settings(
-      projectTitle := "Common test classes used by scalactic and scalatest",
-      libraryDependencies += scalacheckDependency("optional")
+      projectTitle := "Common test classes used by scalactic and scalatest"
     ).dependsOn(scalacticMacro, LocalProject("scalatest"))
 
   lazy val commonTestJS = Project("commonTestJS", file("common-test.js"))
     .settings(sharedSettings: _*)
     .settings(
       projectTitle := "Common test classes used by scalactic.js and scalatest.js",
-      libraryDependencies += scalacheckDependency("optional"),
       sourceGenerators in Compile += {
         Def.task{
           GenCommonTestJS.genMain((sourceManaged in Compile).value / "scala" / "org" / "scalatest", version.value, scalaVersion.value)
@@ -455,7 +449,7 @@ object ScalatestBuild extends Build {
       projectTitle := "ScalaTest ScalaCheck",
       organization := "org.scalatestplus.scalacheck",
       moduleName := "scalatestplus-scalacheck",
-      libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion % "optional",
+      libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion,
       //jsDependencies += RuntimeDOM % "test",
       sourceGenerators in Compile += {
         Def.task {
@@ -469,7 +463,7 @@ object ScalatestBuild extends Build {
           GenScalaCheckGen.genTestJS((sourceManaged in Compile).value, version.value, scalaVersion.value)
         }.taskValue
       }
-    ).dependsOn(scalacticMacro % "compile-internal, test-internal", scalactic, scalatest, commonTest % "test")
+    ).dependsOn(scalacticMacroJS % "compile-internal, test-internal", scalacticJS, scalatestJS, commonTestJS % "test").enablePlugins(ScalaJSPlugin)
 
   lazy val scalatest = Project("scalatest", file("scalatest"))
    .settings(sharedSettings: _*)
@@ -594,7 +588,6 @@ object ScalatestBuild extends Build {
                                       |import Matchers._""".stripMargin,
       scalacOptions ++= Seq("-P:scalajs:mapSourceURI:" + scalatestApp.base.toURI + "->https://raw.githubusercontent.com/scalatest/scalatest/v" + version.value + "/"),
       libraryDependencies ++= scalatestJSLibraryDependencies,
-      libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion % "optional",
       //jsDependencies += RuntimeDOM % "test",
       sourceGenerators in Compile += {
         Def.task {
@@ -614,9 +607,6 @@ object ScalatestBuild extends Build {
       }.taskValue,
       sourceGenerators in Compile += Def.task {
         genFiles("gengen", "GenGen.scala")(GenGen.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
-      }.taskValue,
-      sourceGenerators in Compile += Def.task {
-        genFiles("genscalacheckgen", "GenScalaCheckGen.scala")(GenScalaCheckGen.genMain)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
       }.taskValue,
       sourceGenerators in Compile += Def.task {
         genFiles("gentables", "GenTable.scala")(GenTable.genMainForScalaJS)(baseDirectory.value, (sourceManaged in Compile).value, version.value, scalaVersion.value)
@@ -674,7 +664,6 @@ object ScalatestBuild extends Build {
       projectTitle := "ScalaTest Test",
       organization := "org.scalatest",
       libraryDependencies ++= crossBuildLibraryDependencies(scalaVersion.value),
-      libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalacheckVersion % "test",
       //jsDependencies += RuntimeDOM % "test",
       scalaJSOptimizerOptions ~= { _.withDisableOptimizer(true) },
       //jsEnv := NodeJSEnv(executable = "node").value,
@@ -695,7 +684,7 @@ object ScalatestBuild extends Build {
         (baseDirectory, sourceManaged in Test, version, scalaVersion) map genFiles("gengen", "GenGen.scala")(GenGen.genTest),
       sourceGenerators in Test <+=
         (baseDirectory, sourceManaged in Test, version, scalaVersion) map genFiles("genmatchers", "GenMustMatchersTests.scala")(GenMustMatchersTests.genTestForScalaJS)*/
-    ).dependsOn(scalatestJS % "test", commonTestJS % "test").enablePlugins(ScalaJSPlugin)
+    ).dependsOn(scalatestJS % "test", commonTestJS % "test", scalacheckJS % "test").enablePlugins(ScalaJSPlugin)
 
   lazy val scalatestApp = Project("scalatestApp", file("."))
     .settings(sharedSettings: _*)
@@ -1059,14 +1048,12 @@ object ScalatestBuild extends Build {
 
   lazy val examples = Project("examples", file("examples"), delegates = scalatest :: Nil)
     .settings(
-      scalaVersion := buildScalaVersion,
-      libraryDependencies += scalacheckDependency("compile")
-    ).dependsOn(scalacticMacro, scalactic, scalatest)
+      scalaVersion := buildScalaVersion
+    ).dependsOn(scalacticMacro, scalactic, scalatest, scalacheck)
 
   lazy val examplesJS = Project("examplesJS", file("examples.js"), delegates = scalatest :: Nil)
     .settings(
       scalaVersion := buildScalaVersion,
-      libraryDependencies += scalacheckDependency("compile"),
       sourceGenerators in Test += {
         Def.task {
           GenExamplesJS.genScala((sourceManaged in Test).value / "scala", version.value, scalaVersion.value)

@@ -24,7 +24,7 @@ import org.scalatest.exceptions.GeneratorDrivenPropertyCheckFailedException
 import org.scalacheck.util.Pretty
 import org.scalatest.SharedHelpers.thisLineNumber
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.prop.PropertyChecks
+import org.scalatest.prop.{Generator, PropertyChecks, Randomizer}
 
 class ScalaCheckGeneratorsSpec extends FunSpec with PropertyChecks {
 
@@ -42,6 +42,22 @@ class ScalaCheckGeneratorsSpec extends FunSpec with PropertyChecks {
       forAll { (p: Person) =>
         p shouldEqual p
       }
+    }
+
+    it("should be able to use a ScalaCheck Arbitary and Shrink") {
+      import org.scalacheck.{Arbitrary, Gen, Shrink}
+      import org.scalacheck.rng.Seed
+      import ScalaCheckGenerators._
+      val intShrink = implicitly[Shrink[Int]]
+      val intArbitrary = implicitly[Arbitrary[Int]]
+      val intGen = intArbitrary.arbitrary
+      val intGenerator = scalaCheckArbitaryGenerator(intArbitrary, intShrink)
+      val (edges, er) = intGenerator.initEdges(100, Randomizer.default)
+      edges should equal (Nil) // A ScalaCheck-backed generator would have no edges
+      val scalaCheckShrinkList = intShrink.shrink(100)
+      val (scalaTestShrinkIt, _) = intGenerator.shrink(100, Randomizer.default)
+      val scalaTestShrinkList = scalaTestShrinkIt.toList
+      scalaTestShrinkList shouldEqual scalaCheckShrinkList.reverse
     }
   }
 }

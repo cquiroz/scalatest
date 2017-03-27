@@ -446,7 +446,7 @@ import org.scalactic._
  * 
  * @author Bill Venners
  */
-trait ScalaCheckDrivenPropertyChecks extends Whenever with Configuration {
+trait ScalaCheckDrivenPropertyChecks extends Whenever with ScalaCheckConfiguration {
 
   /**
    * Performs a property check by applying the specified property check function to arguments
@@ -3554,7 +3554,8 @@ $okayExpressions$
 
   def genScalaJS(targetDir: File, version: String, scalaVersion: String): Seq[File] = {
     GenScalacticJS.copyDir("scalacheck/src/main/scala/org/scalatest/prop", "org/scalatest/prop", targetDir, List.empty) ++
-    GenScalacticJS.copyDir("scalacheck/src/main/scala/org/scalatest/check", "org/scalatest/check", targetDir, List.empty)
+    GenScalacticJS.copyDir("scalacheck/src/main/scala/org/scalatest/check", "org/scalatest/check", targetDir, List.empty) ++
+    GenScalacticJS.copyDir("scalacheck/src/main/scala/org/scalatest/enablers", "org/scalatest/enablers", targetDir, List.empty)
   }
 
   def genTest(dir: File, version: String, scalaVersion: String): Seq[File] = {

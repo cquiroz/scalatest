@@ -16,7 +16,7 @@
 package org.scalatest.check
 
 import org.scalatest.enablers.CheckerAsserting
-import org.scalatest.prop.Configuration
+import org.scalatest.prop.ScalaCheckConfiguration
 import org.scalatest.Assertion
 import org.scalacheck.Arbitrary
 import org.scalacheck.Shrink
@@ -223,7 +223,7 @@ repeatedly pass generated data to the function. In this case, the test data is c
  *
  * @author Bill Venners
  */
-trait Checkers extends Configuration {
+trait Checkers extends ScalaCheckConfiguration {
 
   private val asserting: CheckerAsserting[Assertion] { type Result = Assertion }  = CheckerAsserting.assertingNatureOfAssertion
 

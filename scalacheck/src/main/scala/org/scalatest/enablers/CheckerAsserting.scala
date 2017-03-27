@@ -15,22 +15,13 @@
  */
 package org.scalatest.enablers
 
-import org.scalactic._
-import org.scalacheck.Prop
 import org.scalacheck.Prop.Arg
-import org.scalacheck.Test
 import org.scalacheck.util.Pretty
-import org.scalatest.Assertion
-import org.scalatest.Expectation
-import org.scalatest.Fact
-import org.scalatest.FailureMessages
-import org.scalatest.Resources
-import org.scalatest.Succeeded
-import org.scalatest.UnquotedString
-import org.scalatest.exceptions.StackDepthException
-import FailureMessages.decorateToStringValue
-import org.scalatest.exceptions.GeneratorDrivenPropertyCheckFailedException
-import org.scalatest.exceptions.StackDepth
+import org.scalacheck.{Prop, Test}
+import org.scalactic._
+import org.scalatest.FailureMessages.decorateToStringValue
+import org.scalatest.exceptions.{GeneratorDrivenPropertyCheckFailedException, StackDepth, StackDepthException}
+import org.scalatest.{FailureMessages, Resources, _}
 
 /**
  * Supertrait for <code>CheckerAsserting</code> typeclasses, which are used to implement and determine the result
